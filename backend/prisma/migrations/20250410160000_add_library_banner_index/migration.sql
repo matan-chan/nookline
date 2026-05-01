@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Library" ADD COLUMN "bannerIndex" INTEGER NOT NULL DEFAULT 0;

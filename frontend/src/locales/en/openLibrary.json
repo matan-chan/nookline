@@ -1,0 +1,13 @@
+{
+  "seeLess": "see less",
+  "seeMoreSubjects": "See more subjects",
+  "seeFewerSubjects": "See fewer subjects",
+  "summary": "Summary",
+  "ratingsTitle": "Open Library ratings",
+  "outOfFive": " / 5",
+  "ratingSeparator": " · ",
+  "ratingCount_one": "{{count}} rating",
+  "ratingCount_other": "{{count}} ratings",
+  "subjects": "Subjects",
+  "fetchFailed": "Open Library did not return details for this title. You can edit metadata later if needed."
+}

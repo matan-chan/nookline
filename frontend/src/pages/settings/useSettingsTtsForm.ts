@@ -1,0 +1,226 @@
+import { useAuth } from "../../auth/AuthContext";
+import { DEFAULT_TTS_VOICE_ID } from "../../hooks/tts/ttsPlaybackConstants";
+import { DEFAULT_TTS_CHUNK_LIMITS } from "../../utils/readerText/constants";
+import i18n from "../../i18n";
+import { TTS_SETTINGS_AND_PROBE, UPDATE_TTS_SETTINGS } from "./settingsQueries";
+import { useMutation, useQuery } from "@apollo/client";
+import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
+
+const parseChunkWhole = (raw: string): number | null => {
+  const t = raw.trim();
+  if (!/^\d+$/.test(t)) return null;
+  const n = Number(t);
+  return Number.isSafeInteger(n) ? n : null;
+};
+
+export const useSettingsTtsForm = () => {
+  const { t } = useTranslation("settings");
+  const { user } = useAuth();
+  const userId = user?.id ?? 0;
+  const [speed, setSpeed] = useState(1.0);
+  const [ttsMode, setTtsMode] = useState<"kokoro" | "custom">("kokoro");
+  const [customBaseUrl, setCustomBaseUrl] = useState("");
+  const [customApiKeyDraft, setCustomApiKeyDraft] = useState("");
+  const [ttsVoice, setTtsVoice] = useState(DEFAULT_TTS_VOICE_ID);
+  const [ttsModel, setTtsModel] = useState("kokoro");
+  const [chunkMinDraft, setChunkMinDraft] = useState(String(DEFAULT_TTS_CHUNK_LIMITS.minChars));
+  const [chunkMaxDraft, setChunkMaxDraft] = useState(String(DEFAULT_TTS_CHUNK_LIMITS.maxChars));
+  const [chunkPeriodDraft, setChunkPeriodDraft] = useState(String(DEFAULT_TTS_CHUNK_LIMITS.periodScanExtra));
+  const [chunkFieldsError, setChunkFieldsError] = useState<string | null>(null);
+  const [readerShowPage, setReaderShowPage] = useState(true);
+  const [readerShowTitle, setReaderShowTitle] = useState(true);
+  const [readerStripPdfMargins, setReaderStripPdfMargins] = useState(true);
+  const [ttsSavedHint, setTtsSavedHint] = useState<string | null>(null);
+
+  const { data: ttsData, refetch: refetchTts } = useQuery<{
+    ttsSettings: {
+      mode: string;
+      customBaseUrl: string | null;
+      hasCustomApiKey: boolean;
+      voice: string;
+      model: string;
+      speed: number;
+      pitch: number;
+      chunkMinChars: number;
+      chunkMaxChars: number;
+      chunkPeriodExtra: number;
+      readerShowPage: boolean;
+      readerShowTitle: boolean;
+      readerStripPdfMargins: boolean;
+    };
+    ttsEngineProbe: { ok: boolean; error: string | null };
+  }>(TTS_SETTINGS_AND_PROBE, { variables: { userId }, skip: user == null });
+
+  const [updateTts, { loading: ttsSaving }] = useMutation(UPDATE_TTS_SETTINGS, {
+    onCompleted: () => {
+      refetchTts();
+      setCustomApiKeyDraft("");
+      setTtsSavedHint(i18n.t("savedHint", { ns: "settings" }));
+      setTimeout(() => setTtsSavedHint(null), 2500);
+    },
+  });
+
+  useEffect(() => {
+    const s = ttsData?.ttsSettings;
+    if (!s) return;
+    setTtsMode(s.mode === "custom" ? "custom" : "kokoro");
+    setCustomBaseUrl(s.customBaseUrl ?? "");
+    setTtsVoice(s.voice || DEFAULT_TTS_VOICE_ID);
+    setTtsModel(s.model || "kokoro");
+    setSpeed(typeof s.speed === "number" ? s.speed : 1);
+    setChunkMinDraft(String(typeof s.chunkMinChars === "number" ? s.chunkMinChars : DEFAULT_TTS_CHUNK_LIMITS.minChars));
+    setChunkMaxDraft(String(typeof s.chunkMaxChars === "number" ? s.chunkMaxChars : DEFAULT_TTS_CHUNK_LIMITS.maxChars));
+    setChunkPeriodDraft(
+      String(typeof s.chunkPeriodExtra === "number" ? s.chunkPeriodExtra : DEFAULT_TTS_CHUNK_LIMITS.periodScanExtra),
+    );
+    setReaderShowPage(s.readerShowPage !== false);
+    setReaderShowTitle(s.readerShowTitle !== false);
+    setReaderStripPdfMargins(s.readerStripPdfMargins !== false);
+  }, [
+    ttsData?.ttsSettings?.mode,
+    ttsData?.ttsSettings?.customBaseUrl,
+    ttsData?.ttsSettings?.voice,
+    ttsData?.ttsSettings?.model,
+    ttsData?.ttsSettings?.speed,
+    ttsData?.ttsSettings?.chunkMinChars,
+    ttsData?.ttsSettings?.chunkMaxChars,
+    ttsData?.ttsSettings?.chunkPeriodExtra,
+    ttsData?.ttsSettings?.readerShowPage,
+    ttsData?.ttsSettings?.readerShowTitle,
+    ttsData?.ttsSettings?.readerStripPdfMargins,
+  ]);
+
+  const validateChunkDrafts = (): { chunkMinChars: number; chunkMaxChars: number; chunkPeriodExtra: number } | null => {
+    const minN = parseChunkWhole(chunkMinDraft);
+    if (minN == null) {
+      setChunkFieldsError(t("chunkValidationNumbers"));
+      return null;
+    }
+    if (minN < 20 || minN > 4000) {
+      setChunkFieldsError(t("chunkValidationMin"));
+      return null;
+    }
+    const maxN = parseChunkWhole(chunkMaxDraft);
+    if (maxN == null) {
+      setChunkFieldsError(t("chunkValidationNumbers"));
+      return null;
+    }
+    if (maxN < minN + 10 || maxN > 50000) {
+      setChunkFieldsError(t("chunkValidationMax"));
+      return null;
+    }
+    const perN = parseChunkWhole(chunkPeriodDraft);
+    if (perN == null) {
+      setChunkFieldsError(t("chunkValidationNumbers"));
+      return null;
+    }
+    if (perN > 50000) {
+      setChunkFieldsError(t("chunkValidationPeriod"));
+      return null;
+    }
+    setChunkFieldsError(null);
+    return { chunkMinChars: minN, chunkMaxChars: maxN, chunkPeriodExtra: perN };
+  };
+
+  const handleSaveTts = () => {
+    const chunks = validateChunkDrafts();
+    if (!chunks) return;
+    const input: {
+      userId: number;
+      mode: string;
+      customBaseUrl?: string | null;
+      customApiKey?: string;
+      voice: string;
+      model: string;
+      speed: number;
+      pitch: number;
+      chunkMinChars: number;
+      chunkMaxChars: number;
+      chunkPeriodExtra: number;
+      readerShowPage: boolean;
+      readerShowTitle: boolean;
+      readerStripPdfMargins: boolean;
+    } = {
+      userId,
+      mode: ttsMode,
+      voice: ttsVoice.trim() || DEFAULT_TTS_VOICE_ID,
+      model: ttsModel.trim() || "kokoro",
+      speed,
+      pitch: typeof ttsData?.ttsSettings?.pitch === "number" ? ttsData.ttsSettings.pitch : 1,
+      ...chunks,
+      readerShowPage,
+      readerShowTitle,
+      readerStripPdfMargins,
+    };
+    if (ttsMode === "custom") input.customBaseUrl = customBaseUrl.trim() || null;
+    if (customApiKeyDraft.trim()) input.customApiKey = customApiKeyDraft.trim();
+    updateTts({ variables: { input } });
+  };
+
+  const handleClearTtsApiKey = () => {
+    const chunks = validateChunkDrafts();
+    if (!chunks) return;
+    updateTts({
+      variables: {
+        input: {
+          userId,
+          mode: ttsMode,
+          customBaseUrl: ttsMode === "custom" ? customBaseUrl.trim() || null : null,
+          customApiKey: "",
+          voice: ttsVoice.trim() || DEFAULT_TTS_VOICE_ID,
+          model: ttsModel.trim() || "kokoro",
+          speed,
+          pitch: typeof ttsData?.ttsSettings?.pitch === "number" ? ttsData.ttsSettings.pitch : 1,
+          ...chunks,
+          readerShowPage,
+          readerShowTitle,
+          readerStripPdfMargins,
+        },
+      },
+    });
+  };
+
+  return {
+    probe: ttsData?.ttsEngineProbe,
+    ttsData,
+    ttsMode,
+    setTtsMode,
+    customBaseUrl,
+    setCustomBaseUrl,
+    customApiKeyDraft,
+    setCustomApiKeyDraft,
+    ttsVoice,
+    setTtsVoice,
+    ttsModel,
+    setTtsModel,
+    onSaveTts: handleSaveTts,
+    onClearApiKey: handleClearTtsApiKey,
+    ttsSaving,
+    ttsSavedHint,
+    speed,
+    setSpeed,
+    chunkMinDraft,
+    setChunkMinDraft: (v: string) => {
+      setChunkFieldsError(null);
+      setChunkMinDraft(v);
+    },
+    chunkMaxDraft,
+    setChunkMaxDraft: (v: string) => {
+      setChunkFieldsError(null);
+      setChunkMaxDraft(v);
+    },
+    chunkPeriodDraft,
+    setChunkPeriodDraft: (v: string) => {
+      setChunkFieldsError(null);
+      setChunkPeriodDraft(v);
+    },
+    chunkFieldsError,
+    readerShowPage,
+    setReaderShowPage,
+    readerShowTitle,
+    setReaderShowTitle,
+    readerStripPdfMargins,
+    setReaderStripPdfMargins,
+  };
+};

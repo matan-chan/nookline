@@ -1,0 +1,22 @@
+{
+  "title": "Your account",
+  "subtitle": "Profile photo, password, and sign out.",
+  "sectionAccount": "Profile",
+  "sectionPassword": "Password",
+  "usernameReadonly": "Username is your sign-in name. Contact an admin to change it.",
+  "changePhoto": "Upload photo",
+  "removePhoto": "Remove photo",
+  "uploadFailed": "Could not update photo",
+  "removeFailed": "Could not remove photo",
+  "avatarUpdated": "Profile photo updated.",
+  "avatarRemoved": "Profile photo removed.",
+  "currentPassword": "Current password",
+  "newPassword": "New password",
+  "savePassword": "Update password",
+  "saving": "Saving…",
+  "passwordChangeFailed": "Could not change password",
+  "passwordChanged": "Password updated.",
+  "signOut": "Sign out",
+  "roleAdmin": "Administrator",
+  "roleMember": "Member"
+}

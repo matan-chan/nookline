@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# SQLite databases
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Prisma: keep migrations/ committed (required for `prisma migrate deploy` in Docker)
+
+# Logs
+*.log
+npm-debug.log*
+bun-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Playwright
+frontend/e2e/fixtures/*.pdf
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+frontend/playwright/.cache/
+frontend/playwright/.auth/
+
+# IDE
+.vscode/
+.idea/
+
+# Generated cover derivatives (WebP cache)
+**/.cover-cache/
+
+/books
+
+# User uploads (books, libraries, avatars, derived assets)
+backend/uploads/**
+!backend/uploads/.gitkeep

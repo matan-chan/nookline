@@ -1,0 +1,1 @@
+export const TTS_READER_PANEL_MOTION_MS = 320;

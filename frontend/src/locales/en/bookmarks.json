@@ -1,0 +1,12 @@
+{
+  "pageTitle": "Bookmarks & Highlights",
+  "pageSubtitle": "Open a bookmark to jump to that spot in the book. In the reader, right-click text and choose Save as bookmark.",
+  "tabBookmarks": "Bookmarks ({{count}})",
+  "tabHighlights": "Highlights ({{count}})",
+  "emptyBookmarks": "No bookmarks yet.",
+  "emptyHighlights": "No highlights yet.",
+  "positionLine": "Position {{position}} · {{date}}",
+  "positionSnippet": "{{position}}",
+  "delete": "Delete",
+  "highlightJumpHint": "Open in reader at this passage"
+}
