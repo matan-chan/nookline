@@ -11,7 +11,7 @@ import { PrismaClient } from "@prisma/client";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { rmSync } from "fs";
 import { assignGlobalFetch } from "./assignGlobalFetch";
-import { newTestWorkDir, runDbPush, sqliteUrlInDir } from "./testDb";
+import { ensureTestLibraryOwnerUser, newTestWorkDir, runDbPush, sqliteUrlInDir } from "./testDb";
 
 const sampleEnrichment = (): EnrichmentPayload => ({
   enrichedAt: "2020-01-01T00:00:00.000Z",
@@ -112,6 +112,7 @@ describe("enrichBookRecord short-circuit", () => {
     runDbPush(sqliteUrlInDir(testDir));
     prisma = new PrismaClient({ datasources: { db: { url: sqliteUrlInDir(testDir) } } });
     await prisma.$connect();
+    await ensureTestLibraryOwnerUser(prisma);
   });
 
   afterAll(async () => {
@@ -142,6 +143,7 @@ describe("enrichSeriesRecord short-circuit", () => {
     runDbPush(sqliteUrlInDir(testDir));
     prisma = new PrismaClient({ datasources: { db: { url: sqliteUrlInDir(testDir) } } });
     await prisma.$connect();
+    await ensureTestLibraryOwnerUser(prisma);
   });
 
   afterAll(async () => {

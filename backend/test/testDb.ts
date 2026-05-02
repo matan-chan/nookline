@@ -1,3 +1,4 @@
+import type { PrismaClient } from "@prisma/client";
 import { randomBytes } from "crypto";
 import { mkdirSync } from "fs";
 import { tmpdir } from "os";
@@ -11,9 +12,23 @@ export const runDbPush = (databaseUrl: string) => {
     env: { ...process.env, DATABASE_URL: databaseUrl },
     stderr: "pipe",
     stdout: "pipe",
+    timeout: 120_000,
   });
   if (res.exitCode !== 0)
     throw new Error(`prisma db push failed: ${res.stderr.toString()}${res.stdout.toString()}`);
+};
+
+export const ensureTestLibraryOwnerUser = async (prisma: PrismaClient) => {
+  await prisma.user.upsert({
+    where: { email: "nookline-tests-library-owner@local.invalid" },
+    create: {
+      email: "nookline-tests-library-owner@local.invalid",
+      username: "nookline-tests-library-owner",
+      password: "-",
+      isAdmin: false,
+    },
+    update: {},
+  });
 };
 
 export const newTestWorkDir = () => {

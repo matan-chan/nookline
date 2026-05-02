@@ -19,8 +19,8 @@ import { deleteBookmarksHighlightsProgressForBooks } from "./bookCleanup";
 export const libraryQueryResolvers = (prisma: PrismaClient) => ({
   libraries: async (_: unknown, __: unknown, ctx: GqlContext) => {
     beLog("query_libraries");
-    const u = requireGqlUser(ctx);
-    const libs = await prisma.library.findMany({ where: { userId: u.id }, include: libraryWithSeriesBooks });
+    if (ctx.user == null) return [];
+    const libs = await prisma.library.findMany({ where: { userId: ctx.user.id }, include: libraryWithSeriesBooks });
     return libs.map(serializeLibrary);
   },
 

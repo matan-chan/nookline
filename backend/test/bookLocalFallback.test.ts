@@ -1,7 +1,7 @@
 import { applyLocalBookFallback, persistBookDerivedCoverIfPossible, resolveBookFileOnDisk } from "../src/services/bookLocalFallback";
 import { resolveLibraryCoverCacheDir } from "../src/services/libraryPathResolve";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { newTestWorkDir, runDbPush, sqliteUrlInDir } from "./testDb";
+import { ensureTestLibraryOwnerUser, newTestWorkDir, runDbPush, sqliteUrlInDir } from "./testDb";
 import { mkdirSync, rmSync, writeFileSync } from "fs";
 import { PrismaClient } from "@prisma/client";
 import { dirname, join, resolve } from "path";
@@ -21,6 +21,7 @@ describe("bookLocalFallback", () => {
     runDbPush(databaseUrl);
     prisma = new PrismaClient({ datasources: { db: { url: databaseUrl } } });
     await prisma.$connect();
+    await ensureTestLibraryOwnerUser(prisma);
   });
 
   afterAll(async () => {
@@ -117,6 +118,7 @@ describe("book a.pdf under books-base and comedy shelf", () => {
     runDbPush(databaseUrl);
     prisma = new PrismaClient({ datasources: { db: { url: databaseUrl } } });
     await prisma.$connect();
+    await ensureTestLibraryOwnerUser(prisma);
   });
 
   afterAll(async () => {

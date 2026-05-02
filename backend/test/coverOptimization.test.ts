@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { rmSync, writeFileSync } from "fs";
 import { newTestWorkDir } from "./testDb";
 import type { Response } from "express";
+import { finished } from "stream/promises";
 import { PassThrough } from "stream";
 import { join } from "path";
 
@@ -21,12 +22,9 @@ describe("streamRawImage", () => {
       const dest = new PassThrough();
       const chunks: Buffer[] = [];
       dest.on("data", (c: Buffer) => chunks.push(c));
-      const res = Object.assign(dest, { setHeader: () => {} }) as unknown as Response;
+      const res = Object.assign(dest, { setHeader: () => {}, getHeader: () => undefined }) as unknown as Response;
       streamRawImage(res, img, "image/jpeg");
-      await new Promise<void>((resolve, reject) => {
-        dest.on("end", resolve);
-        dest.on("error", reject);
-      });
+      await finished(dest);
       expect(Buffer.concat(chunks).length).toBeGreaterThan(0);
     } finally {
       rmSync(dir, { recursive: true, force: true });

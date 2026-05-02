@@ -8,7 +8,7 @@ import { PrismaClient } from "@prisma/client";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { rmSync } from "fs";
 import { assignGlobalFetch } from "./assignGlobalFetch";
-import { newTestWorkDir, runDbPush, sqliteUrlInDir } from "./testDb";
+import { ensureTestLibraryOwnerUser, newTestWorkDir, runDbPush, sqliteUrlInDir } from "./testDb";
 
 describe("openLibrarySeries", () => {
   let prisma: PrismaClient;
@@ -20,6 +20,7 @@ describe("openLibrarySeries", () => {
     runDbPush(sqliteUrlInDir(testDir));
     prisma = new PrismaClient({ datasources: { db: { url: sqliteUrlInDir(testDir) } } });
     await prisma.$connect();
+    await ensureTestLibraryOwnerUser(prisma);
   });
 
   afterAll(async () => {
