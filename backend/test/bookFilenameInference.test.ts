@@ -3,6 +3,7 @@ import {
   findZipEntryKey,
   inferFromFilenameSlug,
   resolveZipPath,
+  stripLeadingOpaqueSlugPrefix,
   stripUploadTimestamp,
   titleLooksLikeRawFilename,
 } from "../src/services/bookFilenameInference";
@@ -29,7 +30,34 @@ describe("titleLooksLikeRawFilename", () => {
   });
 });
 
+describe("stripLeadingOpaqueSlugPrefix", () => {
+  test("strips long-id numeric segment prefix", () => {
+    expect(stripLeadingOpaqueSlugPrefix("cnzrj4sazlgn6spcwfw5l0az-0046-don-quixote-miguel-de-cervantes")).toBe(
+      "don-quixote-miguel-de-cervantes",
+    );
+  });
+  test("passes through slug without opaque prefix", () => {
+    expect(stripLeadingOpaqueSlugPrefix("don-quixote-miguel-de-cervantes")).toBe("don-quixote-miguel-de-cervantes");
+  });
+});
+
 describe("inferFromFilenameSlug", () => {
+  test("catalog hyphen slug with opaque prefix and particle surname", () => {
+    expect(inferFromFilenameSlug("cnzrj4sazlgn6spcwfw5l0az-0046-don-quixote-miguel-de-cervantes")).toEqual({
+      suggestedTitle: "Don Quixote",
+      suggestedAuthor: "Miguel de Cervantes",
+    });
+  });
+  test("catalog hyphen slug long title and two-word author", () => {
+    expect(
+      inferFromFilenameSlug(
+        "dyiigbcdsscm1gnj3y8iavay-0060-the-adventures-of-tom-sawyer-complete-mark-twain",
+      ),
+    ).toEqual({
+      suggestedTitle: "The Adventures Of Tom Sawyer Complete",
+      suggestedAuthor: "Mark Twain",
+    });
+  });
   test("empty slug", () => {
     expect(inferFromFilenameSlug("")).toEqual({ suggestedTitle: null, suggestedAuthor: null });
   });

@@ -1,11 +1,12 @@
 import type { Book, PrismaClient } from "@prisma/client";
-import { existsSync, mkdirSync, statSync } from "fs";
-import { extname, isAbsolute, join, normalize, resolve } from "path";
 import { inferFromFilenameSlug, stripUploadTimestamp, titleLooksLikeRawFilename, type FilenameInference } from "./bookFilenameInference";
-import { getUploadBaseDir, resolveLibraryContentDir, resolveLibraryCoverCacheDir } from "./libraryPathResolve";
+import { guessPdfTitleAuthorFromFirstPageText, type PdfPlainTextGuess } from "./pdfFirstPageTextInference";
 import { extractPdfEmbeddedMetadata } from "./pdfEmbeddedMetadata";
 import { tryGenerateCoverWebp } from "./bookCoverFromFile";
+import { getUploadBaseDir, resolveLibraryContentDir, resolveLibraryCoverCacheDir } from "./libraryPathResolve";
 import { beLog, beLogErr } from "../utils/beLog";
+import { existsSync, mkdirSync, statSync } from "fs";
+import { extname, isAbsolute, join, normalize, resolve } from "path";
 
 const DERIVED_COVER_PREFIX = "derived-cover-";
 const EPUB_EXT = ".epub";
@@ -14,6 +15,8 @@ const PDF_EXT = ".pdf";
 const fallbackLocks = new Map<number, Promise<Book | null>>();
 
 type PdfEmbeddedMeta = { title: string | null; author: string | null };
+
+const emptyPdfGuess = (): PdfPlainTextGuess => ({ title: null, author: null });
 
 export const applyLocalBookFallback = async (db: PrismaClient, bookId: number): Promise<Book | null> => {
   beLog("applyLocalBookFallback", { bookId });
@@ -64,11 +67,14 @@ const runApplyLocalBookFallback = async (db: PrismaClient, bookId: number): Prom
   const fileSize = tryStatFileSize(absFilePath);
   if (fileSize == null) return book;
   const inference = buildFilenameInference(absFilePath, book.title);
-  const pdfEmb = await loadPdfEmbeddedMetadataIfPdf(ext, absFilePath, fileSize);
+  const [pdfEmb, pdfTextGuess] = await Promise.all([
+    loadPdfEmbeddedMetadataIfPdf(ext, absFilePath, fileSize),
+    ext === PDF_EXT ? guessPdfTitleAuthorFromFirstPageText(absFilePath, fileSize) : Promise.resolve(emptyPdfGuess()),
+  ]);
   const newCoverPath = await maybeGenerateDerivedCover(book, meta, bookId, absFilePath, ext);
-  const nextTitle = pickRepairedTitle(inference.repairTitle, pdfEmb, inference.inferred);
-  const nextAuthor = pickFallbackAuthor(meta, pdfEmb, inference.inferred);
-  const mergedMeta = mergeLocalFallbackIntoMetadata(meta, inference.slug, inference.inferred, nextAuthor, newCoverPath);
+  const nextTitle = pickRepairedTitle(inference.repairTitle, pdfEmb, pdfTextGuess, inference.inferred);
+  const nextAuthor = pickFallbackAuthor(meta, pdfEmb, pdfTextGuess, inference.inferred);
+  const mergedMeta = mergeLocalFallbackIntoMetadata(meta, inference.slug, inference.inferred, nextAuthor, newCoverPath, pdfTextGuess);
   const payload = buildFallbackDbUpdate(book, mergedMeta, newCoverPath, nextTitle);
   if (!payload.hasChanges) return book;
   return db.book.update({ where: { id: bookId }, data: payload.data });
@@ -86,9 +92,23 @@ const buildFallbackDbUpdate = (book: Book, mergedMeta: Record<string, unknown>, 
   return { hasChanges: metaChanged || coverChanged || titleChanged, data };
 };
 
-const mergeLocalFallbackIntoMetadata = (meta: Record<string, unknown> | null, slug: string, inferred: FilenameInference, nextAuthor: string | null, newCoverPath: string | null): Record<string, unknown> => {
+const mergeLocalFallbackIntoMetadata = (
+  meta: Record<string, unknown> | null,
+  slug: string,
+  inferred: FilenameInference,
+  nextAuthor: string | null,
+  newCoverPath: string | null,
+  pdfTextGuess: PdfPlainTextGuess,
+): Record<string, unknown> => {
   const prevLf = meta?.localFallback && typeof meta.localFallback === "object" ? meta.localFallback : {};
   const now = new Date().toISOString();
+  const pdfTxt =
+    pdfTextGuess.title || pdfTextGuess.author
+      ? {
+          ...(pdfTextGuess.title ? { title: pdfTextGuess.title } : {}),
+          ...(pdfTextGuess.author ? { author: pdfTextGuess.author } : {}),
+        }
+      : null;
   return {
     ...(meta ?? {}),
     ...(nextAuthor ? { author: nextAuthor } : {}),
@@ -98,22 +118,35 @@ const mergeLocalFallbackIntoMetadata = (meta: Record<string, unknown> | null, sl
       filenameSlug: slug,
       inferredTitle: inferred.suggestedTitle,
       inferredAuthor: inferred.suggestedAuthor,
+      ...(pdfTxt ? { pdfFirstPageText: pdfTxt } : {}),
       ...(newCoverPath ? { coverFromFirstPage: true, coverGeneratedAt: now } : {}),
     },
   };
 };
 
-const pickFallbackAuthor = (meta: Record<string, unknown> | null, pdfEmb: PdfEmbeddedMeta, inferred: FilenameInference): string | null => {
+const pickFallbackAuthor = (
+  meta: Record<string, unknown> | null,
+  pdfEmb: PdfEmbeddedMeta,
+  pdfText: PdfPlainTextGuess,
+  inferred: FilenameInference,
+): string | null => {
   const hasAuthor = typeof meta?.author === "string" && meta.author.trim().length > 0;
   if (hasAuthor) return null;
-  const a = pdfEmb.author?.trim() || inferred.suggestedAuthor?.trim();
+  const a = pdfEmb.author?.trim() || pdfText.author?.trim() || inferred.suggestedAuthor?.trim();
   return a || null;
 };
 
-const pickRepairedTitle = (repairTitle: boolean, pdfEmb: PdfEmbeddedMeta, inferred: FilenameInference): string | null => {
+const pickRepairedTitle = (
+  repairTitle: boolean,
+  pdfEmb: PdfEmbeddedMeta,
+  pdfText: PdfPlainTextGuess,
+  inferred: FilenameInference,
+): string | null => {
   if (!repairTitle) return null;
   const fromPdf = pdfEmb.title?.trim();
   if (fromPdf) return fromPdf;
+  const fromPageText = pdfText.title?.trim();
+  if (fromPageText) return fromPageText;
   return inferred.suggestedTitle ?? null;
 };
 

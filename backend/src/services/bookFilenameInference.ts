@@ -6,6 +6,76 @@ export type FilenameInference = {
   suggestedAuthor: string | null;
 };
 
+const AUTHOR_PARTICLES = new Set([
+  "de",
+  "del",
+  "della",
+  "di",
+  "da",
+  "das",
+  "dos",
+  "du",
+  "der",
+  "den",
+  "la",
+  "le",
+  "les",
+  "el",
+  "van",
+  "von",
+  "st",
+  "ste",
+  "mac",
+  "mc",
+]);
+
+const capitalizeWord = (w: string) =>
+  w.length === 0 ? w : `${w.charAt(0).toUpperCase()}${w.slice(1).toLowerCase()}`;
+
+const formatTitleFromHyphenParts = (parts: string[]) => parts.map(capitalizeWord).join(" ");
+
+const formatAuthorFromHyphenParts = (parts: string[]) =>
+  parts
+    .map((w, i) => {
+      const lw = w.toLowerCase();
+      if (i > 0 && AUTHOR_PARTICLES.has(lw)) return lw;
+      return capitalizeWord(w);
+    })
+    .join(" ");
+
+const inferFromCatalogHyphenSlug = (rawSlug: string): FilenameInference | null => {
+  const slug = rawSlug.replace(/_/g, "-").replace(/-{2,}/g, "-").trim();
+  if (!slug.includes("-")) return null;
+  const parts = slug
+    .split("-")
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0);
+  if (parts.length < 3) return null;
+
+  let authorLen = 0;
+  if (parts.length >= 5 && AUTHOR_PARTICLES.has(parts[parts.length - 2]!.toLowerCase())) authorLen = 3;
+  else if (parts.length >= 4) authorLen = 2;
+  else authorLen = 2;
+
+  const titleParts = parts.slice(0, -authorLen);
+  const authorParts = parts.slice(-authorLen);
+  if (titleParts.length === 0 || authorParts.length === 0) return null;
+
+  return {
+    suggestedTitle: formatTitleFromHyphenParts(titleParts),
+    suggestedAuthor: formatAuthorFromHyphenParts(authorParts),
+  };
+};
+
+export const stripLeadingOpaqueSlugPrefix = (slug: string): string => {
+  const compact = slug.trim().replace(/\s+/g, "");
+  const hashNum = /^[a-z0-9]{8,}-\d+-(.+)$/i.exec(compact);
+  if (hashNum?.[1]) return hashNum[1];
+  const digits = /^\d+-(.+)$/.exec(compact);
+  if (digits?.[1]) return digits[1];
+  return slug.trim();
+};
+
 export const titleLooksLikeRawFilename = (title: string, slug: string) => {
   beLog("titleLooksLikeRawFilename");
   const nt = normalizeLoose(title);
@@ -25,6 +95,15 @@ export const inferFromFilenameSlug = (slug: string): FilenameInference => {
   if (pg) return { suggestedTitle: `Project Gutenberg eBook #${pg[1]}`, suggestedAuthor: null };
 
   s = s.replace(/\s+images\s+\d+\s*$/i, "").trim();
+
+  const spacedDash = /\s[-–—]\s/.test(s);
+  if (!spacedDash && /-/.test(s.replace(/\s+/g, ""))) {
+    const compactHyphenSlug = s.replace(/\s+/g, "");
+    const hyphenGuess =
+      inferFromCatalogHyphenSlug(stripLeadingOpaqueSlugPrefix(compactHyphenSlug)) ??
+      inferFromCatalogHyphenSlug(compactHyphenSlug);
+    if (hyphenGuess?.suggestedAuthor && hyphenGuess?.suggestedTitle) return hyphenGuess;
+  }
 
   let m = /^(.{2,80}?)\s*[-–—]\s+(.{2,200})$/.exec(s);
   if (m) return { suggestedAuthor: m[1].trim(), suggestedTitle: m[2].trim() };
