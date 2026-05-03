@@ -2,9 +2,10 @@ import type { TtsChunkLimits } from "../../utils/readerText/constants";
 import { extractEpubParagraphs } from "../../utils/readerText";
 import { documentHasNonCollapsedTextSelection } from "../../utils/documentTextSelection";
 import { getStoredToken } from "../../auth/authStorage";
+import { ensureEpubReadingSurfaceStylesInjected } from "./epubReadingSurfaceStyles";
+import { ensureEpubTtsHighlightStylesInjected } from "./epubViewerTtsHighlight";
 import { darkReaderStyles, lightReaderStyles } from "./readerStyles";
 import { isEpubCfi } from "./readerUtils";
-import { ensureEpubTtsHighlightStylesInjected } from "./epubViewerTtsHighlight";
 import { Box, CircularProgress, Typography, useTheme } from "@mui/material";
 import { ReactReader } from "react-reader";
 import type { Contents, Rendition } from "epubjs";
@@ -152,6 +153,7 @@ export const EpubViewer = ({
       const doc = contents.document;
       if (epubPickDocsRef.current.has(doc)) return;
       epubPickDocsRef.current.add(doc);
+      ensureEpubReadingSurfaceStylesInjected(doc);
       ensureEpubTtsHighlightStylesInjected(doc);
       const fn = (e: MouseEvent) => {
         if (e.button !== 0) return;
