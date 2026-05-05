@@ -4,7 +4,7 @@
   "addLibrary": "Add a library",
   "libraries": "Libraries",
   "libraryMoreOptionsAria": "Library options",
-  "refreshLibrary": "Refresh",
+  "refetchLibrary": "Refetch",
   "editLibrarySettings": "Edit settings",
   "deleteLibrary": "Delete library",
   "librarySyncNone": "No new books found in that folder.",

@@ -7,6 +7,7 @@ import { LIBRARY_BROWSER_QUERY, LIBRARY_DELETE_BOOK, LIBRARY_DELETE_SERIES } fro
 import { LibraryCoverCard, libraryCardGridSx } from "./library/LibraryCoverCard";
 import { LibraryHeroBanner } from "./library/LibraryHeroBanner";
 import type { LibraryBrowserLibrary, LibrarySortOption } from "./library/libraryBrowserTypes";
+import { sortSeriesForLibraryBrowser, sortStandaloneBooksForLibraryBrowser } from "./library/libraryBrowserSort";
 import { resolveLibraryHeroBackground } from "./library/resolveLibraryHeroBackgroundUrl";
 import { useQuery, useMutation } from "@apollo/client";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
@@ -50,17 +51,26 @@ const LibraryBrowser = () => {
     if (!library) return null;
     return {
       ariaLabel: t("heroLibraryMenuAria", { name: library.name }),
+      refetchLabel: t("heroMenuRefetch"),
       editLabel: t("heroMenuEdit"),
       deleteLabel: t("heroMenuDelete"),
+      onRefetch: () => refetch(),
       onEdit: () => openEditLibrary(toNavItem(library)),
       onDelete: () => setLibraryPendingDelete(toNavItem(library)),
     };
-  }, [library, openEditLibrary, setLibraryPendingDelete, t]);
+  }, [library, openEditLibrary, refetch, setLibraryPendingDelete, t]);
 
   const query = search.toLowerCase();
 
-  const filteredSeries = (library?.series ?? []).filter((s) => s.title.toLowerCase().includes(query));
-  const filteredBooks = (library?.books ?? []).filter((b) => !b.seriesId).filter((b) => b.title.toLowerCase().includes(query));
+  const filteredSeries = useMemo(() => {
+    const rows = (library?.series ?? []).filter((s) => s.title.toLowerCase().includes(query));
+    return sortSeriesForLibraryBrowser(rows, sort);
+  }, [library?.series, query, sort]);
+
+  const filteredBooks = useMemo(() => {
+    const rows = (library?.books ?? []).filter((b) => !b.seriesId).filter((b) => b.title.toLowerCase().includes(query));
+    return sortStandaloneBooksForLibraryBrowser(rows, sort);
+  }, [library?.books, query, sort]);
 
   return (
     <Box

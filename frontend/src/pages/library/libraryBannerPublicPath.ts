@@ -1,9 +1,7 @@
+import { LIBRARY_BANNER_HERO_WIDTHS } from "./libraryBannerVariants.generated";
+
 export const BUILTIN_LIBRARY_BANNER_FILES = [
   "amaze.jpg",
-  "banner-01.jpg",
-  "banner-03.jpg",
-  "banner-11.jpg",
-  "banner-14.jpg",
   "city.jpg",
   "cloud-castle.jpg",
   "custle.jpg",
@@ -33,8 +31,6 @@ const bannerBaseName = (bannerIndex: number) => {
 export const libraryBannerPickerThumbUrl = (bannerIndex: number) =>
   `/library-banners/variants/${bannerBaseName(bannerIndex)}-640.webp`;
 
-const HERO_WIDTHS = [640, 960, 1280, 1920] as const;
-
 export type LibraryBuiltinHeroSources = {
   webpSrcSet: string;
   jpegSrcSet: string;
@@ -44,13 +40,15 @@ export type LibraryBuiltinHeroSources = {
 
 export const libraryBuiltinHeroSources = (bannerIndex: number): LibraryBuiltinHeroSources => {
   const base = bannerBaseName(bannerIndex);
+  const widths = [...LIBRARY_BANNER_HERO_WIDTHS[base as keyof typeof LIBRARY_BANNER_HERO_WIDTHS]];
   const prefix = `/library-banners/variants/${base}`;
-  const webpSrcSet = HERO_WIDTHS.map((w) => `${prefix}-${w}.webp ${w}w`).join(", ");
-  const jpegSrcSet = HERO_WIDTHS.map((w) => `${prefix}-${w}.jpg ${w}w`).join(", ");
+  const webpSrcSet = widths.map((w) => `${prefix}-${w}.webp ${w}w`).join(", ");
+  const jpegSrcSet = widths.map((w) => `${prefix}-${w}.jpg ${w}w`).join(", ");
+  const max = widths[widths.length - 1];
   return {
     webpSrcSet,
     jpegSrcSet,
-    jpegFallbackSrc: `${prefix}-1280.jpg`,
+    jpegFallbackSrc: `${prefix}-${max}.jpg`,
     sizes: "100vw",
   };
 };

@@ -1,5 +1,6 @@
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { IconButton, Menu, MenuItem } from "@mui/material";
+import { IconButton, ListItemIcon, Menu, MenuItem } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -84,6 +85,9 @@ const CardOverflowMenu = ({ onRemove, variant, itemTitle }: CardOverflowMenuProp
           }}
           sx={{ color: "error.main", fontSize: "0.75rem" }}
         >
+          <ListItemIcon sx={{ minWidth: 28, color: "inherit" }}>
+            <DeleteOutline sx={{ fontSize: 18 }} />
+          </ListItemIcon>
           {tc("remove")}
         </MenuItem>
       </Menu>

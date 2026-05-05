@@ -7,8 +7,10 @@ export type LibraryHeroBannerModel = {
 
 export type LibraryHeroBannerMenu = {
   ariaLabel: string;
+  refetchLabel: string;
   editLabel: string;
   deleteLabel: string;
+  onRefetch: () => void;
   onEdit: () => void;
   onDelete: () => void;
 };

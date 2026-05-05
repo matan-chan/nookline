@@ -2,6 +2,7 @@
   "defaultLibraryName": "Library",
   "heroBannerAria": "Library overview",
   "heroLibraryMenuAria": "Library actions for {{name}}",
+  "heroMenuRefetch": "Refetch",
   "heroMenuEdit": "Edit",
   "heroMenuDelete": "Delete",
   "heroEyebrowLibrary": "LIBRARY",

@@ -4,6 +4,7 @@ export type LibraryBrowserBook = {
   coverImagePath: string | null;
   metadata?: string | null;
   seriesId?: number | null;
+  createdAt: string;
   readingProgressForUser?: { percentage: number } | null;
 };
 
@@ -13,6 +14,7 @@ export type LibraryBrowserSeries = {
   coverImagePath: string | null;
   metadata?: string | null;
   status: string;
+  createdAt: string;
   books: {
     id: number;
     coverImagePath: string | null;

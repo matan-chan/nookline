@@ -5,8 +5,11 @@ import { BookCoverImg } from "../../components/BookCoverImg";
 import { coverCardColumnHoverSx } from "../../utils/staggerGridSx";
 import { getCoverUrl } from "../../utils/cover";
 import { useMutation } from "@apollo/client";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import EditOutlined from "@mui/icons-material/EditOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { Alert, Box, IconButton, Menu, MenuItem, Snackbar, Typography } from "@mui/material";
+import SyncOutlined from "@mui/icons-material/SyncOutlined";
+import { Alert, Box, IconButton, ListItemIcon, Menu, MenuItem, Snackbar, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { MouseEvent } from "react";
 import { useState } from "react";
@@ -245,12 +248,21 @@ const DashboardLibraryCard = ({ library, onRequestDelete, onEditSettings }: { li
               }}
               sx={{ fontSize: "0.75rem" }}
             >
-              {t("refreshLibrary")}
+              <ListItemIcon sx={{ minWidth: 28, color: "inherit" }}>
+                <SyncOutlined sx={{ fontSize: 18 }} />
+              </ListItemIcon>
+              {t("refetchLibrary")}
             </MenuItem>
             <MenuItem onClick={handleEditSettings} sx={{ fontSize: "0.75rem" }}>
+              <ListItemIcon sx={{ minWidth: 28, color: "inherit" }}>
+                <EditOutlined sx={{ fontSize: 18 }} />
+              </ListItemIcon>
               {t("editLibrarySettings")}
             </MenuItem>
             <MenuItem onClick={handleDeleteLibrary} sx={{ fontSize: "0.75rem", color: "error.main" }}>
+              <ListItemIcon sx={{ minWidth: 28, color: "inherit" }}>
+                <DeleteOutline sx={{ fontSize: 18 }} />
+              </ListItemIcon>
               {t("deleteLibrary")}
             </MenuItem>
           </Menu>

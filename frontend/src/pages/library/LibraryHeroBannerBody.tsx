@@ -1,10 +1,13 @@
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import EditOutlined from "@mui/icons-material/EditOutlined";
 import LibraryBooksOutlined from "@mui/icons-material/LibraryBooksOutlined";
 import MenuBookOutlined from "@mui/icons-material/MenuBookOutlined";
-import ViewModuleOutlined from "@mui/icons-material/ViewModuleOutlined";
 import MoreVert from "@mui/icons-material/MoreVert";
+import SyncOutlined from "@mui/icons-material/SyncOutlined";
+import ViewModuleOutlined from "@mui/icons-material/ViewModuleOutlined";
 import { DETAIL_LAVENDER } from "../detail/detailPurpleAccent";
 import type { LibraryHeroBannerMenu, LibraryHeroBannerModel } from "./libraryHeroBannerTypes";
-import { Box, CircularProgress, IconButton, Menu, MenuItem, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, IconButton, ListItemIcon, Menu, MenuItem, Stack, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { TFunction } from "i18next";
 
@@ -109,9 +112,23 @@ export const LibraryHeroBannerBody = ({ loading, library, t, menu, menuAnchor, s
                   <MenuItem
                     onClick={() => {
                       setMenuAnchor(null);
+                      menu.onRefetch();
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
+                      <SyncOutlined fontSize="small" />
+                    </ListItemIcon>
+                    {menu.refetchLabel}
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      setMenuAnchor(null);
                       menu.onEdit();
                     }}
                   >
+                    <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
+                      <EditOutlined fontSize="small" />
+                    </ListItemIcon>
                     {menu.editLabel}
                   </MenuItem>
                   <MenuItem
@@ -121,6 +138,9 @@ export const LibraryHeroBannerBody = ({ loading, library, t, menu, menuAnchor, s
                     }}
                     sx={(th) => ({ color: th.palette.error.main })}
                   >
+                    <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
+                      <DeleteOutline fontSize="small" />
+                    </ListItemIcon>
                     {menu.deleteLabel}
                   </MenuItem>
                 </Menu>
