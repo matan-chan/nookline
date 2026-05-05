@@ -7,6 +7,10 @@ node_modules/
 dist/
 build/
 
+# Docker Compose (machine-specific / NPM network — keep local only)
+docker-compose.yml
+docker-compose.npm.yml
+
 # Environment
 .env
 .env.local

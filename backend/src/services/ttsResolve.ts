@@ -99,21 +99,14 @@ const probeJsonLikeErrorFromBuffer = (buf: ArrayBuffer, contentType: string) => 
   return null;
 };
 
-const buildCustomTtsTarget = (user: User): ResolvedTtsTarget => {
-  beLog("buildCustomTtsTarget", { userId: user.id });
-  const raw = user.ttsCustomBaseUrl?.trim();
-  if (!raw) throw new Error("Custom TTS is selected but no base URL is configured");
-  const base = raw.replace(/\/$/, "");
-  const key = user.ttsCustomApiKey?.trim() || null;
-  const voice = user.ttsVoice?.trim() || "af_heart";
-  const model = user.ttsModel?.trim() || "kokoro";
-  return {
-    speechUrl: `${base}/v1/audio/speech`,
-    authorization: key ? `Bearer ${key}` : null,
-    defaultVoice: voice,
-    defaultModel: model,
-  };
+const normalizeOpenAiTtsBaseUrl = (raw: string) => {
+  let s = raw.trim().replace(/\/+$/, "");
+  for (let i = 0; i < 8 && /\/v1$/i.test(s); i++) s = s.replace(/\/v1$/i, "").replace(/\/+$/, "");
+  return s;
 };
+
+const kokoroPresetBaseUrl = () =>
+  normalizeOpenAiTtsBaseUrl(process.env.KOKORO_TTS_URL ?? "http://127.0.0.1:8880");
 
 const buildKokoroTtsTarget = (user: User): ResolvedTtsTarget => {
   beLog("buildKokoroTtsTarget", { userId: user.id });
@@ -128,4 +121,18 @@ const buildKokoroTtsTarget = (user: User): ResolvedTtsTarget => {
   };
 };
 
-const kokoroPresetBaseUrl = () => (process.env.KOKORO_TTS_URL ?? "http://127.0.0.1:8880").replace(/\/$/, "");
+const buildCustomTtsTarget = (user: User): ResolvedTtsTarget => {
+  beLog("buildCustomTtsTarget", { userId: user.id });
+  const raw = user.ttsCustomBaseUrl?.trim();
+  if (!raw) throw new Error("Custom TTS is selected but no base URL is configured");
+  const base = normalizeOpenAiTtsBaseUrl(raw);
+  const key = user.ttsCustomApiKey?.trim() || null;
+  const voice = user.ttsVoice?.trim() || "af_heart";
+  const model = user.ttsModel?.trim() || "kokoro";
+  return {
+    speechUrl: `${base}/v1/audio/speech`,
+    authorization: key ? `Bearer ${key}` : null,
+    defaultVoice: voice,
+    defaultModel: model,
+  };
+};

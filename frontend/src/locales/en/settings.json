@@ -39,7 +39,7 @@
   "customDesc": "Any OpenAI-compatible TTS — use this for CPU Kokoro, remote APIs, or other engines.",
   "baseUrlLabel": "Base URL",
   "baseUrlPlaceholder": "https://api.openai.com/v1",
-  "baseUrlHintCustom": "This should be the base URL of the OpenAI compatible TTS service you will generate TTS responses from.",
+  "baseUrlHintCustom": "Use scheme + host + port (e.g. http://localhost:8882 from Windows, or http://kokoro-nookline:8880 from the Nookline backend container). If you paste …/v1 like other OpenAI-compatible apps, that is fine — Nookline strips it before calling /v1/audio/speech.",
   "apiKeyLabel": "API key",
   "apiKeyPlaceholderMasked": "•••••••• (enter new key to replace)",
   "apiKeyPlaceholderNew": "API key",

@@ -24,6 +24,28 @@ describe("resolveTtsTarget", () => {
         ttsModel: "kokoro",
       },
     });
+    await prisma.user.create({
+      data: {
+        email: "tts2@test.local",
+        username: "tts2user",
+        password: "x",
+        ttsMode: "custom",
+        ttsCustomBaseUrl: "http://kokoro.test:8880/v1/",
+        ttsVoice: "af_heart",
+        ttsModel: "kokoro",
+      },
+    });
+    await prisma.user.create({
+      data: {
+        email: "tts3@test.local",
+        username: "tts3user",
+        password: "x",
+        ttsMode: "custom",
+        ttsCustomBaseUrl: "http://double.test/v1/v1",
+        ttsVoice: "af_bella",
+        ttsModel: "kokoro",
+      },
+    });
   });
 
   afterAll(async () => {
@@ -36,6 +58,17 @@ describe("resolveTtsTarget", () => {
     expect(t.speechUrl).toContain("/v1/audio/speech");
     expect(t.authorization).toBeNull();
     expect(t.defaultVoice).toBe("af_test");
+  });
+
+  test("custom base URL strips trailing /v1 before /v1/audio/speech", async () => {
+    const t = await resolveTtsTarget(prisma, 2);
+    expect(t.speechUrl).toBe("http://kokoro.test:8880/v1/audio/speech");
+    expect(t.authorization).toBeNull();
+  });
+
+  test("custom base URL collapses duplicated /v1 segments", async () => {
+    const t = await resolveTtsTarget(prisma, 3);
+    expect(t.speechUrl).toBe("http://double.test/v1/audio/speech");
   });
 });
 

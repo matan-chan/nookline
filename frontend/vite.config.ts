@@ -8,7 +8,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 
 export default defineConfig(({ mode }) => {
   const rootEnv = loadEnv(mode, repoRoot, "");
-  const backendPort = rootEnv.DEV_BACKEND_PORT || "4006";
+  const backendPort = rootEnv.DEV_BACKEND_PORT || rootEnv.BACKEND_PORT || "4006";
   return {
     build: {
       rollupOptions: {
@@ -47,7 +47,7 @@ export default defineConfig(({ mode }) => {
           globPatterns: ["**/*.{js,css,html,ico,svg,png,webp,jpg,jpeg,woff2}"],
           globIgnores: ["**/library-banners/*.jpg", "**/library-banners/*.jpeg"],
           navigateFallback: "index.html",
-          navigateFallbackDenylist: [/^\/api\//],
+          navigateFallbackDenylist: [/^\/api/],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
@@ -55,15 +55,6 @@ export default defineConfig(({ mode }) => {
               options: {
                 cacheName: "google-fonts",
                 expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              },
-            },
-            {
-              urlPattern: ({ request, url }) => request.method === "GET" && url.origin === self.location.origin && url.pathname.startsWith("/api/") && !url.pathname.startsWith("/api/files/"),
-              handler: "NetworkFirst",
-              options: {
-                cacheName: "api-get",
-                networkTimeoutSeconds: 8,
-                expiration: { maxEntries: 32, maxAgeSeconds: 120 },
               },
             },
           ],

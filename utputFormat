@@ -1,0 +1,21 @@
+HTTP/1.1 400 Bad Request
+Server: nginx/1.29.8
+Date: Tue, 05 May 2026 15:43:36 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 138
+Connection: keep-alive
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+X-Powered-By: Express
+Cache-Control: no-store, no-cache, must-revalidate
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Bad Request</pre>
+</body>
+</html>
