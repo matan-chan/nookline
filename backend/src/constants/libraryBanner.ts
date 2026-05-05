@@ -1,4 +1,4 @@
-export const LIBRARY_BANNER_COUNT = 10;
+export const LIBRARY_BANNER_COUNT = 14;
 
 export const randomLibraryBannerIndex = () => Math.floor(Math.random() * LIBRARY_BANNER_COUNT);
 

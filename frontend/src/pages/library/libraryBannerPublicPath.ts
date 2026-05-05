@@ -5,10 +5,14 @@ export const BUILTIN_LIBRARY_BANNER_FILES = [
   "banner-11.jpg",
   "banner-14.jpg",
   "city.jpg",
+  "cloud-castle.jpg",
   "custle.jpg",
   "future.jpg",
   "nature.jpg",
   "river.jpg",
+  "spirit-forest.jpg",
+  "storybook.jpg",
+  "watcher-eye.jpg",
 ] as const;
 
 export const LIBRARY_BANNER_COUNT = BUILTIN_LIBRARY_BANNER_FILES.length;
