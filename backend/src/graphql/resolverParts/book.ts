@@ -7,6 +7,7 @@ import { enrichBookRecord } from "../../services/openLibraryEnrichment";
 import { createBookRecord } from "../../services/createBookRecord";
 import { beLog } from "../../utils/beLog";
 import {
+  mergeRecommendationIdsWithFallback,
   parseBookMetadata,
   pickRecommendedBookIds,
 } from "../../services/recommendedBooksForBook";
@@ -76,20 +77,35 @@ export const bookQueryResolvers = (prisma: PrismaClient) => ({
     ctx: GqlContext,
   ) => {
     const cap = Math.min(20, Math.max(1, limit ?? 10));
-    beLog("query_recommendedBooksForBook", { bookId, cap });
+    const sourceBookId = Math.trunc(Number(bookId));
+    if (!Number.isFinite(sourceBookId) || sourceBookId < 1) return [];
+    beLog("query_recommendedBooksForBook", { bookId: sourceBookId, cap });
     const u = requireGqlUser(ctx);
-    const source = await prisma.book.findFirst({ where: { id: bookId, library: { userId: u.id } } });
+    const ownedLibraryIds = (
+      await prisma.library.findMany({ where: { userId: u.id }, select: { id: true } })
+    ).map((row) => row.id);
+    if (ownedLibraryIds.length === 0) return [];
+    const source = await prisma.book.findFirst({
+      where: { id: sourceBookId, libraryId: { in: ownedLibraryIds } },
+    });
     if (!source) return [];
     const sourceMeta = parseBookMetadata(source.metadata);
-    const pool = await prisma.book.findMany({
-      where: { id: { not: bookId }, library: { userId: u.id } },
+    const userPool = await prisma.book.findMany({
+      where: { id: { not: sourceBookId }, libraryId: { in: ownedLibraryIds } },
       orderBy: { createdAt: "desc" },
       take: 500,
-      select: { id: true, metadata: true },
+      select: { id: true, metadata: true, libraryId: true },
     });
-    const ids = pickRecommendedBookIds(sourceMeta, pool, bookId, cap);
-    if (ids.length === 0) return [];
-    const full = await prisma.book.findMany({ where: { id: { in: ids } } });
+    if (userPool.length === 0) return [];
+    const sameLib = userPool.filter((b) => b.libraryId === source.libraryId);
+    const metaOnly = userPool.map(({ id, metadata }) => ({ id, metadata }));
+    const scoredIds = pickRecommendedBookIds(sourceMeta, metaOnly, sourceBookId, cap);
+    const firstPool = sameLib.length ? sameLib : userPool;
+    let ids = mergeRecommendationIdsWithFallback(scoredIds, firstPool, cap);
+    if (ids.length < cap) ids = mergeRecommendationIdsWithFallback(ids, userPool, cap);
+    const full = await prisma.book.findMany({
+      where: { id: { in: ids }, libraryId: { in: ownedLibraryIds } },
+    });
     const byId = new Map(full.map((b) => [b.id, b]));
     return ids
       .map((id) => byId.get(id))

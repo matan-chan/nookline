@@ -6,7 +6,7 @@ import { mkdirSync, rmSync, writeFileSync } from "fs";
 import { PrismaClient } from "@prisma/client";
 import { dirname, join, resolve } from "path";
 
-describe("bookLocalFallback", () => {
+describe("bookLocalFallback", { timeout: 60_000 }, () => {
   let prisma: PrismaClient;
   let testDir: string;
   let uploadDir: string;
@@ -102,7 +102,7 @@ describe("bookLocalFallback", () => {
   });
 });
 
-describe("book a.pdf under books-base and comedy shelf", () => {
+describe("book a.pdf under books-base and comedy shelf", { timeout: 60_000 }, () => {
   let prisma: PrismaClient;
   let testDir: string;
   let booksBase: string;

@@ -45,13 +45,15 @@ const BookDetail = () => {
   const { t } = useTranslation("book");
   const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
-  const bookId = parseInt(id ?? "0");
+  const parsedId = parseInt(id ?? "0", 10);
+  const bookId = Number.isFinite(parsedId) ? parsedId : 0;
   const navigate = useNavigate();
   const [removeOpen, setRemoveOpen] = useState(false);
 
   const { data, loading, refetch } = useQuery<BookDetailQueryData>(BOOK_DETAIL_QUERY, {
     variables: { id: bookId, userId: user?.id ?? 0 },
-    skip: user == null,
+    skip: user == null || bookId < 1,
+    fetchPolicy: "cache-and-network",
   });
   const [deleteBook, { loading: deleting }] = useMutation(BOOK_DETAIL_DELETE_BOOK);
   const [enrichBook] = useMutation(BOOK_DETAIL_ENRICH);
@@ -127,7 +129,7 @@ const BookDetail = () => {
         px: { xs: 3, sm: 4, md: 5 },
         pb: { xs: 4, md: 6 },
         pt: { xs: 2, sm: 3, md: 4 },
-        minHeight: "100%",
+        minHeight: "100vh",
         transition: "background-color 0.45s ease, background-image 0.45s ease",
         ...ambientBackground,
       }}
@@ -148,7 +150,7 @@ const BookDetail = () => {
         }
       />
 
-      <BookDetailRecommendedRow books={data?.recommendedBooksForBook ?? []} />
+      <BookDetailRecommendedRow key={book.id} books={data?.recommendedBooksForBook ?? []} />
 
       <ConfirmModal
         open={removeOpen}

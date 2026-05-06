@@ -1,13 +1,13 @@
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { DETAIL_LAVENDER, DETAIL_RATING_STAR, DETAIL_READ_GRADIENT } from "../detail/detailPurpleAccent";
 import { Box, Button, IconButton, Stack, Tooltip } from "@mui/material";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { HERO_ACTIONS_GAP_PX } from "./bookDetailHeroConstants";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { alpha } from "@mui/material/styles";
 import type { TFunction } from "i18next";
 import { Link } from "react-router-dom";
-import { HERO_ACTIONS_GAP_PX } from "./bookDetailHeroConstants";
 
 type Book = {
   id: number;
@@ -24,15 +24,7 @@ type Props = {
   onToggleFavorite: () => void;
 };
 
-export const BookDetailHeroActions = ({
-  book,
-  compactActions,
-  t,
-  onRemoveClick,
-  isFavorite,
-  favoriteBusy,
-  onToggleFavorite,
-}: Props) => (
+export const BookDetailHeroActions = ({ book, compactActions, t, onRemoveClick, isFavorite, favoriteBusy, onToggleFavorite }: Props) => (
   <Box
     sx={{
       flexShrink: 0,
@@ -43,14 +35,7 @@ export const BookDetailHeroActions = ({
       py: { md: 0.75 },
     }}
   >
-    <Stack
-      direction="row"
-      flexWrap="wrap"
-      alignItems="center"
-      justifyContent={{ xs: "center", md: "flex-start" }}
-      spacing={{ xs: 1, sm: 1.5 }}
-      sx={{ gap: { xs: 1, sm: 1.5 } }}
-    >
+    <Stack direction="row" flexWrap="wrap" alignItems="center" justifyContent={{ xs: "center", md: "flex-start" }} spacing={{ xs: 1, sm: 1.5 }} sx={{ gap: { xs: 1, sm: 1.5 } }}>
       <Button
         component={Link}
         to={`/read/${book.id}`}
@@ -123,14 +108,7 @@ export const BookDetailHeroActions = ({
 
       {onRemoveClick ? (
         <Tooltip title={t("removeBook")}>
-          <IconButton
-            type="button"
-            color="error"
-            onClick={onRemoveClick}
-            aria-label={t("removeBook")}
-            size={compactActions ? "small" : "medium"}
-            sx={{ ml: { xs: 0, sm: 0.5 } }}
-          >
+          <IconButton type="button" color="error" onClick={onRemoveClick} aria-label={t("removeBook")} size={compactActions ? "small" : "medium"} sx={{ ml: { xs: 0, sm: 0.5 } }}>
             <DeleteOutlineIcon fontSize={compactActions ? "small" : "medium"} />
           </IconButton>
         </Tooltip>

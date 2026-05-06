@@ -8,8 +8,10 @@ const BANNERS_DIR = path.resolve(__dirname, "../public/library-banners");
 const VARIANTS_DIR = path.join(BANNERS_DIR, "variants");
 const GENERATED_TS = path.resolve(__dirname, "../src/pages/library/libraryBannerVariants.generated.ts");
 
-/** Upper bounds — outputs use intrinsic width in filenames for correct srcSet `NNNw` descriptors. */
+/** Ladder capped by master width (`withoutEnlargement`); duplicate widths dedupe. */
 const WIDTH_TARGETS = [640, 960, 1280, 1920, 2560, 3840];
+/** Always emit these widths for srcSet (1440p-class ~2560px logical, 4K ~3840). Downscale when master is larger; upscale only when master is narrower than target. */
+const HERO_CAP_WIDTHS = [2560, 3840];
 const WEBP_QUALITY = 86;
 const JPEG_QUALITY = 86;
 const THUMB_WIDTH = 640;
@@ -38,6 +40,8 @@ const main = async () => {
     const base = name.replace(/\.jpe?g$/i, "");
     await removeVariantsForBase(base);
 
+    const { width: intrinsicW = 0 } = await sharp(buf).metadata();
+
     /** @type {Map<number, Buffer>} */
     const webpByW = new Map();
     /** @type {Map<number, Buffer>} */
@@ -51,6 +55,15 @@ const main = async () => {
       const jpegOut = await r().jpeg({ quality: JPEG_QUALITY, mozjpeg: true }).toBuffer({ resolveWithObject: true });
       webpByW.set(aw, webpOut.data);
       jpegByW.set(aw, jpegOut.data);
+    }
+
+    for (const tw of HERO_CAP_WIDTHS) {
+      const capResize = () =>
+        sharp(buf).resize(tw, null, { withoutEnlargement: intrinsicW >= tw });
+      const webpCap = await capResize().webp({ quality: WEBP_QUALITY }).toBuffer({ resolveWithObject: true });
+      const jpegCap = await capResize().jpeg({ quality: JPEG_QUALITY, mozjpeg: true }).toBuffer({ resolveWithObject: true });
+      webpByW.set(tw, webpCap.data);
+      jpegByW.set(tw, jpegCap.data);
     }
 
     const thumbR = () => sharp(buf).resize(THUMB_WIDTH, null, { withoutEnlargement: false });
