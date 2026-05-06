@@ -1,10 +1,11 @@
-import { RangeField, SettingsCard } from "./SettingsPrimitives";
-import { SettingsTtsCardChunkSection } from "./SettingsTtsCardChunkSection";
-import { SettingsTtsCardProbeRow } from "./SettingsTtsCardProbeRow";
 import { SettingsTtsCardProviderFields } from "./SettingsTtsCardProviderFields";
+import { SettingsTtsCardChunkSection } from "./SettingsTtsCardChunkSection";
 import { SettingsTtsCardReaderPrefs } from "./SettingsTtsCardReaderPrefs";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { SettingsTtsCardProbeRow } from "./SettingsTtsCardProbeRow";
+import { RangeField, SettingsCard } from "./SettingsPrimitives";
+import { SettingsTtsResetDialog } from "./SettingsTtsReset";
 import { useTranslation } from "react-i18next";
+import { Box, Button, Stack, Typography } from "@mui/material";
 
 type Probe = { ok: boolean; error: string | null } | null | undefined;
 
@@ -44,6 +45,11 @@ export const SettingsTtsCard = ({
   setReaderShowTitle,
   readerStripPdfMargins,
   setReaderStripPdfMargins,
+  hasNonDefaultTtsSettings,
+  resetDialogOpen,
+  setResetDialogOpen,
+  onConfirmResetTts,
+  resetDoneHint,
 }: {
   probe: Probe;
   ttsMode: "kokoro" | "custom";
@@ -76,6 +82,11 @@ export const SettingsTtsCard = ({
   setReaderShowTitle: (v: boolean) => void;
   readerStripPdfMargins: boolean;
   setReaderStripPdfMargins: (v: boolean) => void;
+  hasNonDefaultTtsSettings: boolean;
+  resetDialogOpen: boolean;
+  setResetDialogOpen: (v: boolean) => void;
+  onConfirmResetTts: () => void;
+  resetDoneHint: string | null;
 }) => {
   const { t } = useTranslation("settings");
 
@@ -122,21 +133,61 @@ export const SettingsTtsCard = ({
         readerStripPdfMargins={readerStripPdfMargins}
         setReaderStripPdfMargins={setReaderStripPdfMargins}
       />
-      <Stack direction="row" alignItems="center" spacing={1.5} flexWrap="wrap">
-        <Button
-          variant="contained"
-          onClick={onSaveTts}
-          disabled={ttsSaving || (ttsMode === "custom" && !customBaseUrl.trim())}
-          sx={{ bgcolor: "primary.main", color: "#000", fontWeight: 600, textTransform: "none" }}
-        >
-          {ttsSaving ? t("savingTts") : t("saveTts")}
-        </Button>
-        {ttsSavedHint && (
-          <Typography variant="caption" color="secondary.main">
-            {ttsSavedHint}
-          </Typography>
-        )}
+      <Stack sx={{ pt: 2, borderTop: 1, borderColor: "divider" }} spacing={1}>
+        <Stack direction="row" alignItems="stretch" spacing={1.5} sx={{ width: "100%", flexWrap: "nowrap" }}>
+          <Button
+            variant="outlined"
+            color="error"
+            size="small"
+            disabled={ttsSaving || !hasNonDefaultTtsSettings}
+            onClick={() => setResetDialogOpen(true)}
+            sx={{ flex: 1, minWidth: 0, textTransform: "none", whiteSpace: "normal", lineHeight: 1.25, py: 1 }}
+          >
+            {t("resetTts")}
+          </Button>
+          <Button
+            variant="contained"
+            onClick={onSaveTts}
+            disabled={ttsSaving || (ttsMode === "custom" && !customBaseUrl.trim())}
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              bgcolor: "primary.main",
+              color: "#000",
+              fontWeight: 600,
+              textTransform: "none",
+              whiteSpace: "normal",
+              lineHeight: 1.25,
+              py: 1,
+            }}
+          >
+            {ttsSaving ? t("savingTts") : t("saveTts")}
+          </Button>
+        </Stack>
+        {(ttsSavedHint || resetDoneHint) ? (
+          <Stack direction="row" alignItems="center" spacing={1.5} flexWrap="wrap" useFlexGap>
+            {ttsSavedHint ? (
+              <Typography variant="caption" color="secondary.main">
+                {ttsSavedHint}
+              </Typography>
+            ) : null}
+            {resetDoneHint ? (
+              <Typography variant="caption" color="success.main">
+                {resetDoneHint}
+              </Typography>
+            ) : null}
+          </Stack>
+        ) : null}
       </Stack>
+      <SettingsTtsResetDialog
+        t={t}
+        open={resetDialogOpen}
+        onClose={() => {
+          if (!ttsSaving) setResetDialogOpen(false);
+        }}
+        onConfirm={onConfirmResetTts}
+        loading={ttsSaving}
+      />
     </SettingsCard>
   );
 };

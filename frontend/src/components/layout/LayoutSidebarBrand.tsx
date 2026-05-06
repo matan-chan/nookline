@@ -1,7 +1,6 @@
-import ChevronLeft from "@mui/icons-material/ChevronLeft";
-import ChevronRight from "@mui/icons-material/ChevronRight";
-import { Avatar, Box, IconButton, Typography } from "@mui/material";
+import { SidebarCollapseIcon } from "./SidebarCollapseIcon";
 import type { Theme } from "@mui/material/styles";
+import { Avatar, Box, IconButton, Typography } from "@mui/material";
 import type { TFunction } from "i18next";
 
 type Props = {
@@ -69,7 +68,7 @@ export const LayoutSidebarBrand = ({
         {brandInitial}
       </Avatar>
     )}
-    {!mobileDrawer ? (
+    {!mobileDrawer && expanded ? (
       <IconButton
         size="small"
         onClick={(e) => {
@@ -79,7 +78,7 @@ export const LayoutSidebarBrand = ({
         aria-label={railPinned ? t("unpinSidebar") : t("pinSidebar")}
         sx={{ color: "text.secondary", flexShrink: 0, alignSelf: expanded ? "flex-start" : "center", mt: expanded ? 0.25 : 0 }}
       >
-        {railPinned ? <ChevronLeft fontSize="small" /> : <ChevronRight fontSize="small" />}
+        <SidebarCollapseIcon fontSize="small" />
       </IconButton>
     ) : null}
   </Box>

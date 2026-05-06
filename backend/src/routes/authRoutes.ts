@@ -199,9 +199,17 @@ export const buildAuthRouter = (prisma: PrismaClient) => {
     }
     const list = await prisma.user.findMany({
       orderBy: { id: "asc" },
-      select: { id: true, username: true, isAdmin: true, createdAt: true },
+      select: { id: true, username: true, isAdmin: true, createdAt: true, avatarRelPath: true },
     });
-    json(res, 200, { users: list.map((x) => ({ id: x.id, username: x.username, isAdmin: x.isAdmin, createdAt: x.createdAt.toISOString() })) });
+    json(res, 200, {
+      users: list.map((x) => ({
+        id: x.id,
+        username: x.username,
+        isAdmin: x.isAdmin,
+        createdAt: x.createdAt.toISOString(),
+        hasAvatar: Boolean(x.avatarRelPath),
+      })),
+    });
   });
 
   r.post("/users", async (req: Request, res: Response) => {

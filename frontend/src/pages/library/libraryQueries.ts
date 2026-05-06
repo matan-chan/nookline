@@ -21,3 +21,12 @@ export const LIBRARY_DELETE_SERIES = gql`
     deleteSeries(id: $id)
   }
 `;
+
+export const SYNC_LIBRARY_FROM_DISK = gql`
+  mutation SyncLibraryFromDisk($libraryId: Int!) {
+    syncLibraryFromDisk(libraryId: $libraryId) {
+      id
+      title
+    }
+  }
+`;

@@ -3,14 +3,14 @@ import AddBookModal from "../components/AddBookModal";
 import type { LayoutOutletContext, LibraryNavItem } from "../components/Layout";
 import { getSeriesCoverUrl } from "../utils/cover";
 import { LibraryBrowserToolbar } from "./library/LibraryBrowserToolbar";
-import { LIBRARY_BROWSER_QUERY, LIBRARY_DELETE_BOOK, LIBRARY_DELETE_SERIES } from "./library/libraryQueries";
+import { LIBRARY_BROWSER_QUERY, LIBRARY_DELETE_BOOK, LIBRARY_DELETE_SERIES, SYNC_LIBRARY_FROM_DISK } from "./library/libraryQueries";
 import { LibraryCoverCard, libraryCardGridSx } from "./library/LibraryCoverCard";
 import { LibraryHeroBanner } from "./library/LibraryHeroBanner";
 import type { LibraryBrowserLibrary, LibrarySortOption } from "./library/libraryBrowserTypes";
 import { sortSeriesForLibraryBrowser, sortStandaloneBooksForLibraryBrowser } from "./library/libraryBrowserSort";
 import { resolveLibraryHeroBackground } from "./library/resolveLibraryHeroBackgroundUrl";
 import { useQuery, useMutation } from "@apollo/client";
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -35,6 +35,7 @@ const LibraryBrowser = () => {
   const [sort, setSort] = useState<LibrarySortOption>("title");
 
   const [addBookOpen, setAddBookOpen] = useState(false);
+  const [toast, setToast] = useState<{ msg: string; severity: "success" | "error" } | null>(null);
 
   const { data, loading, refetch } = useQuery<{ library: LibraryBrowserLibrary }>(LIBRARY_BROWSER_QUERY, {
     variables: { id: libraryId, userId: user?.id ?? 0 },
@@ -43,6 +44,17 @@ const LibraryBrowser = () => {
 
   const [deleteBook] = useMutation(LIBRARY_DELETE_BOOK, { onCompleted: () => refetch() });
   const [deleteSeries] = useMutation(LIBRARY_DELETE_SERIES, { onCompleted: () => refetch() });
+  const [syncLibrary, { loading: syncing }] = useMutation(SYNC_LIBRARY_FROM_DISK, {
+    onCompleted: async (d) => {
+      const added = (d as { syncLibraryFromDisk?: { title: string }[] } | null | undefined)?.syncLibraryFromDisk ?? [];
+      const n = added.length;
+      if (n === 0) setToast({ msg: t("librarySyncNone"), severity: "success" });
+      else if (n <= 5) setToast({ msg: t("librarySyncAddedList", { titles: added.map((b) => b.title).join(", ") }), severity: "success" });
+      else setToast({ msg: t("librarySyncAddedMany", { count: n }), severity: "success" });
+      await refetch();
+    },
+    onError: () => setToast({ msg: t("librarySyncFailed"), severity: "error" }),
+  });
 
   const library = data?.library;
   const heroBackground = library ? resolveLibraryHeroBackground(library) : null;
@@ -51,14 +63,14 @@ const LibraryBrowser = () => {
     if (!library) return null;
     return {
       ariaLabel: t("heroLibraryMenuAria", { name: library.name }),
-      refetchLabel: t("heroMenuRefetch"),
+      refetchLabel: syncing ? t("heroMenuRefetchBusy") : t("heroMenuRefetch"),
       editLabel: t("heroMenuEdit"),
       deleteLabel: t("heroMenuDelete"),
-      onRefetch: () => refetch(),
+      onRefetch: () => syncLibrary({ variables: { libraryId: library.id } }),
       onEdit: () => openEditLibrary(toNavItem(library)),
       onDelete: () => setLibraryPendingDelete(toNavItem(library)),
     };
-  }, [library, openEditLibrary, refetch, setLibraryPendingDelete, t]);
+  }, [library, openEditLibrary, setLibraryPendingDelete, syncLibrary, syncing, t]);
 
   const query = search.toLowerCase();
 
@@ -83,11 +95,19 @@ const LibraryBrowser = () => {
         pb: { xs: 2, sm: 3, md: 4 },
       }}
     >
+      <Snackbar open={toast != null} autoHideDuration={4000} onClose={() => setToast(null)} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
+        {toast ? (
+          <Alert onClose={() => setToast(null)} severity={toast.severity} variant="filled" sx={{ width: "100%" }}>
+            {toast.msg}
+          </Alert>
+        ) : (
+          <span />
+        )}
+      </Snackbar>
       <Box
         sx={{
           mx: { xs: -2, sm: -3, md: -4 },
           mt: { xs: 0, sm: 0, md: -4 },
-          mb: { xs: 1, md: 1.5 },
         }}
       >
         <LibraryHeroBanner loading={loading && !data?.library} library={library} heroBackground={heroBackground} menu={heroMenu} />

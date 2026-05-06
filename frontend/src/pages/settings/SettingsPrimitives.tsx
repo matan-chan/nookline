@@ -1,9 +1,22 @@
-import { Paper, Slider, Stack, Typography } from "@mui/material";
+import type { ReactNode } from "react";
+import { Box, Paper, Slider, Stack, Typography } from "@mui/material";
 
-export const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-  <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-    {children}
-  </Typography>
+type SectionTitleProps = {
+  children: ReactNode;
+  icon?: ReactNode;
+};
+
+export const SectionTitle = ({ children, icon }: SectionTitleProps) => (
+  <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 2 }}>
+    {icon != null ? (
+      <Box sx={{ display: "flex", color: "primary.main", "& svg": { fontSize: 26 } }} aria-hidden>
+        {icon}
+      </Box>
+    ) : null}
+    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+      {children}
+    </Typography>
+  </Stack>
 );
 
 export const SettingsCard = ({ children }: { children: React.ReactNode }) => (

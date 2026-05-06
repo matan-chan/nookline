@@ -1,23 +1,25 @@
+import ManageAccountsOutlined from "@mui/icons-material/ManageAccountsOutlined";
 import { PasswordStrengthMeter } from "../../components/PasswordStrengthMeter";
 import ConfirmModal from "../../components/ConfirmModal";
-import { useAuth } from "../../auth/AuthContext";
 import { passwordIsStrongEnough } from "../../auth/passwordStrength";
 import { buildAuthHeader, getStoredToken } from "../../auth/authStorage";
+import { useAuth } from "../../auth/AuthContext";
 import { SectionTitle, SettingsCard } from "./SettingsPrimitives";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
-import { Alert, Box, Button, Checkbox, FormControlLabel, IconButton, Stack, TextField, Tooltip, Typography } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { SettingsUserListRow, type SettingsUserRowModel } from "./SettingsUserListRow";
+import { alpha } from "@mui/material/styles";
+import { Alert, Box, Button, Checkbox, Divider, FormControlLabel, Stack, TextField, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import { useCallback, useEffect, useState } from "react";
 
 const USERNAME_RE = /^[a-zA-Z0-9_\p{L}]{2,32}$/u;
 
-type RowUser = { id: number; username: string; isAdmin: boolean; createdAt: string };
+const USERNAME_ERROR_ID = "settings-new-username-error";
 
 const SettingsUsersCard = () => {
   const { t } = useTranslation("auth");
   const { t: tc } = useTranslation("common");
   const { user } = useAuth();
-  const [rows, setRows] = useState<RowUser[]>([]);
+  const [rows, setRows] = useState<SettingsUserRowModel[]>([]);
   const [loadErr, setLoadErr] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +27,7 @@ const SettingsUsersCard = () => {
   const [formErr, setFormErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [pendingDelete, setPendingDelete] = useState<RowUser | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<SettingsUserRowModel | null>(null);
   const [deleteErr, setDeleteErr] = useState<string | null>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const strong = passwordIsStrongEnough(password);
@@ -47,7 +49,7 @@ const SettingsUsersCard = () => {
       setLoading(false);
       return;
     }
-    const j = (await r.json()) as { users?: RowUser[] };
+    const j = (await r.json()) as { users?: SettingsUserRowModel[] };
     setRows(j.users ?? []);
     setLoading(false);
   }, [t]);
@@ -117,7 +119,7 @@ const SettingsUsersCard = () => {
 
   return (
     <Stack spacing={2}>
-      <SectionTitle>{t("sectionUsers")}</SectionTitle>
+      <SectionTitle icon={<ManageAccountsOutlined />}>{t("sectionUsers")}</SectionTitle>
       <SettingsCard>
         <Typography variant="body2" color="text.secondary">
           {t("usersDescription")}
@@ -137,87 +139,125 @@ const SettingsUsersCard = () => {
             …
           </Typography>
         ) : (
-          <Box component="ul" sx={{ m: 0, pl: 0, listStyle: "none" }}>
+          <Stack component="ul" spacing={1.5} sx={{ m: 0, p: 0, listStyle: "none" }}>
             {rows.map((row) => {
               const isSelf = user.id === row.id;
               return (
-                <Box
+                <SettingsUserListRow
                   key={row.id}
-                  component="li"
-                  sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1, py: 0.5, pr: 0.5 }}
-                >
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography variant="body2" component="span" sx={{ fontWeight: 600 }}>
-                      {row.username}
-                    </Typography>
-                    <Typography variant="body2" component="span" color="text.secondary" sx={{ ml: 1 }}>
-                      — {row.isAdmin ? t("userRoleAdmin") : t("userRoleMember")}
-                    </Typography>
-                  </Box>
-                  {!isSelf ? (
-                    <Tooltip title={t("removeUser")}>
-                      <IconButton
-                        size="small"
-                        aria-label={t("removeUser")}
-                        onClick={() => {
-                          setDeleteErr(null);
-                          setPendingDelete(row);
-                        }}
-                        sx={{ color: "error.main" }}
-                      >
-                        <DeleteOutline fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  ) : null}
-                </Box>
+                  row={row}
+                  isSelf={isSelf}
+                  onRequestDelete={() => {
+                    setDeleteErr(null);
+                    setPendingDelete(row);
+                  }}
+                  t={t}
+                />
               );
             })}
-          </Box>
+          </Stack>
         )}
+        <Divider
+          sx={(th) => ({
+            borderColor: alpha(th.palette.divider, th.palette.mode === "dark" ? 0.35 : 0.8),
+            my: 2,
+          })}
+        />
+        <Typography
+          variant="subtitle2"
+          sx={(th) => ({
+            color: alpha(th.palette.primary.main, 0.95),
+            fontWeight: 600,
+            letterSpacing: "0.04em",
+            mb: 1.5,
+          })}
+        >
+          {t("addUser")}
+        </Typography>
         <Box component="form" onSubmit={onCreate} sx={{ pt: 1 }}>
           {formErr ? (
             <Alert severity="error" sx={{ mb: 1 }} onClose={() => setFormErr(null)}>
               {formErr}
             </Alert>
           ) : null}
-          <TextField
-            fullWidth
-            size="small"
-            label={t("newUserUsername")}
-            name="new-username"
-            autoComplete="off"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            error={name.length > 0 && !nameOk}
-            helperText={name.length > 0 && !nameOk ? t("usernameHint") : " "}
-            sx={{ mb: 0.5 }}
-          />
-          <TextField
-            fullWidth
-            size="small"
-            type="password"
-            label={t("newUserPassword")}
-            name="new-password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            sx={{ mb: 0.5 }}
-          />
-          <PasswordStrengthMeter value={password} />
-          <FormControlLabel
-            control={<Checkbox size="small" checked={asAdmin} onChange={(_, v) => setAsAdmin(v)} />}
-            label={t("newUserAdmin")}
-            sx={{ alignItems: "center", my: 0.5 }}
-          />
-          <Button
-            type="submit"
-            variant="outlined"
-            size="small"
-            disabled={busy || !strong || !nameOk}
-            sx={{ textTransform: "none" }}
-          >
-            {t("createUser")}
-          </Button>
+          <Stack spacing={2}>
+            <Box
+              sx={{
+                display: { xs: "flex", sm: "grid" },
+                flexDirection: { xs: "column" },
+                gap: { xs: 2, sm: 0 },
+                columnGap: { sm: 2 },
+                rowGap: { sm: 1 },
+                gridTemplateColumns: { sm: "1fr 1fr auto" },
+                gridTemplateRows: { sm: "auto auto" },
+              }}
+            >
+              <TextField
+                fullWidth
+                size="small"
+                label={t("newUserUsername")}
+                name="new-username"
+                autoComplete="off"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                error={name.length > 0 && !nameOk}
+                slotProps={{
+                  input: {
+                    "aria-describedby": name.length > 0 && !nameOk ? USERNAME_ERROR_ID : undefined,
+                  },
+                }}
+                sx={{ gridColumn: { sm: "1" }, gridRow: { sm: "1" }, alignSelf: { sm: "start" } }}
+              />
+              <Box
+                sx={{
+                  gridColumn: { sm: "1" },
+                  gridRow: { sm: "2" },
+                  minHeight: { sm: "1.25rem" },
+                }}
+              >
+                {name.length > 0 && !nameOk ? (
+                  <Typography id={USERNAME_ERROR_ID} variant="caption" color="error" role="alert" sx={{ display: "block", lineHeight: 1.4 }}>
+                    {t("usernameHint")}
+                  </Typography>
+                ) : null}
+              </Box>
+              <TextField
+                fullWidth
+                size="small"
+                type="password"
+                label={t("newUserPassword")}
+                name="new-password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                sx={{ gridColumn: { sm: "2" }, gridRow: { sm: "1" }, alignSelf: { sm: "start" } }}
+              />
+              <Box sx={{ gridColumn: { sm: "2" }, gridRow: { sm: "2" }, minWidth: 0 }}>
+                <PasswordStrengthMeter value={password} />
+              </Box>
+              <Button
+                type="submit"
+                variant="outlined"
+                size="small"
+                disabled={busy || !strong || !nameOk}
+                sx={{
+                  textTransform: "none",
+                  gridColumn: { sm: "3" },
+                  gridRow: { sm: "1" },
+                  width: { xs: "100%", sm: "auto" },
+                  alignSelf: { sm: "end" },
+                }}
+              >
+                {t("createUser")}
+              </Button>
+              <Box sx={{ display: { xs: "none", sm: "block" }, gridColumn: { sm: "3" }, gridRow: { sm: "2" } }} />
+            </Box>
+            <FormControlLabel
+              control={<Checkbox size="small" checked={asAdmin} onChange={(_, v) => setAsAdmin(v)} />}
+              label={t("newUserAdmin")}
+              sx={{ alignItems: "center", m: 0 }}
+            />
+          </Stack>
         </Box>
       </SettingsCard>
       <ConfirmModal

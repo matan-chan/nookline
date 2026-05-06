@@ -1,15 +1,15 @@
-import { useNooklineColorMode } from "../AppThemeProvider";
+import RecordVoiceOverOutlined from "@mui/icons-material/RecordVoiceOverOutlined";
 import SettingsCustomizationCard from "./settings/SettingsCustomizationCard";
-import { SectionTitle, SettingsCard } from "./settings/SettingsPrimitives";
-import { SettingsTtsCard } from "./settings/SettingsTtsCard";
-import SettingsUsersCard from "./settings/SettingsUsersCard";
+import PaletteOutlined from "@mui/icons-material/PaletteOutlined";
 import { useSettingsTtsForm } from "./settings/useSettingsTtsForm";
-import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { SectionTitle } from "./settings/SettingsPrimitives";
+import SettingsUsersCard from "./settings/SettingsUsersCard";
+import { SettingsTtsCard } from "./settings/SettingsTtsCard";
 import { useTranslation } from "react-i18next";
+import { Box, Stack, Typography } from "@mui/material";
 
 const Settings = () => {
   const { t } = useTranslation("settings");
-  const { mode, setMode } = useNooklineColorMode();
   const tts = useSettingsTtsForm();
 
   return (
@@ -26,66 +26,58 @@ const Settings = () => {
 
         <SettingsUsersCard />
 
-        <Stack spacing={2}>
-          <SectionTitle>{t("sectionAppearance")}</SectionTitle>
-          <SettingsCard>
-            <Typography variant="body2" color="text.secondary">
-              {t("appearanceHint")}
-            </Typography>
-            <ToggleButtonGroup
-              exclusive
-              value={mode}
-              onChange={(_, v) => v && setMode(v)}
-              size="small"
-              color="primary"
-              sx={{ alignSelf: "flex-start" }}
-            >
-              <ToggleButton value="dark">{t("themeDark")}</ToggleButton>
-              <ToggleButton value="light">{t("themeLight")}</ToggleButton>
-            </ToggleButtonGroup>
-          </SettingsCard>
-        </Stack>
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={{ xs: 5, md: 3 }}
+          alignItems="stretch"
+          sx={{ width: "100%" }}
+        >
+          <Stack spacing={2} sx={{ flex: 1, minWidth: 0 }}>
+            <SectionTitle icon={<PaletteOutlined />}>{t("sectionCustomization")}</SectionTitle>
+            <SettingsCustomizationCard />
+          </Stack>
 
-        <Stack spacing={2}>
-          <SectionTitle>{t("sectionCustomization")}</SectionTitle>
-          <SettingsCustomizationCard />
-        </Stack>
-
-        <Stack spacing={2}>
-          <SectionTitle>{t("sectionTts")}</SectionTitle>
-          <SettingsTtsCard
-            probe={tts.probe}
-            ttsMode={tts.ttsMode}
-            setTtsMode={tts.setTtsMode}
-            customBaseUrl={tts.customBaseUrl}
-            setCustomBaseUrl={tts.setCustomBaseUrl}
-            customApiKeyDraft={tts.customApiKeyDraft}
-            setCustomApiKeyDraft={tts.setCustomApiKeyDraft}
-            ttsVoice={tts.ttsVoice}
-            setTtsVoice={tts.setTtsVoice}
-            ttsModel={tts.ttsModel}
-            setTtsModel={tts.setTtsModel}
-            ttsData={tts.ttsData}
-            onSaveTts={tts.onSaveTts}
-            onClearApiKey={tts.onClearApiKey}
-            ttsSaving={tts.ttsSaving}
-            ttsSavedHint={tts.ttsSavedHint}
-            speed={tts.speed}
-            setSpeed={tts.setSpeed}
-            chunkMinDraft={tts.chunkMinDraft}
-            setChunkMinDraft={tts.setChunkMinDraft}
-            chunkMaxDraft={tts.chunkMaxDraft}
-            setChunkMaxDraft={tts.setChunkMaxDraft}
-            chunkPeriodDraft={tts.chunkPeriodDraft}
-            setChunkPeriodDraft={tts.setChunkPeriodDraft}
-            chunkFieldsError={tts.chunkFieldsError}
-            readerShowPage={tts.readerShowPage}
-            setReaderShowPage={tts.setReaderShowPage}
-            readerShowTitle={tts.readerShowTitle}
-            setReaderShowTitle={tts.setReaderShowTitle}
-            readerStripPdfMargins={tts.readerStripPdfMargins}
-            setReaderStripPdfMargins={tts.setReaderStripPdfMargins}
-          />
+          <Stack spacing={2} sx={{ flex: 1, minWidth: 0 }}>
+            <SectionTitle icon={<RecordVoiceOverOutlined />}>{t("sectionTts")}</SectionTitle>
+            <SettingsTtsCard
+              probe={tts.probe}
+              ttsMode={tts.ttsMode}
+              setTtsMode={tts.setTtsMode}
+              customBaseUrl={tts.customBaseUrl}
+              setCustomBaseUrl={tts.setCustomBaseUrl}
+              customApiKeyDraft={tts.customApiKeyDraft}
+              setCustomApiKeyDraft={tts.setCustomApiKeyDraft}
+              ttsVoice={tts.ttsVoice}
+              setTtsVoice={tts.setTtsVoice}
+              ttsModel={tts.ttsModel}
+              setTtsModel={tts.setTtsModel}
+              ttsData={tts.ttsData}
+              onSaveTts={tts.onSaveTts}
+              onClearApiKey={tts.onClearApiKey}
+              ttsSaving={tts.ttsSaving}
+              ttsSavedHint={tts.ttsSavedHint}
+              speed={tts.speed}
+              setSpeed={tts.setSpeed}
+              chunkMinDraft={tts.chunkMinDraft}
+              setChunkMinDraft={tts.setChunkMinDraft}
+              chunkMaxDraft={tts.chunkMaxDraft}
+              setChunkMaxDraft={tts.setChunkMaxDraft}
+              chunkPeriodDraft={tts.chunkPeriodDraft}
+              setChunkPeriodDraft={tts.setChunkPeriodDraft}
+              chunkFieldsError={tts.chunkFieldsError}
+              readerShowPage={tts.readerShowPage}
+              setReaderShowPage={tts.setReaderShowPage}
+              readerShowTitle={tts.readerShowTitle}
+              setReaderShowTitle={tts.setReaderShowTitle}
+              readerStripPdfMargins={tts.readerStripPdfMargins}
+              setReaderStripPdfMargins={tts.setReaderStripPdfMargins}
+              hasNonDefaultTtsSettings={tts.hasNonDefaultTtsSettings}
+              resetDialogOpen={tts.resetDialogOpen}
+              setResetDialogOpen={tts.setResetDialogOpen}
+              onConfirmResetTts={tts.onConfirmResetTts}
+              resetDoneHint={tts.resetDoneHint}
+            />
+          </Stack>
         </Stack>
       </Stack>
     </Box>

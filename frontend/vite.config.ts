@@ -1,15 +1,21 @@
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import { readFileSync } from "node:fs";
 import { defineConfig, loadEnv } from "vite";
-import { fileURLToPath } from "url";
 import path from "path";
+import { fileURLToPath } from "url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const frontendDir = path.dirname(fileURLToPath(import.meta.url));
+const appVersion = (JSON.parse(readFileSync(path.join(frontendDir, "package.json"), "utf-8")) as { version: string }).version;
 
 export default defineConfig(({ mode }) => {
   const rootEnv = loadEnv(mode, repoRoot, "");
   const backendPort = rootEnv.DEV_BACKEND_PORT || rootEnv.BACKEND_PORT || "4006";
   return {
+    define: {
+      __APP_VERSION__: JSON.stringify(appVersion),
+    },
     build: {
       rollupOptions: {
         output: {

@@ -20,3 +20,10 @@ export const passwordIsStrongEnough = (t: string) => {
   const c = [LOWER.test(t), UPPER.test(t), DIGIT.test(t), SPECIAL.test(t)].filter(Boolean).length;
   return c >= 3;
 };
+
+/** Meter max is "Good" (3) until `passwordIsStrongEnough` — avoids "Strong" while Create stays disabled. */
+export const passwordStrengthMeterTier = (t: string): 0 | 1 | 2 | 3 | 4 => {
+  const raw = passwordScore(t);
+  if (passwordIsStrongEnough(t)) return raw;
+  return Math.min(raw, 3) as 0 | 1 | 2 | 3;
+};

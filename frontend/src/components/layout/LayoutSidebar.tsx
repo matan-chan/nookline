@@ -4,7 +4,7 @@ import { LayoutSidebarFooter } from "./LayoutSidebarFooter";
 import { LayoutSidebarLibraries } from "./LayoutSidebarLibraries";
 import { LayoutSidebarMainNav } from "./LayoutSidebarMainNav";
 import { RAIL_COLLAPSED, RAIL_EXPANDED, type LibraryNavItem } from "./layoutConstants";
-import { Box, Divider } from "@mui/material";
+import { Box } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { TFunction } from "i18next";
 
@@ -92,7 +92,6 @@ export const LayoutSidebar = ({
         />
       </Box>
 
-      <Divider sx={{ borderColor: "divider", flexShrink: 0 }} />
       <LayoutSidebarFooter expanded={expanded} t={t} onNavigate={onNavigate} />
     </Box>
   );

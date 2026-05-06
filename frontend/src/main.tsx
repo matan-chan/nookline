@@ -1,6 +1,7 @@
 import { ApolloProvider } from "@apollo/client";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { TimezonePreferenceProvider } from "./TimezonePreferenceProvider";
 import { AppThemeProvider } from "./AppThemeProvider";
 import App from "./App";
 import { AuthProvider } from "./auth/AuthContext";
@@ -16,7 +17,9 @@ createRoot(document.getElementById("root")!).render(
     <ApolloProvider client={client}>
       <AuthProvider>
         <AppThemeProvider>
-          <App />
+          <TimezonePreferenceProvider>
+            <App />
+          </TimezonePreferenceProvider>
         </AppThemeProvider>
       </AuthProvider>
     </ApolloProvider>

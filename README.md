@@ -2,11 +2,30 @@
 
 Personal library and reader stack (web UI + API). **Self‑host with Docker.**
 
-## License
 
-This project is licensed under the **PolyForm Noncommercial License 1.0.0** — see [`LICENSE`](./LICENSE).
 
-You may use, modify, and share it for **non‑commercial** purposes. **Commercial use** (selling/hosting-as-a-Service for profit, internal use tied to revenue, etc.) is **not** granted by that license; contact the maintainers if you need a commercial agreement.
+---
+
+
+<img src="./demo/readme/library-browser-ultrawide.png" alt="" width="100%" />
+
+<img src="./demo/readme/library-browser-phone-desk.png" alt="" width="100%" />
+
+<table>
+<tbody>
+<tr valign="top">
+<td width="50%"><img src="./demo/readme/dashboard-home-monitor.png" alt="" width="100%" /></td>
+<td width="50%"><img src="./demo/readme/dashboard-mobile-hand.png" alt="" width="100%" /></td>
+</tr>
+<tr valign="top">
+<td width="50%"><img src="./demo/readme/book-detail-tablet-cozy.png" alt="" width="100%" /></td>
+<td width="50%"><img src="./demo/readme/reader-ai-panel-laptop.png" alt="" width="100%" /></td>
+</tr>
+<tr valign="top">
+<td colspan="2"><img src="./demo/readme/reader-ai-panel-mobile-transit.png" alt="" width="100%" /></td>
+</tr>
+</tbody>
+</table>
 
 ---
 
@@ -81,3 +100,9 @@ See `frontend/` and `backend/` package scripts (`npm`, `bun`). Use a `.env` in e
 ## Security note for production installs
 
 When **`NODE_ENV=production`** (set in Compose for the backend), the API **exits at startup** if the signing secret is missing, too short, or matches known weak placeholders. Always set **`JWT_SECRET`** (or **`AUTH_SECRET`**) properly before exposing the stack to the internet.
+
+## License
+
+This project is licensed under the **PolyForm Noncommercial License 1.0.0** — see [`LICENSE`](./LICENSE).
+
+You may use, modify, and share it for **non‑commercial** purposes. **Commercial use** (selling/hosting-as-a-Service for profit, internal use tied to revenue, etc.) is **not** granted by that license; contact the maintainers if you need a commercial agreement.

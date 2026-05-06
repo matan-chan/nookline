@@ -17,7 +17,7 @@ setup("authenticate via API + persist session", async ({ page, request }) => {
 
   await page.addInitScript(([t]) => localStorage.setItem("nookline_auth_token", t), [token]);
   await page.goto("/");
-  await expect(page.getByText("Good evening", { exact: true })).toBeVisible({ timeout: 25_000 });
+  await expect(page.getByText(/Good (morning|afternoon|evening|night)/)).toBeVisible({ timeout: 25_000 });
 
   await page.context().storageState({ path: E2E_AUTH_STORAGE });
 });

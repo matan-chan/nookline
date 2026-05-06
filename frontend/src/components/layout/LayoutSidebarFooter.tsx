@@ -1,6 +1,6 @@
-import { useAuth } from "../../auth/AuthContext";
 import { useAvatarObjectUrl } from "../../hooks/useAvatarObjectUrl";
-import { Avatar, Box, ButtonBase, Typography } from "@mui/material";
+import { useAuth } from "../../auth/AuthContext";
+import { Avatar, Box, ButtonBase, Divider, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
@@ -50,35 +50,58 @@ export const LayoutSidebarFooter = ({ expanded, t, onNavigate }: Props) => {
     </>
   );
 
-  if (user == null) {
-    return (
+  const versionLabel = expanded ? tr("appVersion", { version: __APP_VERSION__ }) : `v${__APP_VERSION__}`;
+
+  const panel =
+    user == null ? (
       <Box sx={{ px: expanded ? 2 : 1, py: 2, display: "flex", justifyContent: expanded ? "flex-start" : "center", flexShrink: 0 }}>{content}</Box>
+    ) : (
+      <ButtonBase
+        component={Link}
+        to="/profile"
+        onClick={() => onNavigate?.()}
+        sx={{
+          px: expanded ? 2 : 1,
+          py: 2,
+          display: "flex",
+          justifyContent: expanded ? "flex-start" : "center",
+          alignItems: "center",
+          flexShrink: 0,
+          width: "100%",
+          gap: expanded ? 1.5 : 0,
+          textAlign: "left",
+          color: "inherit",
+          textDecoration: "none",
+          borderRadius: 1,
+          transition: (th) => th.transitions.create("background-color", { duration: th.transitions.duration.shortest }),
+          "&:hover": { bgcolor: (th) => alpha(th.palette.text.primary, 0.04) },
+        }}
+      >
+        {content}
+      </ButtonBase>
     );
-  }
 
   return (
-    <ButtonBase
-      component={Link}
-      to="/profile"
-      onClick={() => onNavigate?.()}
-      sx={{
-        px: expanded ? 2 : 1,
-        py: 2,
-        display: "flex",
-        justifyContent: expanded ? "flex-start" : "center",
-        alignItems: "center",
-        flexShrink: 0,
-        width: "100%",
-        gap: expanded ? 1.5 : 0,
-        textAlign: "left",
-        color: "inherit",
-        textDecoration: "none",
-        borderRadius: 1,
-        transition: (th) => th.transitions.create("background-color", { duration: th.transitions.duration.shortest }),
-        "&:hover": { bgcolor: (th) => alpha(th.palette.text.primary, 0.04) },
-      }}
-    >
-      {content}
-    </ButtonBase>
+    <Box sx={{ flexShrink: 0 }}>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        component="p"
+        sx={{
+          m: 0,
+          px: expanded ? 2 : 1,
+          pt: 1.25,
+          pb: 0.75,
+          fontSize: "0.6875rem",
+          letterSpacing: "0.02em",
+          textAlign: expanded ? "left" : "center",
+          opacity: 0.85,
+        }}
+      >
+        {versionLabel}
+      </Typography>
+      <Divider sx={{ borderColor: "divider" }} />
+      {panel}
+    </Box>
   );
 };

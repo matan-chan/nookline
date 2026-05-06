@@ -5,13 +5,49 @@ import i18n from "../../i18n";
 import { TTS_SETTINGS_AND_PROBE, UPDATE_TTS_SETTINGS } from "./settingsQueries";
 import { useMutation, useQuery } from "@apollo/client";
 import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const parseChunkWhole = (raw: string): number | null => {
   const t = raw.trim();
   if (!/^\d+$/.test(t)) return null;
   const n = Number(t);
   return Number.isSafeInteger(n) ? n : null;
+};
+
+const approxEq = (a: number, b: number) => Math.abs(a - b) < 1e-5;
+
+type TtsSavedSnapshot = {
+  mode: string;
+  customBaseUrl: string | null;
+  hasCustomApiKey: boolean;
+  voice: string;
+  model: string;
+  speed: number;
+  pitch: number;
+  chunkMinChars: number;
+  chunkMaxChars: number;
+  chunkPeriodExtra: number;
+  readerShowPage: boolean;
+  readerShowTitle: boolean;
+  readerStripPdfMargins: boolean;
+};
+
+const savedSettingsMatchDefaults = (s: TtsSavedSnapshot | undefined): boolean => {
+  if (!s) return true;
+  if (s.mode !== "kokoro") return false;
+  if ((s.customBaseUrl ?? "").trim() !== "") return false;
+  if (s.hasCustomApiKey) return false;
+  if ((s.voice || DEFAULT_TTS_VOICE_ID) !== DEFAULT_TTS_VOICE_ID) return false;
+  if ((s.model || "kokoro") !== "kokoro") return false;
+  if (!approxEq(s.speed, 1)) return false;
+  if (!approxEq(s.pitch, 1)) return false;
+  if (s.chunkMinChars !== DEFAULT_TTS_CHUNK_LIMITS.minChars) return false;
+  if (s.chunkMaxChars !== DEFAULT_TTS_CHUNK_LIMITS.maxChars) return false;
+  if (s.chunkPeriodExtra !== DEFAULT_TTS_CHUNK_LIMITS.periodScanExtra) return false;
+  if (!s.readerShowPage) return false;
+  if (!s.readerShowTitle) return false;
+  if (!s.readerStripPdfMargins) return false;
+  return true;
 };
 
 export const useSettingsTtsForm = () => {
@@ -32,6 +68,9 @@ export const useSettingsTtsForm = () => {
   const [readerShowTitle, setReaderShowTitle] = useState(true);
   const [readerStripPdfMargins, setReaderStripPdfMargins] = useState(true);
   const [ttsSavedHint, setTtsSavedHint] = useState<string | null>(null);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetDoneHint, setResetDoneHint] = useState<string | null>(null);
+  const pendingResetRef = useRef(false);
 
   const { data: ttsData, refetch: refetchTts } = useQuery<{
     ttsSettings: {
@@ -56,8 +95,18 @@ export const useSettingsTtsForm = () => {
     onCompleted: () => {
       refetchTts();
       setCustomApiKeyDraft("");
-      setTtsSavedHint(i18n.t("savedHint", { ns: "settings" }));
-      setTimeout(() => setTtsSavedHint(null), 2500);
+      if (pendingResetRef.current) {
+        pendingResetRef.current = false;
+        setResetDialogOpen(false);
+        setResetDoneHint(t("resetTtsDone"));
+        setTimeout(() => setResetDoneHint(null), 3000);
+      } else {
+        setTtsSavedHint(i18n.t("savedHint", { ns: "settings" }));
+        setTimeout(() => setTtsSavedHint(null), 2500);
+      }
+    },
+    onError: () => {
+      pendingResetRef.current = false;
     },
   });
 
@@ -83,6 +132,7 @@ export const useSettingsTtsForm = () => {
     ttsData?.ttsSettings?.voice,
     ttsData?.ttsSettings?.model,
     ttsData?.ttsSettings?.speed,
+    ttsData?.ttsSettings?.pitch,
     ttsData?.ttsSettings?.chunkMinChars,
     ttsData?.ttsSettings?.chunkMaxChars,
     ttsData?.ttsSettings?.chunkPeriodExtra,
@@ -90,6 +140,36 @@ export const useSettingsTtsForm = () => {
     ttsData?.ttsSettings?.readerShowTitle,
     ttsData?.ttsSettings?.readerStripPdfMargins,
   ]);
+
+  const hasNonDefaultTtsSettings = useMemo(
+    () => !savedSettingsMatchDefaults(ttsData?.ttsSettings),
+    [ttsData?.ttsSettings],
+  );
+
+  const onConfirmResetTts = () => {
+    if (userId === 0) return;
+    pendingResetRef.current = true;
+    updateTts({
+      variables: {
+        input: {
+          userId,
+          mode: "kokoro",
+          customBaseUrl: null,
+          customApiKey: "",
+          voice: DEFAULT_TTS_VOICE_ID,
+          model: "kokoro",
+          speed: 1,
+          pitch: 1,
+          chunkMinChars: DEFAULT_TTS_CHUNK_LIMITS.minChars,
+          chunkMaxChars: DEFAULT_TTS_CHUNK_LIMITS.maxChars,
+          chunkPeriodExtra: DEFAULT_TTS_CHUNK_LIMITS.periodScanExtra,
+          readerShowPage: true,
+          readerShowTitle: true,
+          readerStripPdfMargins: true,
+        },
+      },
+    });
+  };
 
   const validateChunkDrafts = (): { chunkMinChars: number; chunkMaxChars: number; chunkPeriodExtra: number } | null => {
     const minN = parseChunkWhole(chunkMinDraft);
@@ -222,5 +302,10 @@ export const useSettingsTtsForm = () => {
     setReaderShowTitle,
     readerStripPdfMargins,
     setReaderStripPdfMargins,
+    hasNonDefaultTtsSettings,
+    resetDialogOpen,
+    setResetDialogOpen,
+    onConfirmResetTts,
+    resetDoneHint,
   };
 };

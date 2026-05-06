@@ -1,5 +1,5 @@
 import ConfirmModal from "../../components/ConfirmModal";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Button, Stack, Typography } from "@mui/material";
 import type { TFunction } from "i18next";
 
 type Props = {
@@ -24,21 +24,22 @@ export const SettingsCustomizationReset = ({
   resetDoneHint,
 }: Props) => (
   <>
-    <Stack spacing={1} sx={{ pt: 1, borderTop: 1, borderColor: "divider" }}>
-      <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5 }}>
-        {t("resetCustomizationDetail")}
-      </Typography>
-      <Box>
-        <Button
-          variant="outlined"
-          color="error"
-          size="small"
-          disabled={busy || resettingCustomization || !hasOverrides}
-          onClick={() => setResetDialogOpen(true)}
-        >
-          {t("resetCustomization")}
-        </Button>
-      </Box>
+    <Stack
+      direction="row"
+      alignItems="center"
+      spacing={1.5}
+      flexWrap="wrap"
+      sx={{ pt: 1, borderTop: 1, borderColor: "divider" }}
+    >
+      <Button
+        variant="outlined"
+        color="error"
+        size="small"
+        disabled={busy || resettingCustomization || !hasOverrides}
+        onClick={() => setResetDialogOpen(true)}
+      >
+        {t("resetCustomization")}
+      </Button>
       {resetDoneHint ? (
         <Typography variant="caption" color="success.main">
           {resetDoneHint}

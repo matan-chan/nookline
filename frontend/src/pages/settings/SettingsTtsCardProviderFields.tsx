@@ -176,9 +176,7 @@ export const SettingsTtsCardProviderFields = ({
               </Typography>
             </Box>
           </Box>
-          <Typography variant="caption" color="text.secondary" sx={{ ...fieldHintSx, display: "block", pt: 0.5 }}>
-            {t("kokoroPresetHint")}
-          </Typography>
+
         </>
       )}
     </>

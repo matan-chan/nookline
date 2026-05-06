@@ -1,5 +1,8 @@
 {
-  "greeting": "Good evening",
+  "greetingMorning": "Good morning, {{username}}",
+  "greetingAfternoon": "Good afternoon, {{username}}",
+  "greetingEvening": "Good evening, {{username}}",
+  "greetingNight": "Good night, {{username}}",
   "welcomeSubtitle": "Welcome back to your library",
   "addLibrary": "Add a library",
   "libraries": "Libraries",

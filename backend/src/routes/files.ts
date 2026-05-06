@@ -187,6 +187,31 @@ router.get("/avatar/me", async (req: Request, res: Response) => {
   createReadStream(abs).pipe(res);
 });
 
+router.get("/avatar/user/:userId", async (req: Request, res: Response) => {
+  beLog("route_get_avatar_user");
+  const admin = await requireAdmin(req, res);
+  if (admin == null) return;
+  const userId = parseInt(String(req.params.userId), 10);
+  if (!Number.isFinite(userId) || userId < 1) {
+    res.status(400).json({ error: "Invalid user id" });
+    return;
+  }
+  const row = await prisma.user.findUnique({ where: { id: userId }, select: { avatarRelPath: true } });
+  if (row?.avatarRelPath == null || row.avatarRelPath === "") {
+    res.status(404).end();
+    return;
+  }
+  const abs = join(UPLOAD_DIR, row.avatarRelPath);
+  if (!existsSync(abs)) {
+    res.status(404).end();
+    return;
+  }
+  const ext = extname(abs).toLowerCase();
+  res.setHeader("Content-Type", MIME_TYPES[ext] ?? "application/octet-stream");
+  res.setHeader("Cache-Control", "private, no-cache");
+  createReadStream(abs).pipe(res);
+});
+
 router.post("/avatar", avatarUpload.single("file"), async (req: Request, res: Response) => {
   beLog("route_post_avatar");
   const u = await requireUser(req, res);
