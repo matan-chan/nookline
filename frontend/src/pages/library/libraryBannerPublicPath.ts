@@ -2,14 +2,17 @@ import { LIBRARY_BANNER_HERO_WIDTHS } from "./libraryBannerVariants.generated";
 
 export const BUILTIN_LIBRARY_BANNER_FILES = [
   "amaze.jpg",
+  "ancient-valley.jpg",
   "city.jpg",
   "cloud-castle.jpg",
   "custle.jpg",
   "future.jpg",
   "nature.jpg",
   "river.jpg",
+  "sky-citadel.jpg",
   "spirit-forest.jpg",
   "storybook.jpg",
+  "sunset-rider.jpg",
   "watcher-eye.jpg",
 ] as const;
 
