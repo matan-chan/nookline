@@ -1,7 +1,7 @@
 import { HeroCollapsibleDescription } from "../detail/HeroCollapsibleDescription";
 import { HeroCollapsibleTags } from "../detail/HeroCollapsibleTags";
 import { DETAIL_LAVENDER } from "../detail/detailPurpleAccent";
-import { getCoverUrl } from "../../utils/cover";
+import { getCoverUrl } from "../../utils/cover/cover";
 import { BookDetailHeroActions } from "./BookDetailHeroActions";
 import { BookDetailHeroCover } from "./BookDetailHeroCover";
 import { BookDetailHeroRatingRow } from "./BookDetailHeroRatingRow";

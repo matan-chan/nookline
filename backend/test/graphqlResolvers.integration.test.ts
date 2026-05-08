@@ -1,5 +1,5 @@
 import { buildResolvers } from "../src/graphql/resolverParts";
-import { typeDefs } from "../src/graphql/schema";
+import { typeDefs } from "../src/graphql/schema/schema";
 import { runGql } from "./graphqlRunGql";
 import { newTestWorkDir, runDbPush, sqliteUrlInDir } from "./testDb";
 import { runCrudTest } from "./graphqlResolversCrudCases";

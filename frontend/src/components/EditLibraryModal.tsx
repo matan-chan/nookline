@@ -1,6 +1,6 @@
 import { useAuth } from "../auth/AuthContext";
 import { dashboardHomeRefetch } from "../pages/dashboard/dashboardQueries";
-import { APP_CUSTOMIZATION } from "../pages/settings/settingsQueries";
+import { APP_CUSTOMIZATION } from "../pages/settings/Tts/settingsQueries";
 import { LIBRARIES_QUERY, type LibraryNavItem } from "./layout/layoutConstants";
 import LibraryModalFormFields from "./library/LibraryModalFormFields";
 import { LIBRARY_MODAL_PRIMARY_BUTTON_SX, LIBRARY_TYPES, type LibraryType } from "./library/libraryFormConstants";

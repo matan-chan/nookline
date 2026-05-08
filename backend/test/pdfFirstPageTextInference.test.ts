@@ -1,4 +1,4 @@
-import { inferTitleAuthorFromPdfPlainLines } from "../src/services/pdfFirstPageTextInference";
+import { inferTitleAuthorFromPdfPlainLines } from "../src/services/pdf/pdfFirstPageTextInference";
 import { describe, expect, test } from "bun:test";
 
 describe("inferTitleAuthorFromPdfPlainLines", () => {

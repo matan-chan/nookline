@@ -1,4 +1,4 @@
-import { extractSortedLinesFromPdfPage, inferPdfRepeatingHeaderFooterRegexes } from "../src/services/pdfRepeatingHeaderFooterRegex";
+import { extractSortedLinesFromPdfPage, inferPdfRepeatingHeaderFooterRegexes } from "../src/services/pdf/pdfRepeatingHeaderFooterRegex";
 import { readFile } from "fs/promises";
 import { existsSync } from "fs";
 import { homedir } from "os";

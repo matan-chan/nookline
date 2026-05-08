@@ -1,8 +1,8 @@
 import { useAuth } from "../auth/AuthContext";
 import { useCoverAmbientBackground } from "../hooks/useCoverAmbientBackground";
 import ConfirmModal from "../components/ConfirmModal";
-import { isOpenLibraryEnrichmentCurrent } from "../utils/openLibraryMeta";
-import { getCoverUrl } from "../utils/cover";
+import { isOpenLibraryEnrichmentCurrent } from "../utils/openLibrary/openLibraryMeta";
+import { getCoverUrl } from "../utils/cover/cover";
 import { BookDetailRecommendedRow } from "./book/BookDetailRecommendedRow";
 import { BookDetailHero } from "./book/BookDetailHero";
 import {

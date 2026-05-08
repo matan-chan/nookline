@@ -3,7 +3,7 @@ import {
   resolveSeriesFromIsbns,
   resolveSeriesFromWorkKey,
   seriesInfoFromWorkJson,
-} from "../src/services/openLibrarySeries";
+} from "../src/services/openLibrary/openLibrarySeries";
 import { PrismaClient } from "@prisma/client";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { rmSync } from "fs";

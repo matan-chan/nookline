@@ -1,4 +1,4 @@
-import { getUploadBaseDir, resolveLibraryContentDir } from "../src/services/libraryPathResolve";
+import { getUploadBaseDir, resolveLibraryContentDir } from "../src/services/library/libraryPathResolve";
 import { afterEach, describe, expect, test } from "bun:test";
 import { mkdirSync, rmSync } from "fs";
 import { join } from "path";

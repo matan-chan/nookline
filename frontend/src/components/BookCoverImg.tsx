@@ -1,5 +1,5 @@
 import { Box, type SxProps, type Theme } from "@mui/material";
-import { buildCoverSrcSet, COVER_SIZES_GRID, defaultCoverImgSrc } from "../utils/cover";
+import { buildCoverSrcSet, COVER_SIZES_GRID, defaultCoverImgSrc } from "../utils/cover/cover";
 
 export type BookCoverImgProps = {
   src: string;

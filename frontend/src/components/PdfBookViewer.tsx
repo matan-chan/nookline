@@ -1,12 +1,12 @@
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import "./pdfBookViewer/configurePdfWorker";
+import "./pdfBookViewer/config/configurePdfWorker";
 import { Box, Typography } from "@mui/material";
 import { PdfDocumentPagesList } from "./PdfDocumentPagesList";
 import { ReaderBottomBar } from "./ReaderBottomBar";
 import { PdfZoomMenu } from "./PdfZoomMenu";
-import { usePdfBookViewer } from "./pdfBookViewer/usePdfBookViewer";
-import type { PdfBookViewerProps } from "./pdfBookViewer/types";
+import { usePdfBookViewer } from "./pdfBookViewer/hooks/usePdfBookViewer";
+import type { PdfBookViewerProps } from "./pdfBookViewer/core/types";
 
 export type { PdfBookViewerProps };
 

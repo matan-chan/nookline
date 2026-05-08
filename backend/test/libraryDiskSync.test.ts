@@ -1,4 +1,4 @@
-import { syncLibraryBooksFromDisk } from "../src/services/libraryDiskSync";
+import { syncLibraryBooksFromDisk } from "../src/services/library/libraryDiskSync";
 import { PrismaClient } from "@prisma/client";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdirSync, rmSync, writeFileSync } from "fs";

@@ -1,8 +1,8 @@
 import { BookCoverImg } from "../../components/BookCoverImg";
 import BookCoverProgressBar from "../../components/BookCoverProgressBar";
 import CardOverflowMenu from "../../components/CardOverflowMenu";
-import { COVER_SIZES_VOLUME, getCoverUrl } from "../../utils/cover";
-import { coverCardColumnHoverSx } from "../../utils/staggerGridSx";
+import { COVER_SIZES_VOLUME, getCoverUrl } from "../../utils/cover/cover";
+import { coverCardColumnHoverSx } from "../../utils/layout/staggerGridSx";
 import { DETAIL_LAVENDER } from "../detail/detailPurpleAccent";
 import { pickVolumeCardSubtitle } from "./seriesVolumeSubtitle";
 import { Box, Typography } from "@mui/material";

@@ -1,5 +1,5 @@
-import { pdfCustomTextWrapSavedHighlights, type PdfSavedHighlightRow } from "../utils/pdfTextLayerSavedHighlightHtml";
-import { TTS_READING_PDF_CLASS } from "../hooks/tts/ttsPlaybackConstants";
+import { pdfCustomTextWrapSavedHighlights, type PdfSavedHighlightRow } from "../utils/pdf/pdfTextLayerSavedHighlightHtml";
+import { TTS_READING_PDF_CLASS } from "../hooks/tts/constants/ttsPlaybackConstants";
 import {
   PDF_DOCUMENT_PAGES_LIST_NO_PINNED,
   PDF_DOCUMENT_PAGES_LIST_PAD_TOP_PX,
@@ -10,7 +10,7 @@ import {
   shouldRenderPdfListPage,
   type PdfFitViewportLayout,
   type PdfListRenderWindow,
-} from "../utils/pdfPageCalc";
+} from "../utils/pdf/pdfPageCalc";
 import { Box, CircularProgress } from "@mui/material";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { Document, Page, type DocumentProps } from "react-pdf";

@@ -1,7 +1,7 @@
 import { getStoredToken } from "../../auth/authStorage";
-import { sanitizeLettersDigitsAndWhitespace } from "../../utils/sanitizeUserInput";
+import { sanitizeLettersDigitsAndWhitespace } from "../../utils/input/sanitizeUserInput";
 import { BookCoverImg } from "../BookCoverImg";
-import { optimizedCoverSrc } from "../../utils/cover";
+import { optimizedCoverSrc } from "../../utils/cover/cover";
 import { Box, CircularProgress, Stack, TextField, Typography } from "@mui/material";
 import type { TFunction } from "i18next";
 import type { Dispatch, SetStateAction } from "react";

@@ -1,4 +1,4 @@
-import { extractPdfEmbeddedMetadata } from "../src/services/pdfEmbeddedMetadata";
+import { extractPdfEmbeddedMetadata } from "../src/services/pdf/pdfEmbeddedMetadata";
 import { PDFDocument } from "pdf-lib";
 import { afterAll, describe, expect, test } from "bun:test";
 import { rmSync, statSync, writeFileSync } from "fs";

@@ -6,7 +6,7 @@ import {
   stripLeadingOpaqueSlugPrefix,
   stripUploadTimestamp,
   titleLooksLikeRawFilename,
-} from "../src/services/bookFilenameInference";
+} from "../src/services/book/bookFilenameInference";
 import { describe, expect, test } from "bun:test";
 
 describe("stripUploadTimestamp", () => {

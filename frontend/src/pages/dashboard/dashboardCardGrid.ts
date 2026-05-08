@@ -1,4 +1,4 @@
-import { staggerGridChildrenSx } from "../../utils/staggerGridSx";
+import { staggerGridChildrenSx } from "../../utils/layout/staggerGridSx";
 
 export const dashboardCardGridSx = {
   display: "grid",

@@ -1,4 +1,4 @@
-import { mergeRecommendationIdsWithFallback } from "../src/services/recommendedBooksForBook";
+import { mergeRecommendationIdsWithFallback } from "../src/services/book/recommendedBooksForBook";
 import { describe, expect, test } from "bun:test";
 
 describe("mergeRecommendationIdsWithFallback", () => {

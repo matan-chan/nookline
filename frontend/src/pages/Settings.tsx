@@ -1,10 +1,10 @@
 import RecordVoiceOverOutlined from "@mui/icons-material/RecordVoiceOverOutlined";
-import SettingsCustomizationCard from "./settings/SettingsCustomizationCard";
+import SettingsCustomizationCard from "./settings/Customization/SettingsCustomizationCard";
 import PaletteOutlined from "@mui/icons-material/PaletteOutlined";
-import { useSettingsTtsForm } from "./settings/useSettingsTtsForm";
+import { useSettingsTtsForm } from "./settings/Tts/hooks/useSettingsTtsForm";
 import { SectionTitle } from "./settings/SettingsPrimitives";
-import SettingsUsersCard from "./settings/SettingsUsersCard";
-import { SettingsTtsCard } from "./settings/SettingsTtsCard";
+import SettingsUsersCard from "./settings/Users/SettingsUsersCard";
+import { SettingsTtsCard } from "./settings/Tts/SettingsTtsCard";
 import { useTranslation } from "react-i18next";
 import { Box, Stack, Typography } from "@mui/material";
 

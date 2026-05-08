@@ -1,4 +1,4 @@
-import { APP_CUSTOMIZATION } from "../pages/settings/settingsQueries";
+import { APP_CUSTOMIZATION } from "../pages/settings/Tts/settingsQueries";
 import { useQuery } from "@apollo/client";
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 

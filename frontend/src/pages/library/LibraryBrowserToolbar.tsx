@@ -1,5 +1,5 @@
 import { Box, Button, Drawer, FormControl, IconButton, InputLabel, List, ListItemButton, ListItemText, MenuItem, Select, TextField, Typography } from "@mui/material";
-import { sanitizeLettersDigitsAndWhitespace } from "../../utils/sanitizeUserInput";
+import { sanitizeLettersDigitsAndWhitespace } from "../../utils/input/sanitizeUserInput";
 import type { LibrarySortOption } from "./libraryBrowserTypes";
 import SwapVert from "@mui/icons-material/SwapVert";
 import Add from "@mui/icons-material/Add";

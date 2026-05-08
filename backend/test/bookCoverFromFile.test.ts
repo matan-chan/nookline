@@ -1,4 +1,4 @@
-import { extractEpubCoverWebp, tryGenerateCoverWebp } from "../src/services/bookCoverFromFile";
+import { extractEpubCoverWebp, tryGenerateCoverWebp } from "../src/services/book/bookCoverFromFile";
 import { describe, expect, test } from "bun:test";
 import { rmSync } from "fs";
 import { join } from "path";

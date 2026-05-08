@@ -1,4 +1,4 @@
-import { sanitizeLettersDigitsAndWhitespace, sanitizePathInput } from "../../utils/sanitizeUserInput";
+import { sanitizeLettersDigitsAndWhitespace, sanitizePathInput } from "../../utils/input/sanitizeUserInput";
 import { FormControl, FormLabel, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { LIBRARY_MODAL_FORM_LABEL_SX, LIBRARY_TYPES, type LibraryType } from "./libraryFormConstants";

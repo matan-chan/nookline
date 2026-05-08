@@ -1,6 +1,6 @@
 import { DETAIL_COVER_GLOW } from "../detail/detailPurpleAccent";
 import { BookCoverImg } from "../../components/BookCoverImg";
-import { COVER_SIZES_HERO } from "../../utils/cover";
+import { COVER_SIZES_HERO } from "../../utils/cover/cover";
 import { Box, Typography } from "@mui/material";
 import { COVER_WIDTH_PX } from "./bookDetailHeroConstants";
 

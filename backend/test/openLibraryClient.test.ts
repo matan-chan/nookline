@@ -9,7 +9,7 @@ import {
   openLibraryKeyJsonUrl,
   openLibrarySearchByTitleUrl,
   openLibraryWorkRatingsUrl,
-} from "../src/services/openLibraryClient";
+} from "../src/services/openLibrary/openLibraryClient";
 import { assignGlobalFetch } from "./assignGlobalFetch";
 import { afterEach, describe, expect, test } from "bun:test";
 

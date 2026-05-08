@@ -1,5 +1,5 @@
 import { LIBRARY_BANNER_COUNT } from "../pages/library/libraryBannerPublicPath";
-import { APP_CUSTOMIZATION } from "../pages/settings/settingsQueries";
+import { APP_CUSTOMIZATION } from "../pages/settings/Tts/settingsQueries";
 import LibraryModalFormFields from "./library/LibraryModalFormFields";
 import { LIBRARY_MODAL_PRIMARY_BUTTON_SX, LIBRARY_TYPES, type LibraryType } from "./library/libraryFormConstants";
 import LibraryBannerPicker from "./library/LibraryBannerPicker";

@@ -1,5 +1,5 @@
 import { BookCoverImg } from "../../components/BookCoverImg";
-import { getCoverUrl } from "../../utils/cover";
+import { getCoverUrl } from "../../utils/cover/cover";
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { DashboardLibraryPreviewBook } from "./dashboardLibraryCardTypes";

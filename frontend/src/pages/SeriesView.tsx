@@ -1,7 +1,7 @@
 import { useAuth } from "../auth/AuthContext";
 import ConfirmModal from "../components/ConfirmModal";
-import { isOpenLibraryEnrichmentCurrent } from "../utils/openLibraryMeta";
-import { getSeriesCoverUrl } from "../utils/cover";
+import { isOpenLibraryEnrichmentCurrent } from "../utils/openLibrary/openLibraryMeta";
+import { getSeriesCoverUrl } from "../utils/cover/cover";
 import { useQuery, useMutation } from "@apollo/client";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";

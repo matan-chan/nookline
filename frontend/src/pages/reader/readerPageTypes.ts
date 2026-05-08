@@ -1,4 +1,4 @@
-import type { PdfHighlightStored } from "../../utils/readerHighlightPosition";
+import type { PdfHighlightStored } from "../../utils/reader/readerHighlightPosition";
 
 export type EpubHighlightMenu = { cfiRange: string; text: string };
 

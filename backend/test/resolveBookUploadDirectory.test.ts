@@ -1,5 +1,5 @@
-import { resolveBookUploadDirectory } from "../src/services/resolveBookUploadDirectory";
-import { resolveBookFileOnDisk } from "../src/services/bookLocalFallback";
+import { resolveBookUploadDirectory } from "../src/services/book/resolveBookUploadDirectory";
+import { resolveBookFileOnDisk } from "../src/services/book/bookLocalFallback";
 import { PrismaClient } from "@prisma/client";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { ensureTestLibraryOwnerUser, newTestWorkDir, runDbPush, sqliteUrlInDir } from "./testDb";

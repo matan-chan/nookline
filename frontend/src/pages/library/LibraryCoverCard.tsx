@@ -1,8 +1,8 @@
 import { BookCoverImg } from "../../components/BookCoverImg";
 import BookCoverProgressBar from "../../components/BookCoverProgressBar";
 import CardOverflowMenu from "../../components/CardOverflowMenu";
-import { getCoverUrl } from "../../utils/cover";
-import { coverCardColumnHoverSx, staggerGridChildrenSx } from "../../utils/staggerGridSx";
+import { getCoverUrl } from "../../utils/cover/cover";
+import { coverCardColumnHoverSx, staggerGridChildrenSx } from "../../utils/layout/staggerGridSx";
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { Link } from "react-router-dom";

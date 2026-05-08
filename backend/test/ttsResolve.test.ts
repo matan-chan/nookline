@@ -1,4 +1,4 @@
-import { probeTtsSynthesis, resolveTtsTarget } from "../src/services/ttsResolve";
+import { probeTtsSynthesis, resolveTtsTarget } from "../src/services/tts/ttsResolve";
 import { PrismaClient } from "@prisma/client";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { rmSync } from "fs";

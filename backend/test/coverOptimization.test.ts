@@ -1,4 +1,4 @@
-import { getCoverCacheDir, streamRawImage } from "../src/services/coverOptimization";
+import { getCoverCacheDir, streamRawImage } from "../src/services/book/coverOptimization";
 import { describe, expect, test } from "bun:test";
 import { rmSync, writeFileSync } from "fs";
 import { newTestWorkDir } from "./testDb";

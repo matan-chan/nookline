@@ -1,6 +1,6 @@
 import { getAuthUserForRequest } from "../auth/getAuthUserForRequest";
 import { prisma } from "../graphql/resolverParts/prisma";
-import { resolveTtsTarget } from "../services/ttsResolve";
+import { resolveTtsTarget } from "../services/tts/ttsResolve";
 import { prismaSchemaMessage } from "../utils/prismaSchemaMessage";
 import { ttsUpstreamConnectionMessage } from "../utils/ttsUpstreamError";
 import { safeUserId } from "../utils/safeUserId";

@@ -1,4 +1,4 @@
-import { inferPdfRepeatingHeaderFooterRegexes } from "../src/services/pdfRepeatingHeaderFooterRegex";
+import { inferPdfRepeatingHeaderFooterRegexes } from "../src/services/pdf/pdfRepeatingHeaderFooterRegex";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import { describe, expect, test } from "bun:test";
 

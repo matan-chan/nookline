@@ -1,5 +1,5 @@
-import { decodeReaderBookmark } from "../../utils/readerBookmarkPosition";
-import { highlightNavFromStartPos } from "../../utils/readerHighlightPosition";
+import { decodeReaderBookmark } from "../../utils/reader/readerBookmarkPosition";
+import { highlightNavFromStartPos } from "../../utils/reader/readerHighlightPosition";
 import { useEffect, useMemo } from "react";
 import type { useSearchParams } from "react-router-dom";
 

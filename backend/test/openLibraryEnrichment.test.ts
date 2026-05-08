@@ -1,4 +1,4 @@
-import type { EnrichmentPayload } from "../src/services/openLibraryEnrichment";
+import type { EnrichmentPayload } from "../src/services/openLibrary/openLibraryEnrichment";
 import {
   enrichBookRecord,
   enrichSeriesRecord,
@@ -6,7 +6,7 @@ import {
   mergeBookOpenLibrary,
   mergeSeriesOpenLibrary,
   resolveWorkKey,
-} from "../src/services/openLibraryEnrichment";
+} from "../src/services/openLibrary/openLibraryEnrichment";
 import { PrismaClient } from "@prisma/client";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { rmSync } from "fs";

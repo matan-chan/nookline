@@ -1,6 +1,6 @@
-import type { DecodedBookmark } from "../../utils/readerBookmarkPosition";
-import type { ReaderHighlightNav } from "../../utils/readerHighlightPosition";
-import { parsePdfStoredPage } from "../../utils/pdfPageCalc";
+import type { DecodedBookmark } from "../../utils/reader/readerBookmarkPosition";
+import type { ReaderHighlightNav } from "../../utils/reader/readerHighlightPosition";
+import { parsePdfStoredPage } from "../../utils/pdf/pdfPageCalc";
 import { isEpubCfi } from "./readerUtils";
 
 export const computeReaderResumeCfi = (

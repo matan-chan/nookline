@@ -1,9 +1,9 @@
-import { useTtsParagraphPlaybackAudio } from "./tts/useTtsParagraphPlaybackAudio";
-import { useTtsParagraphPlaybackEffects } from "./tts/useTtsParagraphPlaybackEffects";
-import { useTtsParagraphPlaybackPlay } from "./tts/useTtsParagraphPlaybackPlay";
-import { useTtsParagraphPlaybackScroll } from "./tts/useTtsParagraphPlaybackScroll";
-import { useTtsParagraphPlaybackSeek } from "./tts/useTtsParagraphPlaybackSeek";
-import { useTtsParagraphPlaybackState } from "./tts/useTtsParagraphPlaybackState";
+import { useTtsParagraphPlaybackAudio } from "./tts/hooks/useTtsParagraphPlaybackAudio";
+import { useTtsParagraphPlaybackEffects } from "./tts/hooks/useTtsParagraphPlaybackEffects";
+import { useTtsParagraphPlaybackPlay } from "./tts/paragraphPlayback/useTtsParagraphPlaybackPlay";
+import { useTtsParagraphPlaybackScroll } from "./tts/hooks/useTtsParagraphPlaybackScroll";
+import { useTtsParagraphPlaybackSeek } from "./tts/hooks/useTtsParagraphPlaybackSeek";
+import { useTtsParagraphPlaybackState } from "./tts/hooks/useTtsParagraphPlaybackState";
 import type { TtsChunkLimits } from "../utils/readerText/constants";
 import { useEffect } from "react";
 import type { PDFDocumentProxy } from "pdfjs-dist";

@@ -1,4 +1,4 @@
-import { pdfHighlightBackgroundRgba } from "../../utils/readerHighlightColors";
+import { pdfHighlightBackgroundRgba } from "../../utils/reader/readerHighlightColors";
 import { bookmarksRowSx, type UserHighlight } from "./bookmarksHighlightsTypes";
 import { Box, Button, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";

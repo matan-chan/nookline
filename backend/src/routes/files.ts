@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { beLog } from "../utils/beLog";
-import { registerUploadRoutes } from "./filesUploadRoutes";
-import { registerAvatarRoutes } from "./filesAvatarRoutes";
-import { registerBookFileRoutes } from "./filesBookRoutes";
-import { registerBrandingRoutes } from "./filesBrandingRoutes";
+import { registerUploadRoutes } from "./files/filesUploadRoutes";
+import { registerAvatarRoutes } from "./files/filesAvatarRoutes";
+import { registerBookFileRoutes } from "./files/filesBookRoutes";
+import { registerBrandingRoutes } from "./files/filesBrandingRoutes";
 
 const router = Router();
 

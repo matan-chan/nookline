@@ -1,7 +1,7 @@
 import { useAuth } from "../auth/AuthContext";
 import AddBookModal from "../components/AddBookModal";
 import type { LayoutOutletContext, LibraryNavItem } from "../components/Layout";
-import { getSeriesCoverUrl } from "../utils/cover";
+import { getSeriesCoverUrl } from "../utils/cover/cover";
 import { LibraryBrowserToolbar } from "./library/LibraryBrowserToolbar";
 import { LIBRARY_BROWSER_QUERY, LIBRARY_DELETE_BOOK, LIBRARY_DELETE_SERIES, SYNC_LIBRARY_FROM_DISK } from "./library/libraryQueries";
 import { LibraryCoverCard, libraryCardGridSx } from "./library/LibraryCoverCard";

@@ -1,22 +1,23 @@
 import type { PrismaClient } from "@prisma/client";
-import { beLog } from "../../utils/beLog";
-import { voiceProfileMutationResolvers, voiceProfileQueryResolvers } from "./voiceProfile";
-import { highlightMutationResolvers, highlightQueryResolvers } from "./highlight";
-import { bookmarkMutationResolvers, bookmarkQueryResolvers } from "./bookmark";
-import { userTtsMutationResolvers, userTtsQueryResolvers } from "./userTts";
-import { Library, libraryMutationResolvers, libraryQueryResolvers } from "./library";
-import { Series, seriesMutationResolvers, seriesQueryResolvers } from "./series";
-import { Book, bookMutationResolvers, bookQueryResolvers } from "./book";
-import { customizationMutationResolvers, customizationQueryResolvers } from "./customization";
+import { customizationMutationResolvers, customizationQueryResolvers } from "./customization/customization";
 import { coreQueryResolvers } from "./core";
+import { bookmarkMutationResolvers, bookmarkQueryResolvers } from "./book/social/bookmark";
+import { bookMutationResolvers } from "./book/mutations/bookMutationResolvers";
+import { bookQueryResolvers } from "./book/queries/bookQueryResolvers";
+import { highlightMutationResolvers, highlightQueryResolvers } from "./book/social/highlight";
+import { Library, libraryMutationResolvers, libraryQueryResolvers } from "./library/library";
 import { prisma } from "./prisma";
+import { Series, seriesMutationResolvers, seriesQueryResolvers } from "./series/series";
+import { userTtsMutationResolvers, userTtsQueryResolvers } from "./tts/userTts";
+import { voiceProfileMutationResolvers, voiceProfileQueryResolvers } from "./tts/voiceProfile";
+import { Book } from "./book/fields/bookFieldResolvers";
 
-export const buildResolvers = (db: PrismaClient) => {
-  beLog("buildResolvers");
-  return {
+export * from "./errors";
+export * from "./prisma";
+
+export const buildResolvers = (db: PrismaClient) => ({
   Query: {
     ...coreQueryResolvers,
-    ...customizationQueryResolvers(db),
     ...libraryQueryResolvers(db),
     ...seriesQueryResolvers(db),
     ...bookQueryResolvers(db),
@@ -24,9 +25,9 @@ export const buildResolvers = (db: PrismaClient) => {
     ...highlightQueryResolvers(db),
     ...voiceProfileQueryResolvers(db),
     ...userTtsQueryResolvers(db),
+    ...customizationQueryResolvers(db),
   },
   Mutation: {
-    ...customizationMutationResolvers(db),
     ...libraryMutationResolvers(db),
     ...seriesMutationResolvers(db),
     ...bookMutationResolvers(db),
@@ -34,11 +35,12 @@ export const buildResolvers = (db: PrismaClient) => {
     ...highlightMutationResolvers(db),
     ...voiceProfileMutationResolvers(db),
     ...userTtsMutationResolvers(db),
+    ...customizationMutationResolvers(db),
   },
+  Book: Book(db),
   Library: Library(db),
   Series: Series(db),
-  Book: Book(db),
-};
-};
+});
 
 export const resolvers = buildResolvers(prisma);
+

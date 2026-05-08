@@ -1,5 +1,5 @@
-import { applyLocalBookFallback, persistBookDerivedCoverIfPossible, resolveBookFileOnDisk } from "../src/services/bookLocalFallback";
-import { resolveLibraryCoverCacheDir } from "../src/services/libraryPathResolve";
+import { applyLocalBookFallback, persistBookDerivedCoverIfPossible, resolveBookFileOnDisk } from "../src/services/book/bookLocalFallback";
+import { resolveLibraryCoverCacheDir } from "../src/services/library/libraryPathResolve";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { ensureTestLibraryOwnerUser, newTestWorkDir, runDbPush, sqliteUrlInDir } from "./testDb";
 import { mkdirSync, rmSync, writeFileSync } from "fs";

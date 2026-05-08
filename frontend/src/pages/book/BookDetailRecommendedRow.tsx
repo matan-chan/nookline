@@ -1,7 +1,7 @@
 import { pickVolumeCardSubtitle } from "../series/seriesVolumeSubtitle";
 import { seriesVolumeRowSx } from "../series/seriesVolumeStyles";
 import { BookCoverImg } from "../../components/BookCoverImg";
-import { COVER_SIZES_RECOMMENDED, getCoverUrl } from "../../utils/cover";
+import { COVER_SIZES_RECOMMENDED, getCoverUrl } from "../../utils/cover/cover";
 import { Box, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";

@@ -4,8 +4,8 @@ import {
   openLibraryCoverLargeUrl,
   openLibrarySearchByQueryUrl,
   openLibrarySearchByTitleUrl,
-} from "../../utils/openLibraryClient";
-import { resolveOpenLibrarySeriesForBook } from "../../utils/openLibrarySeries";
+} from "../../utils/openLibrary/openLibraryClient";
+import { resolveOpenLibrarySeriesForBook } from "../../utils/openLibrary/openLibrarySeries";
 
 export type OpenLibraryMeta = {
   title: string;

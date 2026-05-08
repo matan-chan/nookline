@@ -1,4 +1,4 @@
-import { renderPdfFirstPageWebpViaPdfJs } from "../src/services/pdfFirstPageWebp";
+import { renderPdfFirstPageWebpViaPdfJs } from "../src/services/pdf/pdfFirstPageWebp";
 import { PDFDocument } from "pdf-lib";
 import { describe, expect, test } from "bun:test";
 import { rmSync, writeFileSync } from "fs";

@@ -1,4 +1,4 @@
-import { createBookRecord } from "../src/services/createBookRecord";
+import { createBookRecord } from "../src/services/book/createBookRecord";
 import { PrismaClient } from "@prisma/client";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { ensureTestLibraryOwnerUser, newTestWorkDir, runDbPush, sqliteUrlInDir } from "./testDb";

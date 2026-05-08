@@ -1,7 +1,7 @@
 import { useAuth } from "../../auth/AuthContext";
 import { dashboardLibrarySyncToastMessage } from "./dashboardLibraryCardSyncToast";
 import { dashboardHomeRefetch, SYNC_LIBRARY_FROM_DISK } from "./dashboardQueries";
-import { coverCardColumnHoverSx } from "../../utils/staggerGridSx";
+import { coverCardColumnHoverSx } from "../../utils/layout/staggerGridSx";
 import { DashboardLibraryCardMenu } from "./DashboardLibraryCardMenu";
 import { LibraryCoverFanStack, LIBRARY_CARD_STACK_FAN_EXTRA_PX } from "./LibraryCoverFanStack";
 import type { DashboardLibraryPreview } from "./dashboardLibraryCardTypes";

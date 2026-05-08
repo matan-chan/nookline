@@ -1,5 +1,5 @@
-import { resolveCoverSampleUrl, sampleDominantHueFromImageUrl } from "../utils/coverHueSampling";
-import { coverUrlWithWidth, defaultCoverImgSrc, isApiCoverUrl } from "../utils/cover";
+import { resolveCoverSampleUrl, sampleDominantHueFromImageUrl } from "../utils/cover/coverHueSampling";
+import { coverUrlWithWidth, defaultCoverImgSrc, isApiCoverUrl } from "../utils/cover/cover";
 import { useTheme, type PaletteMode, type SxProps, type Theme } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 
