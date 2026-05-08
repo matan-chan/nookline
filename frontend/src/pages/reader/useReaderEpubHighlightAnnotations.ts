@@ -15,6 +15,7 @@ export const useReaderEpubHighlightAnnotations = ({
   theme,
   bookHighlights,
   renditionRef,
+  readerDarkDocument,
 }: {
   fileExt: string | null;
   highlightsSig: string;
@@ -23,6 +24,7 @@ export const useReaderEpubHighlightAnnotations = ({
   theme: Theme;
   bookHighlights: HighlightRow[];
   renditionRef: MutableRefObject<Rendition | null>;
+  readerDarkDocument: boolean;
 }) => {
   const epubHlAppliedRef = useRef<{ cfi: string }[]>([]);
 
@@ -39,7 +41,7 @@ export const useReaderEpubHighlightAnnotations = ({
     epubHlAppliedRef.current = [];
     if (!r) return;
     const rows = bookHighlights.filter((h) => isEpubHighlightStartPos(h.startPos));
-    const hlSvgBase = epubHighlightSvgBaseStyles(theme.palette.mode);
+    const hlSvgBase = epubHighlightSvgBaseStyles(readerDarkDocument ? "dark" : theme.palette.mode === "dark" ? "dark" : "light");
     for (const h of rows) {
       const cfi = decodeEpubHighlightCfi(h.startPos);
       if (!cfi) continue;
@@ -64,6 +66,6 @@ export const useReaderEpubHighlightAnnotations = ({
       });
       epubHlAppliedRef.current = [];
     };
-  }, [fileExt, highlightsSig, renditionReadyTick, bookId, theme.palette.mode, bookHighlights]);
+  }, [fileExt, highlightsSig, renditionReadyTick, bookId, theme.palette.mode, readerDarkDocument, bookHighlights]);
 };
 

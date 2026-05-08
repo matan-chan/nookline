@@ -260,13 +260,14 @@ describe("GraphQL resolvers (isolated SQLite + Apollo executeOperation)", () => 
     );
     expect(tts0.ttsSettings.mode).toBe("kokoro");
 
-    const tts1 = await runGql<{ updateTtsSettings: { mode: string; readerShowPage: boolean; voice: string } }>(
+    const tts1 = await runGql<{ updateTtsSettings: { mode: string; readerShowPage: boolean; readerDarkDocument: boolean; voice: string } }>(
       server,
-      `mutation($in: UpdateTtsSettingsInput!) { updateTtsSettings(input: $in) { mode readerShowPage voice } }`,
-      { in: { userId: uid, mode: "kokoro", readerShowPage: false, voice: "af_bella" } },
+      `mutation($in: UpdateTtsSettingsInput!) { updateTtsSettings(input: $in) { mode readerShowPage readerDarkDocument voice } }`,
+      { in: { userId: uid, mode: "kokoro", readerShowPage: false, readerDarkDocument: true, voice: "af_bella" } },
       gqlCtx,
     );
     expect(tts1.updateTtsSettings.readerShowPage).toBe(false);
+    expect(tts1.updateTtsSettings.readerDarkDocument).toBe(true);
     expect(tts1.updateTtsSettings.voice).toBe("af_bella");
 
     const probe = await runGql<{ ttsEngineProbe: { ok: boolean; error?: string | null } }>(

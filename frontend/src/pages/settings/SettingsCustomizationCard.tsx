@@ -1,6 +1,14 @@
+import { useAuth } from "../../auth/AuthContext";
 import { useNooklineColorMode } from "../../AppThemeProvider";
 import { useTimezonePreference } from "../../TimezonePreferenceProvider";
-import { APP_CUSTOMIZATION, RESET_APP_CUSTOMIZATION, UPDATE_APP_CUSTOMIZATION } from "./settingsQueries";
+import { COMMON_TIMEZONES } from "../../timezonePreference/commonTimeZones";
+import { READER_TTS_SETTINGS } from "../reader/readerQueries";
+import {
+  APP_CUSTOMIZATION,
+  RESET_APP_CUSTOMIZATION,
+  UPDATE_APP_CUSTOMIZATION,
+  UPDATE_TTS_SETTINGS,
+} from "./settingsQueries";
 import { SettingsCustomizationBanners } from "./SettingsCustomizationBanners";
 import { SettingsCustomizationFavicon } from "./SettingsCustomizationFavicon";
 import { SettingsCustomizationReset } from "./SettingsCustomizationReset";
@@ -10,7 +18,7 @@ import { SettingsCard } from "./SettingsPrimitives";
 import DarkModeOutlined from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlined from "@mui/icons-material/LightModeOutlined";
 import { useMutation, useQuery } from "@apollo/client";
-import { Autocomplete, Box, Button, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Stack, Switch, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -26,17 +34,59 @@ const listSupportedTimeZones = (): string[] => {
   } catch {
     /* ignore */
   }
-  return [];
+  return [...COMMON_TIMEZONES];
 };
 
 const TIMEZONE_OPTIONS = listSupportedTimeZones()
   .slice()
   .sort((a, b) => a.localeCompare(b));
 
-const SettingsCustomizationCard = () => {
+type SettingsCustomizationCardProps = {
+  ttsData:
+    | {
+        ttsSettings: {
+          mode: string;
+          readerDarkDocument: boolean;
+        };
+      }
+    | undefined;
+  ttsLoading: boolean;
+};
+
+const SettingsCustomizationCard = ({ ttsData, ttsLoading }: SettingsCustomizationCardProps) => {
   const { t } = useTranslation("settings");
+  const { user } = useAuth();
+  const userId = user?.id ?? 0;
   const { mode, setMode } = useNooklineColorMode();
   const { effectiveTimeZone, storedTimeZone, setTimeZone, clearToDeviceTimeZone } = useTimezonePreference();
+
+  const [localDarkDocument, setLocalDarkDocument] = useState<boolean | null>(null);
+
+  const [updateReaderDarkDocument] = useMutation(UPDATE_TTS_SETTINGS, {
+    refetchQueries: [{ query: READER_TTS_SETTINGS, variables: { userId } }],
+    onCompleted: (result) => {
+      const next = result?.updateTtsSettings?.readerDarkDocument === true;
+      setLocalDarkDocument(next);
+    },
+    onError: () => setLocalDarkDocument(null),
+  });
+
+  const serverDarkDocument = ttsData?.ttsSettings?.readerDarkDocument === true;
+  const readerDarkDocumentOn = localDarkDocument ?? serverDarkDocument;
+  const readerTtsMode = ttsData?.ttsSettings?.mode ?? "kokoro";
+
+  useEffect(() => {
+    if (localDarkDocument === null) return;
+    if (localDarkDocument === serverDarkDocument) setLocalDarkDocument(null);
+  }, [localDarkDocument, serverDarkDocument]);
+
+  const onReaderDarkDocumentChange = (_: unknown, checked: boolean) => {
+    if (userId === 0) return;
+    setLocalDarkDocument(checked);
+    void updateReaderDarkDocument({
+      variables: { input: { userId, mode: readerTtsMode, readerDarkDocument: checked } },
+    });
+  };
 
   const faviconInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -46,12 +96,15 @@ const SettingsCustomizationCard = () => {
   const [siteNameSavedHint, setSiteNameSavedHint] = useState<string | null>(null);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [resetDoneHint, setResetDoneHint] = useState<string | null>(null);
+  const [timezoneDraft, setTimezoneDraft] = useState(effectiveTimeZone);
 
   const timezoneChoices = useMemo(() => {
     const base = TIMEZONE_OPTIONS.length > 0 ? TIMEZONE_OPTIONS : [effectiveTimeZone];
     if (base.includes(effectiveTimeZone)) return base;
     return [...base, effectiveTimeZone].sort((a, b) => a.localeCompare(b));
   }, [effectiveTimeZone]);
+
+  useEffect(() => setTimezoneDraft(effectiveTimeZone), [effectiveTimeZone]);
 
   const { data, refetch } = useQuery<{
     appCustomization: {
@@ -219,13 +272,44 @@ const SettingsCustomizationCard = () => {
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
             alignItems: { xs: "stretch", sm: "center" },
-            justifyContent: "flex-start",
-            gap: { xs: 1.5, sm: 2.5 },
+            justifyContent: "space-between",
+            gap: { xs: 1.5, sm: 2 },
           }}
         >
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, flexShrink: 0, alignSelf: { xs: "flex-start", sm: "center" } }}>
-            {t("timezoneLabel")}
-          </Typography>
+          <Box sx={{ flex: "1 1 auto", minWidth: 0 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              {t("readerDarkDocumentLabel")}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>
+              {t("readerAppearanceSectionHint")} {t("readerDarkDocumentHint")}
+            </Typography>
+          </Box>
+          <Switch
+            checked={readerDarkDocumentOn}
+            onChange={onReaderDarkDocumentChange}
+            disabled={userId === 0 || (ttsLoading && ttsData == null)}
+            inputProps={{ "aria-label": t("readerDarkDocumentLabel") }}
+            sx={{ alignSelf: { xs: "flex-end", sm: "center" }, flexShrink: 0 }}
+          />
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "stretch", sm: "center" },
+            justifyContent: "space-between",
+            gap: { xs: 1.5, sm: 2 },
+          }}
+        >
+          <Box sx={{ flex: "1 1 auto", minWidth: 0 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              {t("timezoneLabel")}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>
+              {t("timezoneHint")}
+            </Typography>
+          </Box>
 
           <Box
             sx={{
@@ -235,15 +319,31 @@ const SettingsCustomizationCard = () => {
               gap: 1,
               flexShrink: 0,
               minWidth: 0,
-              justifyContent: "flex-start",
+              alignSelf: { xs: "stretch", sm: "center" },
             }}
           >
             <Autocomplete
               size="small"
               options={timezoneChoices}
               value={effectiveTimeZone}
+              inputValue={timezoneDraft}
+              freeSolo
               onChange={(_, v) => {
-                if (v != null) setTimeZone(v);
+                if (typeof v !== "string") return;
+                const tz = v.trim();
+                if (!tz) return;
+                setTimezoneDraft(tz);
+                setTimeZone(tz);
+              }}
+              onInputChange={(_, v, reason) => {
+                if (reason !== "input") return;
+                setTimezoneDraft(v);
+              }}
+              onBlur={() => {
+                const tz = timezoneDraft.trim();
+                if (!tz) return;
+                if (tz === effectiveTimeZone) return;
+                setTimeZone(tz);
               }}
               disableClearable
               renderInput={(params) => <TextField {...params} hiddenLabel inputProps={{ ...params.inputProps, "aria-label": t("timezoneLabel") }} />}

@@ -25,4 +25,5 @@ export type PdfBookViewerProps = {
   bookmarkScrollDomIndex?: number | null;
   scrollResumeSig?: string;
   bookHighlights?: { id: number; startPos: string; color: string }[];
+  readerDarkDocument?: boolean;
 };

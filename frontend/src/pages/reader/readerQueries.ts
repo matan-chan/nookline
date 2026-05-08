@@ -40,6 +40,7 @@ export const READER_TTS_SETTINGS = gql`
       readerShowPage
       readerShowTitle
       readerStripPdfMargins
+      readerDarkDocument
     }
   }
 `;

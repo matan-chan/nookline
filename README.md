@@ -2,14 +2,9 @@
 
 Personal library and reader stack (web UI + API). **Self‑host with Docker.**
 
-
-
 ---
 
-
 <img src="./demo/readme/library-browser-ultrawide.png" alt="" width="100%" />
-
-<img src="./demo/readme/library-browser-phone-desk.png" alt="" width="100%" />
 
 <table>
 <tbody>
@@ -22,7 +17,8 @@ Personal library and reader stack (web UI + API). **Self‑host with Docker.**
 <td width="50%"><img src="./demo/readme/reader-ai-panel-laptop.png" alt="" width="100%" /></td>
 </tr>
 <tr valign="top">
-<td colspan="2"><img src="./demo/readme/reader-ai-panel-mobile-transit.png" alt="" width="100%" /></td>
+<td width="50%"><img src="./demo/readme/library-browser-iphone.png" alt="" width="100%" /></td>
+<td width="50%"><img src="./demo/readme/reader-mobile-hand.png" alt="" width="100%" /></td>
 </tr>
 </tbody>
 </table>
@@ -80,12 +76,12 @@ Kokoro is also exposed on the host at **http://localhost:8882 → 8880** (see `d
 
 ## Environment summary
 
-| Variable | Purpose |
-|----------|---------|
-| **`JWT_SECRET`** | Required — signs session tokens in production Docker |
-| **`BOOKS_BIND`** | Host folder mounted at `/books` in the backend |
-| **`BACKEND_PORT`**, **`FRONTEND_PORT`** | Published HTTP ports |
-| **`KOKORO_TTS_URL`** | Base URL for TTS used by AI reader flows |
+| Variable                                | Purpose                                              |
+| --------------------------------------- | ---------------------------------------------------- |
+| **`JWT_SECRET`**                        | Required — signs session tokens in production Docker |
+| **`BOOKS_BIND`**                        | Host folder mounted at `/books` in the backend       |
+| **`BACKEND_PORT`**, **`FRONTEND_PORT`** | Published HTTP ports                                 |
+| **`KOKORO_TTS_URL`**                    | Base URL for TTS used by AI reader flows             |
 
 Older deployments may set **`AUTH_SECRET`** instead of **`JWT_SECRET`**; both are recognized by the server (see backend auth).
 
@@ -100,9 +96,3 @@ See `frontend/` and `backend/` package scripts (`npm`, `bun`). Use a `.env` in e
 ## Security note for production installs
 
 When **`NODE_ENV=production`** (set in Compose for the backend), the API **exits at startup** if the signing secret is missing, too short, or matches known weak placeholders. Always set **`JWT_SECRET`** (or **`AUTH_SECRET`**) properly before exposing the stack to the internet.
-
-## License
-
-This project is licensed under the **PolyForm Noncommercial License 1.0.0** — see [`LICENSE`](./LICENSE).
-
-You may use, modify, and share it for **non‑commercial** purposes. **Commercial use** (selling/hosting-as-a-Service for profit, internal use tied to revenue, etc.) is **not** granted by that license; contact the maintainers if you need a commercial agreement.

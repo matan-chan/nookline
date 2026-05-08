@@ -34,7 +34,7 @@ const Settings = () => {
         >
           <Stack spacing={2} sx={{ flex: 1, minWidth: 0 }}>
             <SectionTitle icon={<PaletteOutlined />}>{t("sectionCustomization")}</SectionTitle>
-            <SettingsCustomizationCard />
+            <SettingsCustomizationCard ttsData={tts.ttsData} ttsLoading={tts.ttsLoading} />
           </Stack>
 
           <Stack spacing={2} sx={{ flex: 1, minWidth: 0 }}>

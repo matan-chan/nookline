@@ -27,6 +27,7 @@ model User {
   ttsReaderShowPage  Boolean         @default(true)
   ttsReaderShowTitle Boolean         @default(true)
   ttsReaderStripPdfMargins Boolean   @default(true)
+  ttsReaderDarkDocument Boolean       @default(false)
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
   readingProgress    ReadingProgress[]

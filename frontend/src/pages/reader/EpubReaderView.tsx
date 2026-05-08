@@ -24,6 +24,7 @@ type EpubReaderViewProps = {
   backHref: string;
   aiOpen: boolean;
   onAiToggle: () => void;
+  readerDarkDocument?: boolean;
 };
 
 export const EpubReaderView = ({
@@ -41,6 +42,7 @@ export const EpubReaderView = ({
   backHref,
   aiOpen,
   onAiToggle,
+  readerDarkDocument = false,
 }: EpubReaderViewProps) => (
   <>
     <Box sx={{ display: "flex", minHeight: 0, flex: 1, flexDirection: "column" }}>
@@ -57,6 +59,7 @@ export const EpubReaderView = ({
         ttsChunkLimits={ttsChunkLimits}
         scrollToParagraphIndex={scrollToParagraphIndex}
         bookmarkResumeSig={bookmarkResumeSig}
+        readerDarkDocument={readerDarkDocument}
       />
     </Box>
     <ReaderBottomBar backHref={backHref} aiOpen={aiOpen} onAiToggle={onAiToggle} />

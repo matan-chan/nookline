@@ -114,6 +114,7 @@ export const buildTtsUserUpdatePayload = (input: any, existing: TtsUserChunkExis
   if (input.readerShowPage !== undefined) data.ttsReaderShowPage = Boolean(input.readerShowPage);
   if (input.readerShowTitle !== undefined) data.ttsReaderShowTitle = Boolean(input.readerShowTitle);
   if (input.readerStripPdfMargins !== undefined) data.ttsReaderStripPdfMargins = Boolean(input.readerStripPdfMargins);
+  if (input.readerDarkDocument !== undefined) data.ttsReaderDarkDocument = Boolean(input.readerDarkDocument);
   return data;
 };
 
@@ -133,6 +134,7 @@ export const serializeTtsSettings = (
     ttsReaderShowPage: boolean | null;
     ttsReaderShowTitle: boolean | null;
     ttsReaderStripPdfMargins: boolean | null;
+    ttsReaderDarkDocument: boolean | null;
   }>
 ) => {
   beLog("serializeTtsSettings");
@@ -151,6 +153,7 @@ export const serializeTtsSettings = (
     readerShowPage: u.ttsReaderShowPage !== false,
     readerShowTitle: u.ttsReaderShowTitle !== false,
     readerStripPdfMargins: u.ttsReaderStripPdfMargins !== false,
+    readerDarkDocument: u.ttsReaderDarkDocument === true,
   };
 };
 

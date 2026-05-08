@@ -25,6 +25,7 @@ export const EpubViewer = ({
   ttsChunkLimits,
   scrollToParagraphIndex = null,
   bookmarkResumeSig = "",
+  readerDarkDocument = false,
 }: {
   bookId: string;
   resumeCfi: string | null;
@@ -42,6 +43,7 @@ export const EpubViewer = ({
   ttsChunkLimits: TtsChunkLimits;
   scrollToParagraphIndex?: number | null;
   bookmarkResumeSig?: string;
+  readerDarkDocument?: boolean;
 }) => {
   const theme = useTheme();
   const [epubBuf, setEpubBuf] = useState<ArrayBuffer | null>(null);
@@ -57,6 +59,9 @@ export const EpubViewer = ({
   const onEpubBookmarkContextRef = useRef(onEpubBookmarkContext);
   const epubPickDocsRef = useRef<WeakSet<Document>>(new WeakSet());
   const renditionRef = useRef<Rendition | null>(null);
+  const epubReadingDocsRef = useRef(new Set<Document>());
+  const readerDarkDocumentRef = useRef(readerDarkDocument);
+  readerDarkDocumentRef.current = readerDarkDocument;
   const paragraphScrollDoneRef = useRef(false);
   onRenditionReadyRef.current = onRenditionReady;
   onReaderLocationChangedRef.current = onReaderLocationChanged;
@@ -73,7 +78,12 @@ export const EpubViewer = ({
 
   useEffect(() => {
     epubPickDocsRef.current = new WeakSet();
+    epubReadingDocsRef.current.clear();
   }, [bookId]);
+
+  useEffect(() => {
+    epubReadingDocsRef.current.forEach((d) => ensureEpubReadingSurfaceStylesInjected(d, readerDarkDocument));
+  }, [readerDarkDocument]);
 
   useEffect(() => {
     if (!bookId.trim()) return;
@@ -153,7 +163,8 @@ export const EpubViewer = ({
       const doc = contents.document;
       if (epubPickDocsRef.current.has(doc)) return;
       epubPickDocsRef.current.add(doc);
-      ensureEpubReadingSurfaceStylesInjected(doc);
+      epubReadingDocsRef.current.add(doc);
+      ensureEpubReadingSurfaceStylesInjected(doc, readerDarkDocumentRef.current);
       ensureEpubTtsHighlightStylesInjected(doc);
       const fn = (e: MouseEvent) => {
         if (e.button !== 0) return;
@@ -206,6 +217,8 @@ export const EpubViewer = ({
     onReaderLocationChangedRef.current?.();
   }, []);
 
+  const readerChromeStyles = readerDarkDocument ? darkReaderStyles : theme.palette.mode === "dark" ? darkReaderStyles : lightReaderStyles;
+
   return (
     <Box sx={{ position: "relative", height: "100%", minHeight: 0 }}>
       {epubFetchErr ? (
@@ -225,7 +238,7 @@ export const EpubViewer = ({
           locationChanged={locationChanged}
           getRendition={getRendition}
           epubOptions={{ flow: "paginated" }}
-          readerStyles={theme.palette.mode === "light" ? lightReaderStyles : darkReaderStyles}
+          readerStyles={readerChromeStyles}
         />
       )}
     </Box>

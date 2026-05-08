@@ -30,6 +30,7 @@ type TtsSavedSnapshot = {
   readerShowPage: boolean;
   readerShowTitle: boolean;
   readerStripPdfMargins: boolean;
+  readerDarkDocument: boolean;
 };
 
 const savedSettingsMatchDefaults = (s: TtsSavedSnapshot | undefined): boolean => {
@@ -47,6 +48,7 @@ const savedSettingsMatchDefaults = (s: TtsSavedSnapshot | undefined): boolean =>
   if (!s.readerShowPage) return false;
   if (!s.readerShowTitle) return false;
   if (!s.readerStripPdfMargins) return false;
+  if (s.readerDarkDocument) return false;
   return true;
 };
 
@@ -72,7 +74,7 @@ export const useSettingsTtsForm = () => {
   const [resetDoneHint, setResetDoneHint] = useState<string | null>(null);
   const pendingResetRef = useRef(false);
 
-  const { data: ttsData, refetch: refetchTts } = useQuery<{
+  const { data: ttsData, loading: ttsLoading, refetch: refetchTts } = useQuery<{
     ttsSettings: {
       mode: string;
       customBaseUrl: string | null;
@@ -87,6 +89,7 @@ export const useSettingsTtsForm = () => {
       readerShowPage: boolean;
       readerShowTitle: boolean;
       readerStripPdfMargins: boolean;
+      readerDarkDocument: boolean;
     };
     ttsEngineProbe: { ok: boolean; error: string | null };
   }>(TTS_SETTINGS_AND_PROBE, { variables: { userId }, skip: user == null });
@@ -166,6 +169,7 @@ export const useSettingsTtsForm = () => {
           readerShowPage: true,
           readerShowTitle: true,
           readerStripPdfMargins: true,
+          readerDarkDocument: false,
         },
       },
     });
@@ -264,6 +268,7 @@ export const useSettingsTtsForm = () => {
   return {
     probe: ttsData?.ttsEngineProbe,
     ttsData,
+    ttsLoading,
     ttsMode,
     setTtsMode,
     customBaseUrl,

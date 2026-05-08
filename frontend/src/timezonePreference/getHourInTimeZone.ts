@@ -1,13 +1,23 @@
-export const getHourInTimeZone = (date: Date, timeZone: string) => {
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone,
-    hour: "numeric",
-    hour12: false,
-  }).formatToParts(date);
+const parseHourFromParts = (date: Date, timeZone: string, options: Intl.DateTimeFormatOptions) => {
+  const parts = new Intl.DateTimeFormat("en-GB", { ...options, timeZone }).formatToParts(date);
   const hourRaw = parts.find((p) => p.type === "hour")?.value;
-  if (hourRaw == null) return date.getHours();
-  const hour = parseInt(hourRaw, 10);
-  return Number.isFinite(hour) ? hour : date.getHours();
+  if (hourRaw == null) return null;
+  let hour = parseInt(hourRaw, 10);
+  if (!Number.isFinite(hour)) return null;
+  if (hour === 24) hour = 0;
+  return hour;
+};
+
+export const getHourInTimeZone = (date: Date, timeZone: string) => {
+  try {
+    const h =
+      parseHourFromParts(date, timeZone, { hour: "numeric", hourCycle: "h23" }) ??
+      parseHourFromParts(date, timeZone, { hour: "numeric", hour12: false });
+    if (h != null) return h;
+  } catch {
+    /* fall through */
+  }
+  return date.getHours();
 };
 
 export const getDashboardGreetingKey = (hour: number) => {

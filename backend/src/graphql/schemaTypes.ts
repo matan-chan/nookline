@@ -141,6 +141,7 @@ export const graphqlSchemaTypes = `
     readerShowPage: Boolean!
     readerShowTitle: Boolean!
     readerStripPdfMargins: Boolean!
+    readerDarkDocument: Boolean!
   }
 
   type TtsEngineProbe {
@@ -231,5 +232,6 @@ export const graphqlSchemaTypes = `
     readerShowPage: Boolean
     readerShowTitle: Boolean
     readerStripPdfMargins: Boolean
+    readerDarkDocument: Boolean
   }
 `;

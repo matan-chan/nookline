@@ -12,6 +12,7 @@ export type { PdfBookViewerProps };
 
 const PdfBookViewer = (props: PdfBookViewerProps) => {
   const v = usePdfBookViewer(props);
+  const readerDarkDocument = props.readerDarkDocument === true;
   return (
     <Box ref={v.shellRef} sx={{ display: "flex", minHeight: 0, flex: 1, flexDirection: "column" }}>
       <Box
@@ -23,6 +24,12 @@ const PdfBookViewer = (props: PdfBookViewerProps) => {
           overflow: "auto",
           touchAction: "pan-y",
           WebkitOverflowScrolling: "touch",
+          ...(readerDarkDocument
+            ? {
+                bgcolor: "#121212",
+                "& .react-pdf__Page__canvas": { filter: "invert(92%) hue-rotate(180deg)" },
+              }
+            : {}),
         }}
       >
         <PdfDocumentPagesList

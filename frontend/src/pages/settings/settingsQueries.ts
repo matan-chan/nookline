@@ -58,6 +58,7 @@ export const TTS_SETTINGS_AND_PROBE = gql`
       readerShowPage
       readerShowTitle
       readerStripPdfMargins
+      readerDarkDocument
     }
     ttsEngineProbe(userId: $userId) {
       ok
@@ -82,6 +83,7 @@ export const UPDATE_TTS_SETTINGS = gql`
       readerShowPage
       readerShowTitle
       readerStripPdfMargins
+      readerDarkDocument
     }
   }
 `;

@@ -142,6 +142,7 @@ const ReaderPage = () => {
       readerShowPage: boolean;
       readerShowTitle: boolean;
       readerStripPdfMargins: boolean;
+      readerDarkDocument: boolean;
     };
   }>(READER_TTS_SETTINGS, { variables: { userId }, skip: !bookId || user == null });
 
@@ -157,6 +158,7 @@ const ReaderPage = () => {
 
   const pdfMarginStripRegexes = useMemo(() => parsePdfMarginStripRegexesFromBookMetadata(book?.metadata ?? null), [book?.metadata]);
   const pdfMarginStripEnabled = ttsData?.ttsSettings?.readerStripPdfMargins !== false && pdfMarginStripRegexes.length > 0;
+  const readerDarkDocument = ttsData?.ttsSettings?.readerDarkDocument === true;
 
   const [updateTtsSettings] = useMutation(UPDATE_TTS_SETTINGS, {
     refetchQueries: [{ query: READER_TTS_SETTINGS, variables: { userId } }],
@@ -329,6 +331,7 @@ const ReaderPage = () => {
     theme,
     bookHighlights,
     renditionRef,
+    readerDarkDocument,
   });
 
   const openBookmarkNameModal = useCallback(() => {
@@ -404,6 +407,7 @@ const ReaderPage = () => {
           bookmarkScrollDomIndex={pdfBookmarkDomIndex}
           scrollResumeSig={`${bmRaw ?? ""}|${hlRaw ?? ""}`}
           bookHighlights={bookHighlights}
+          readerDarkDocument={readerDarkDocument}
         />
       ) : (
         <EpubReaderView
@@ -421,6 +425,7 @@ const ReaderPage = () => {
           backHref={backHref}
           aiOpen={aiOpen}
           onAiToggle={toggleAi}
+          readerDarkDocument={readerDarkDocument}
         />
       )}
 

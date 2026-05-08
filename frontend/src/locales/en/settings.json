@@ -23,6 +23,7 @@
   "resetCustomizationDone": "Customization was reset.",
   "sectionAppearance": "Appearance",
   "timezoneLabel": "Timezone",
+  "timezoneHint": "Home greeting uses the time of day in this zone. Starts as your device timezone; pick another city if you travel or work across regions.",
   "timezoneUseDevice": "Use device timezone",
   "themeInky": "Inky",
   "themeLight": "Light",
@@ -81,5 +82,9 @@
   "readerShowPageLabel": "Show PDF page number (current page, and total pages when known)",
   "readerShowTitleLabel": "Show book title",
   "readerStripPdfMarginsLabel": "Strip repeating PDF headers and footers for TTS",
-  "readerStripPdfMarginsHint": "Uses patterns detected when each PDF was added (page numbers, title bars, etc.). Only affects spoken text in the AI reader, not the on-page PDF."
+  "readerStripPdfMarginsHint": "Uses patterns detected when each PDF was added (page numbers, title bars, etc.). Only affects spoken text in the AI reader, not the on-page PDF.",
+  "readerAppearanceSection": "Reading appearance",
+  "readerAppearanceSectionHint": "Independent from the app theme — affects PDF and EPUB pages only.",
+  "readerDarkDocumentLabel": "Dark document",
+  "readerDarkDocumentHint": "Shows EPUB text and PDF pages as light text on a dark background."
 }
