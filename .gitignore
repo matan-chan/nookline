@@ -45,9 +45,6 @@ frontend/playwright/.auth/
 .vscode/
 .idea/
 
-# Local release helper script
-release.bat
-
 # Accidental local scratch files
 utputFormat
 
