@@ -1,8 +1,9 @@
 import type { PrismaClient } from "@prisma/client";
-import { existsSync, statSync } from "fs";
-import { basename, dirname, extname, join } from "path";
-import { beLog, beLogErr } from "../../utils/beLog";
 import { convertPdfToEpub } from "./pdfToEpubConvert";
+import { beLog, beLogErr } from "../../utils/beLog";
+import { unlink } from "fs/promises";
+import { basename, dirname, extname, join, resolve } from "path";
+import { existsSync, statSync } from "fs";
 
 type Job = { bookId: number };
 
@@ -61,6 +62,18 @@ const runJob = async (db: PrismaClient, job: Job) => {
   await tryUpdateBookToEpub(db, row.id, row.libraryId, row.filePath, outPath, meta);
 };
 
+const removeSourcePdfAfterEpubUpgrade = async (pdfPath: string, epubPath: string, bookId: number) => {
+  try {
+    if (extname(pdfPath).toLowerCase() !== ".pdf") return;
+    if (resolve(pdfPath) === resolve(epubPath)) return;
+    if (!existsSync(pdfPath)) return;
+    await unlink(pdfPath);
+    beLog("pdfToEpub_removed_source_pdf", { bookId });
+  } catch (e) {
+    beLogErr("pdfToEpub_remove_pdf_failed", e, { bookId });
+  }
+};
+
 const tryUpdateBookToEpub = async (
   db: PrismaClient,
   bookId: number,
@@ -87,6 +100,8 @@ const tryUpdateBookToEpub = async (
     where: { id: bookId },
     data: { filePath: epubPath, metadata: JSON.stringify(nextMeta) },
   });
+
+  await removeSourcePdfAfterEpubUpgrade(pdfPath, epubPath, bookId);
 };
 
 const isPdfToEpubEnabled = async (db: PrismaClient) => {
