@@ -9,6 +9,15 @@ e2e/
 .env
 .env.*
 
+*.pem
+*.key
+*.pfx
+*.p12
+*id_rsa*
+*id_ed25519*
+**/secrets/**
+**/private/**
+
 playwright-report/
 test-results/
 

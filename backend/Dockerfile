@@ -1,23 +1,30 @@
-FROM oven/bun:1 AS builder
+FROM oven/bun:1.1.38 AS builder
 WORKDIR /app
 COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --production
 COPY . .
-RUN bunx prisma generate
 
-FROM builder AS test
-WORKDIR /app
-RUN bun test
-
-FROM oven/bun:1
-RUN apt-get update && apt-get install -y --no-install-recommends curl poppler-utils && rm -rf /var/lib/apt/lists/*
+FROM node:22.14.0-alpine3.20 AS prisma-gen
 WORKDIR /app
 COPY --from=builder /app/package.json /app/bun.lock ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/src ./src
+RUN npm i --no-save prisma@5.22.0 && npx prisma generate
+
+FROM oven/bun:1.1.38 AS runtime
+RUN apt-get update && apt-get install -y --no-install-recommends curl poppler-utils && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+RUN groupadd -r app && useradd -r -g app -d /app app
+RUN mkdir -p /data && chown app:app /data
+COPY --chown=app:app --from=builder /app/package.json /app/bun.lock ./
+RUN bun install --frozen-lockfile --production
+COPY --chown=app:app --from=prisma-gen /app/node_modules/.prisma ./node_modules/.prisma
+COPY --chown=app:app --from=prisma-gen /app/node_modules/@prisma ./node_modules/@prisma
+COPY --chown=app:app --from=builder /app/prisma ./prisma
+COPY --chown=app:app --from=builder /app/src ./src
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 EXPOSE 4000
+USER app
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["sh", "-c", "bunx prisma migrate deploy && exec bun run src/index.ts"]
