@@ -1,8 +1,9 @@
-import { join } from "path";
 import { mkdirSync } from "fs";
+import { join } from "path";
+import { getUploadBaseDir } from "../../services/library/libraryPathResolve";
 import { getCoverCacheDir } from "../../services/book/coverOptimization";
 
-export const UPLOAD_DIR = process.env.UPLOAD_DIR ?? join(process.cwd(), "uploads");
+export const UPLOAD_DIR = getUploadBaseDir();
 mkdirSync(UPLOAD_DIR, { recursive: true });
 export const COVER_CACHE_DIR = getCoverCacheDir(UPLOAD_DIR);
 export const BRANDING_DIR = join(UPLOAD_DIR, "branding");

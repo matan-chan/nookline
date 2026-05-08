@@ -1,8 +1,17 @@
+import { existsSync } from "fs";
 import { dirname, isAbsolute, join, normalize, relative, resolve } from "path";
 
 const COVER_CACHE_SEGMENT = ".cover-cache";
+const DOCKER_BOOKS_ROOT = "/books";
 
-export const getUploadBaseDir = () => process.env.UPLOAD_DIR ?? join(process.cwd(), "uploads");
+export const getUploadBaseDir = () => {
+  const override = process.env.UPLOAD_DIR?.trim();
+  if (override) return resolve(override);
+
+  if (existsSync("/.dockerenv")) return DOCKER_BOOKS_ROOT;
+
+  return resolve(join(process.cwd(), "uploads"));
+};
 
 export const resolveLibraryCoverCacheDir = (libraryPath: string | null | undefined): string => {
   const base = resolve(getUploadBaseDir());

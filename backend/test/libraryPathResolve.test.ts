@@ -11,7 +11,7 @@ describe("libraryPathResolve", () => {
     else process.env.UPLOAD_DIR = prev;
   });
 
-  test("getUploadBaseDir uses UPLOAD_DIR when set", () => {
+  test("getUploadBaseDir resolves UPLOAD_DIR override when set (advanced/tests)", () => {
     process.env.UPLOAD_DIR = "D:\\books";
     expect(getUploadBaseDir()).toBe("D:\\books");
   });

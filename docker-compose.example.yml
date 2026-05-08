@@ -59,10 +59,10 @@ services:
     ports:
       - "${BACKEND_PORT:-4005}:4000"
     # DATABASE_URL optional: defaults to sqlite file:/data/app.db (persisted on nookline-data volume).
+    # Books/libraries live under /books inside the container; mount host path there only.
     environment:
       NODE_ENV: production
       PORT: 4000
-      UPLOAD_DIR: /books
       JWT_SECRET: ${JWT_SECRET:-}
       TTS_URL: ${TTS_URL:-${KOKORO_TTS_URL:-http://kokoro-nookline:8880}}
     volumes:

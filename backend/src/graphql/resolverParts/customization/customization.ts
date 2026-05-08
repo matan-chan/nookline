@@ -1,15 +1,14 @@
 import type { AppCustomization, CustomLibraryBanner, PrismaClient } from "@prisma/client";
 import { existsSync, unlinkSync } from "fs";
 import { join } from "path";
+import { getUploadBaseDir } from "../../../services/library/libraryPathResolve";
 import type { GqlContext } from "../../gqlContext";
 import { requireGqlAdmin } from "../../gqlContext";
 import { beLog } from "../../../utils/beLog";
 
-const UPLOAD_DIR = process.env.UPLOAD_DIR ?? join(process.cwd(), "uploads");
-
 const unlinkUploadRelPath = (relPath: string | null | undefined) => {
   if (relPath == null || relPath.length === 0) return;
-  const abs = join(UPLOAD_DIR, relPath);
+  const abs = join(getUploadBaseDir(), relPath);
   try {
     if (existsSync(abs)) unlinkSync(abs);
   } catch {

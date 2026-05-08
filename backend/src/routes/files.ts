@@ -24,7 +24,10 @@ const filesErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   beLogErr("files_router", err, { path: req.path, errno });
 
   if (errno === "EACCES" || errno === "EROFS") {
-    res.status(507).json({ error: "Upload storage is not writable. Fix UPLOAD_DIR volume permissions." });
+    res.status(507).json({
+      error:
+        "Upload storage not writable (Docker: writable mount on /books; dev: uploads/ beside cwd).",
+    });
     return;
   }
 
