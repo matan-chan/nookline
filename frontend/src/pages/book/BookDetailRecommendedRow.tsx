@@ -16,6 +16,13 @@ export type RecommendedBookCard = {
 
 type Props = { books: RecommendedBookCard[] };
 
+const recommendedRowScrollSx = {
+  ...seriesVolumeRowSx,
+  scrollbarWidth: "none",
+  msOverflowStyle: "none",
+  "&::-webkit-scrollbar": { display: "none" },
+};
+
 export const BookDetailRecommendedRow = ({ books }: Props) => {
   const { t } = useTranslation("book");
   if (books.length === 0) return null;
@@ -25,7 +32,7 @@ export const BookDetailRecommendedRow = ({ books }: Props) => {
       <Typography variant="h5" sx={{ mb: 1.5, fontWeight: 700, color: "text.primary", letterSpacing: "0.04em" }}>
         {t("recommendedBooks")}
       </Typography>
-      <Box sx={seriesVolumeRowSx}>
+      <Box sx={recommendedRowScrollSx}>
         {books.map((book) => {
           const coverUrl = getCoverUrl(book);
           const subtitle = pickVolumeCardSubtitle(book);

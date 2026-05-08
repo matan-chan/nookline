@@ -3,9 +3,10 @@
 # 1. Copy this file:
 #      cp docker-compose.example.yml docker-compose.yml
 #
-# 2. Copy and fill in the required secrets:
+# 2. Copy environment file (optional: set JWT_SECRET yourself, or omit it and
+#    the backend image will generate one on first start and store it on the
+#    nookline-data volume under /data/.jwt_secret):
 #      cp .env.example .env
-#      # edit .env — at minimum set JWT_SECRET
 #
 # 3. (Optional) Create the external network if you use Nginx Proxy Manager:
 #      docker network create nginx-proxy-manager
@@ -62,8 +63,8 @@ services:
       PORT: 4000
       DATABASE_URL: file:/data/app.db
       UPLOAD_DIR: /books
-      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env — copy from .env.example}
-      KOKORO_TTS_URL: ${KOKORO_TTS_URL:-http://kokoro-nookline:8880}
+      JWT_SECRET: ${JWT_SECRET:-}
+      TTS_URL: ${TTS_URL:-${KOKORO_TTS_URL:-http://kokoro-nookline:8880}}
     volumes:
       - nookline-data:/data
       - ${BOOKS_BIND:-./books}:/books

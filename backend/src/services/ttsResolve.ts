@@ -105,8 +105,11 @@ const normalizeOpenAiTtsBaseUrl = (raw: string) => {
   return s;
 };
 
-const kokoroPresetBaseUrl = () =>
-  normalizeOpenAiTtsBaseUrl(process.env.KOKORO_TTS_URL ?? "http://127.0.0.1:8880");
+const kokoroPresetBaseUrl = () => {
+  const raw =
+    process.env.TTS_URL?.trim() || process.env.KOKORO_TTS_URL?.trim() || "http://127.0.0.1:8880";
+  return normalizeOpenAiTtsBaseUrl(raw);
+};
 
 const buildKokoroTtsTarget = (user: User): ResolvedTtsTarget => {
   beLog("buildKokoroTtsTarget", { userId: user.id });

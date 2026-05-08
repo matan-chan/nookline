@@ -34,7 +34,7 @@
   "engineSection": "Engine",
   "providerLabel": "Provider",
   "kokoroTitle": "Kokoro (GPU preset)",
-  "kokoroDesc": "Targets the backend KOKORO_TTS_URL (intended for GPU Kokoro-FastAPI, e.g. repo docker-compose). OpenAI-compatible /v1/audio/speech.",
+  "kokoroDesc": "Uses the server TTS_URL (intended for GPU Kokoro-FastAPI, e.g. repo docker-compose). OpenAI-compatible /v1/audio/speech.",
   "customTitle": "OpenAI compatible",
   "customDesc": "Any OpenAI-compatible TTS — use this for CPU Kokoro, remote APIs, or other engines.",
   "baseUrlLabel": "Base URL",

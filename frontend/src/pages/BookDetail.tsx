@@ -137,8 +137,6 @@ const BookDetail = () => {
       <BookDetailHero
         book={book}
         metadata={metadata}
-        libraryName={book.library.name}
-        seriesTitle={book.series?.title ?? null}
         t={t}
         onRemoveClick={() => setRemoveOpen(true)}
         isFavorite={book.isFavoriteForUser}

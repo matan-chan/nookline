@@ -23,7 +23,7 @@
   "zoomIn": "Zoom in",
   "fitPage": "Fit page",
   "loadPdfFailed": "Could not load this PDF.",
-  "ttsErrorFooterKokoro": "Built-in Kokoro uses KOKORO_TTS_URL (normally GPU Docker). If the service is down or this PC has no GPU, open Settings → Text-to-speech, choose OpenAI compatible, and set your CPU Kokoro (or other) base URL.",
+  "ttsErrorFooterKokoro": "Built-in Kokoro uses the server TTS_URL (Compose defaults to GPU Kokoro). If the service is down or this PC has no GPU, open Settings → Text-to-speech, choose OpenAI compatible, and set your CPU Kokoro (or other) base URL.",
   "ttsErrorFooterCustom": "Check the custom base URL, API key, and that the TTS service is running.",
   "contextSaveBookmark": "Save as bookmark",
   "contextHighlightSection": "Highlight selection",

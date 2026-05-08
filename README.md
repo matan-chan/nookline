@@ -1,6 +1,6 @@
 # Nookline
 
-Personal library and reader stack (web UI + API). **Self‑host with Docker.**
+Organize your books, read them in your browser, and turn pages with optional read-aloud. **Run everything on your own machine with Docker.**
 
 ---
 
@@ -28,25 +28,17 @@ Personal library and reader stack (web UI + API). **Self‑host with Docker.**
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose v2
-- `.env` file (copy from `.env.example`)
+- Optional `.env` (copy from `.env.example` for ports, `TTS_URL`, etc.
 
 ---
 
-## Quick start (no GPU Kokoro)
+## Quick start
 
 Best if you already run TTS elsewhere or you only care about reading without **AI reader / Kokoro**:
 
-1. Copy env template and set a strong secret:
+1. Optionally point **`TTS_URL`** at another TTS host (CPU Kokoro, OpenAI-compatible server, etc.). If you skip this and omit the Kokoro service, voice features may error until `TTS_URL` is reachable.
 
-   ```bash
-   cp .env.example .env
-   ```
-
-   Edit `.env`: set **`JWT_SECRET`** to a long random string (at least 32 characters).
-
-2. Optionally point **`KOKORO_TTS_URL`** at another TTS host (CPU Kokoro, OpenAI-compatible server, etc.). If you skip this and omit the Kokoro service, voice features may error until `KOKORO_TTS_URL` is reachable.
-
-3. Start only app services (default profile — **does not start** Kokoro):
+2. Start only app services (default profile — **does not start** Kokoro):
 
    ```bash
    mkdir -p books
@@ -56,7 +48,7 @@ Best if you already run TTS elsewhere or you only care about reading without **A
    - Frontend: **http://localhost:${FRONTEND_PORT:-3009}**
    - API health: **http://localhost:${BACKEND_PORT:-4005}/api/health**
 
-4. Uploaded files and SQLite live in the **`books`** bind mount (`BOOKS_BIND`) and **`nookline-data`** Docker volume respectively.
+3. Uploaded files and SQLite live in the **`books`** bind mount (`BOOKS_BIND`) and **`nookline-data`** Docker volume respectively.
 
 ---
 
@@ -68,7 +60,7 @@ Uses the optional **`kokoro`** Compose profile (`ghcr.io/remsky/kokoro-fastapi-g
 docker compose --profile kokoro up -d --build
 ```
 
-`KOKORO_TTS_URL` in `.env` defaults to `http://kokoro-nookline:8880`, which resolves when the Kokoro container is running on profile `kokoro`.
+`TTS_URL` in `.env` defaults to `http://kokoro-nookline:8880`, which resolves when the Kokoro container is running on profile `kokoro`.
 
 Kokoro is also exposed on the host at **http://localhost:8882 → 8880** (see `docker-compose.yml`).
 
@@ -78,21 +70,12 @@ Kokoro is also exposed on the host at **http://localhost:8882 → 8880** (see `d
 
 | Variable                                | Purpose                                              |
 | --------------------------------------- | ---------------------------------------------------- |
-| **`JWT_SECRET`**                        | Required — signs session tokens in production Docker |
+| **`JWT_SECRET`**                        | Optional in Docker — signs session tokens; if unset, generated on first start and stored on the data volume (`/data/.jwt_secret`) |
 | **`BOOKS_BIND`**                        | Host folder mounted at `/books` in the backend       |
 | **`BACKEND_PORT`**, **`FRONTEND_PORT`** | Published HTTP ports                                 |
-| **`KOKORO_TTS_URL`**                    | Base URL for TTS used by AI reader flows             |
-
-Older deployments may set **`AUTH_SECRET`** instead of **`JWT_SECRET`**; both are recognized by the server (see backend auth).
-
----
+| **`TTS_URL`**                           | Base URL for OpenAI-compatible TTS used by AI reader flows (Compose defaults to bundled Kokoro) |
 
 ## Development (without Compose)
 
 See `frontend/` and `backend/` package scripts (`npm`, `bun`). Use a `.env` in each folder as documented in your local setup — **do not commit real secrets.**
 
----
-
-## Security note for production installs
-
-When **`NODE_ENV=production`** (set in Compose for the backend), the API **exits at startup** if the signing secret is missing, too short, or matches known weak placeholders. Always set **`JWT_SECRET`** (or **`AUTH_SECRET`**) properly before exposing the stack to the internet.

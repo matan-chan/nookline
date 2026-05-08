@@ -16,5 +16,8 @@ COPY --from=builder /app/package.json /app/bun.lock ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/src ./src
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 EXPOSE 4000
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["sh", "-c", "bunx prisma migrate deploy && exec bun run src/index.ts"]

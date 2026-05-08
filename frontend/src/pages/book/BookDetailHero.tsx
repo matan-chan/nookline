@@ -23,8 +23,6 @@ type Book = {
 type Props = {
   book: Book;
   metadata: Record<string, unknown>;
-  libraryName: string;
-  seriesTitle: string | null;
   t: TFunction<"book">;
   onRemoveClick?: () => void;
   isFavorite: boolean;
@@ -35,8 +33,6 @@ type Props = {
 export const BookDetailHero = ({
   book,
   metadata,
-  libraryName,
-  seriesTitle,
   t,
   onRemoveClick,
   isFavorite,
@@ -50,9 +46,6 @@ export const BookDetailHero = ({
   const description = pickBookDescription(metadata);
   const tags = pickBookSubjectTags(metadata, 6);
   const ratings = pickBookRatings(metadata);
-  const eyebrowParts = [libraryName.toUpperCase()];
-  if (seriesTitle) eyebrowParts.push(seriesTitle.toUpperCase());
-  if (book.volumeNumber != null) eyebrowParts.push(t("vol", { volume: book.volumeNumber }).toUpperCase());
 
   return (
     <Box sx={{ position: "relative", mb: { xs: 4, md: 5 } }}>
@@ -91,19 +84,6 @@ export const BookDetailHero = ({
             }}
           >
             <Stack spacing={2.5} sx={{ flexShrink: 0 }}>
-              <Typography
-                variant="overline"
-                sx={{
-                  color: DETAIL_LAVENDER,
-                  letterSpacing: "0.14em",
-                  fontWeight: 600,
-                  fontSize: { xs: "0.65rem", md: "0.7rem" },
-                  lineHeight: 1.4,
-                }}
-              >
-                {eyebrowParts.join(" • ")}
-              </Typography>
-
               <Typography
                 component="h1"
                 sx={{

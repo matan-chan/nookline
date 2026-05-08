@@ -25,7 +25,7 @@ export const ttsUpstreamConnectionMessage = (e: unknown, requestUrl: string): st
 
   const looksLocalKokoro = /localhost|127\.0\.0\.1|:8880\b|:8881\b|:8882\b/i.test(requestUrl);
   const hint = looksLocalKokoro
-    ? " Start GPU Kokoro (docker compose), or set KOKORO_TTS_URL. If this host has no GPU or Kokoro keeps crashing, use Settings → Text-to-speech → OpenAI compatible and point at CPU Kokoro or another TTS API."
+    ? " Start GPU Kokoro (docker compose), or set TTS_URL. If this host has no GPU or Kokoro keeps crashing, use Settings → Text-to-speech → OpenAI compatible and point at CPU Kokoro or another TTS API."
     : " Check Settings → custom TTS base URL, VPN, firewall, and that the service is running.";
   return `Cannot reach TTS at ${origin}.${hint}`;
 };
