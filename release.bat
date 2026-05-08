@@ -55,7 +55,8 @@ if errorlevel 1 (
 )
 
 echo Tagging v%NEWVER% ...
-git tag "v%NEWVER%"
+set "GIT_RELEASE_TAG=v%NEWVER%"
+powershell -NoProfile -Command "git tag $env:GIT_RELEASE_TAG; exit $LASTEXITCODE"
 if errorlevel 1 (
   echo Tag creation failed (tag may already exist).
   exit /b 1
@@ -68,11 +69,11 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo Pushing tag v%NEWVER% ...
-git push origin "v%NEWVER%"
+echo Pushing tag %GIT_RELEASE_TAG% ...
+powershell -NoProfile -Command "git push origin $env:GIT_RELEASE_TAG; exit $LASTEXITCODE"
 if errorlevel 1 (
   echo Tag push failed.
   exit /b 1
 )
 
-echo Done: released v%NEWVER%
+echo Done: released %GIT_RELEASE_TAG%
