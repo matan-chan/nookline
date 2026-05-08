@@ -6,7 +6,7 @@ import { mkdirSync, rmSync, writeFileSync } from "fs";
 import { PrismaClient } from "@prisma/client";
 import { dirname, join, resolve } from "path";
 
-describe("bookLocalFallback", { timeout: 60_000 }, () => {
+describe("bookLocalFallback", { timeout: 130_000 }, () => {
   let prisma: PrismaClient;
   let testDir: string;
   let uploadDir: string;

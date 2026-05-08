@@ -9,6 +9,7 @@ WORKDIR /app
 COPY --from=builder /app/package.json /app/bun.lock ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
+ENV DATABASE_URL=file:/tmp/nookline-build.db
 RUN npm i --no-save prisma@5.22.0 && npx prisma generate
 
 FROM oven/bun:1.1.38 AS runtime

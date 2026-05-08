@@ -1,3 +1,4 @@
+import "../src/utils/defaultDatabaseRuntime";
 import { PrismaClient } from "@prisma/client";
 
 const p = new PrismaClient();

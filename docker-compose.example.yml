@@ -58,10 +58,10 @@ services:
     restart: unless-stopped
     ports:
       - "${BACKEND_PORT:-4005}:4000"
+    # DATABASE_URL optional: defaults to sqlite file:/data/app.db (persisted on nookline-data volume).
     environment:
       NODE_ENV: production
       PORT: 4000
-      DATABASE_URL: file:/data/app.db
       UPLOAD_DIR: /books
       JWT_SECRET: ${JWT_SECRET:-}
       TTS_URL: ${TTS_URL:-${KOKORO_TTS_URL:-http://kokoro-nookline:8880}}

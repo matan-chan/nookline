@@ -1,3 +1,4 @@
+import "../src/utils/defaultDatabaseRuntime";
 import { PrismaClient } from "@prisma/client";
 
 if (process.env.DELETE_ALL_USERS !== "1") {

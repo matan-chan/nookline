@@ -1,8 +1,8 @@
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
-import { assertProductionSigningSecret } from "./auth/authToken";
-import { PrismaClient } from "@prisma/client";
 import express from "express";
+import { assertProductionSigningSecret } from "./auth/authToken";
+import { prisma } from "./graphql/resolverParts/prisma";
 import { hashPassword } from "./auth/authPassword";
 import { getAuthUserForRequest } from "./auth/getAuthUserForRequest";
 import { buildAuthRouter } from "./routes/auth/authRoutes";
@@ -14,8 +14,6 @@ import { writeSrvLog } from "./utils/accessLog";
 import { beLog, beLogErr } from "./utils/beLog";
 
 const PORT = process.env.PORT ?? 4000;
-
-const prisma = new PrismaClient();
 
 const ensureLegacyLibrariesAdmin = async () => {
   const userCount = await prisma.user.count();

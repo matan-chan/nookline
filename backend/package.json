@@ -6,10 +6,10 @@
     "test": "bun test",
     "dev": "bun run --watch src/index.ts",
     "start": "bun run src/index.ts",
-    "db:deploy": "prisma migrate deploy",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push",
+    "db:deploy": "bun scripts/runPrismaWithDefaultDb.ts migrate deploy",
+    "db:generate": "bun scripts/runPrismaWithDefaultDb.ts generate",
+    "db:migrate": "bun scripts/runPrismaWithDefaultDb.ts migrate dev",
+    "db:push": "bun scripts/runPrismaWithDefaultDb.ts db push",
     "db:delete-all-users": "bun run scripts/deleteAllUsers.ts"
   },
   "dependencies": {
