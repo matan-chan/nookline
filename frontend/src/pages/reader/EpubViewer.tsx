@@ -1,17 +1,33 @@
 import type { TtsChunkLimits } from "../../utils/readerText/constants";
 import { extractEpubParagraphs } from "../../utils/readerText";
-import { documentHasNonCollapsedTextSelection } from "../../utils/documentTextSelection";
-import { getStoredToken } from "../../auth/authStorage";
 import { ensureEpubReadingSurfaceStylesInjected } from "./epubReadingSurfaceStyles";
-import { ensureEpubTtsHighlightStylesInjected } from "./epubViewerTtsHighlight";
 import { darkReaderStyles, lightReaderStyles } from "./readerStyles";
 import { isEpubCfi } from "./readerUtils";
+import { registerEpubContentHandlers } from "./epubViewerContentHandlers";
+import { useEpubFileLoader } from "./useEpubFileLoader";
 import { Box, CircularProgress, Typography, useTheme } from "@mui/material";
 import { ReactReader } from "react-reader";
-import type { Contents, Rendition } from "epubjs";
+import type { Rendition } from "epubjs";
 import { useState, useCallback, useEffect, useRef } from "react";
 
 const SAVE_DEBOUNCE_MS = 700;
+const PARAGRAPH_SCROLL_DELAY_MS = 900;
+const LOCATIONS_GRANULARITY = 1600;
+
+type EpubViewerProps = {
+  bookId: string;
+  resumeCfi: string | null;
+  fallbackPercentage: number;
+  onPersistProgress: (position: string, percentage: number) => void;
+  onRenditionReady?: (r: Rendition) => void;
+  onReaderLocationChanged?: () => void;
+  onEpubContentPick?: (target: Node) => void;
+  onEpubBookmarkContext?: (target: Node, clientX: number, clientY: number, highlight: { cfiRange: string; text: string } | null) => void;
+  ttsChunkLimits: TtsChunkLimits;
+  scrollToParagraphIndex?: number | null;
+  bookmarkResumeSig?: string;
+  readerDarkDocument?: boolean;
+};
 
 export const EpubViewer = ({
   bookId,
@@ -26,28 +42,9 @@ export const EpubViewer = ({
   scrollToParagraphIndex = null,
   bookmarkResumeSig = "",
   readerDarkDocument = false,
-}: {
-  bookId: string;
-  resumeCfi: string | null;
-  fallbackPercentage: number;
-  onPersistProgress: (position: string, percentage: number) => void;
-  onRenditionReady?: (r: Rendition) => void;
-  onReaderLocationChanged?: () => void;
-  onEpubContentPick?: (target: Node) => void;
-  onEpubBookmarkContext?: (
-    target: Node,
-    clientX: number,
-    clientY: number,
-    highlight: { cfiRange: string; text: string } | null,
-  ) => void;
-  ttsChunkLimits: TtsChunkLimits;
-  scrollToParagraphIndex?: number | null;
-  bookmarkResumeSig?: string;
-  readerDarkDocument?: boolean;
-}) => {
+}: EpubViewerProps) => {
   const theme = useTheme();
-  const [epubBuf, setEpubBuf] = useState<ArrayBuffer | null>(null);
-  const [epubFetchErr, setEpubFetchErr] = useState<string | null>(null);
+  const { epubBuf, epubFetchErr } = useEpubFileLoader(bookId);
   const [location, setLocation] = useState<string | number>(0);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const appliedResumeRef = useRef(false);
@@ -86,29 +83,6 @@ export const EpubViewer = ({
   }, [readerDarkDocument]);
 
   useEffect(() => {
-    if (!bookId.trim()) return;
-    let cancelled = false;
-    setEpubBuf(null);
-    setEpubFetchErr(null);
-    void (async () => {
-      try {
-        const tok = getStoredToken();
-        const res = await fetch(`/api/files/books/${encodeURIComponent(bookId)}`, {
-          headers: { ...(tok ? { Authorization: `Bearer ${tok}` } : {}) },
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const buf = await res.arrayBuffer();
-        if (!cancelled) setEpubBuf(buf);
-      } catch (e) {
-        if (!cancelled) setEpubFetchErr(e instanceof Error ? e.message : "Failed to load EPUB");
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [bookId]);
-
-  useEffect(() => {
     appliedResumeRef.current = false;
     paragraphScrollDoneRef.current = false;
   }, [bookId]);
@@ -131,7 +105,7 @@ export const EpubViewer = ({
     if (!r) return;
     let cancelled = false;
     const run = async () => {
-      await new Promise((x) => setTimeout(x, 900));
+      await new Promise((x) => setTimeout(x, PARAGRAPH_SCROLL_DELAY_MS));
       if (cancelled || paragraphScrollDoneRef.current) return;
       try {
         const ex = await extractEpubParagraphs(r, ttsChunkLimits);
@@ -155,62 +129,31 @@ export const EpubViewer = ({
     []
   );
 
+  const persistLocationChange = useCallback((payload: { start: string; percentage?: number }) => {
+    if (!payload?.start || !isEpubCfi(payload.start)) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      let pct = fallbackPctRef.current;
+      if (typeof payload.percentage === "number" && !Number.isNaN(payload.percentage))
+        pct = Math.round(Math.min(100, Math.max(0, payload.percentage * 100)));
+      persistRef.current(payload.start, pct);
+    }, SAVE_DEBOUNCE_MS);
+  }, []);
+
   const getRendition = useCallback((r: Rendition) => {
     renditionRef.current = r;
     onRenditionReadyRef.current?.(r);
-    r.book.ready.then(() => r.book.locations.generate(1600)).catch(() => {});
-    r.hooks.content.register((contents: Contents) => {
-      const doc = contents.document;
-      if (epubPickDocsRef.current.has(doc)) return;
-      epubPickDocsRef.current.add(doc);
-      epubReadingDocsRef.current.add(doc);
-      ensureEpubReadingSurfaceStylesInjected(doc, readerDarkDocumentRef.current);
-      ensureEpubTtsHighlightStylesInjected(doc);
-      const fn = (e: MouseEvent) => {
-        if (e.button !== 0) return;
-        const t = e.target as HTMLElement;
-        if (t.closest("a")) return;
-        const node = e.target as Node;
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (documentHasNonCollapsedTextSelection(doc)) return;
-            onEpubContentPickRef.current?.(node);
-          });
-        });
-      };
-      const onCtx = (e: MouseEvent) => {
-        if (!onEpubBookmarkContextRef.current) return;
-        const t = e.target as HTMLElement;
-        if (t.closest("a")) return;
-        e.preventDefault();
-        let highlight: { cfiRange: string; text: string } | null = null;
-        const sel = contents.document.getSelection();
-        if (sel && !sel.isCollapsed && sel.rangeCount > 0) {
-          try {
-            const rng = sel.getRangeAt(0);
-            const cfiRange = contents.cfiFromRange(rng, r.settings.ignoreClass);
-            const tx = sel.toString().replace(/\s+/g, " ").trim();
-            if (cfiRange?.startsWith("epubcfi(") && tx) highlight = { cfiRange, text: tx.slice(0, 8000) };
-          } catch {
-            /* ignore */
-          }
-        }
-        onEpubBookmarkContextRef.current(e.target as Node, e.clientX, e.clientY, highlight);
-      };
-      doc.addEventListener("click", fn, true);
-      doc.addEventListener("contextmenu", onCtx, true);
+    r.book.ready.then(() => r.book.locations.generate(LOCATIONS_GRANULARITY)).catch(() => {});
+    registerEpubContentHandlers({
+      rendition: r,
+      epubPickDocsRef,
+      epubReadingDocsRef,
+      readerDarkDocumentRef,
+      onPickRef: onEpubContentPickRef,
+      onCtxRef: onEpubBookmarkContextRef,
     });
-    r.on("locationChanged", (payload: { start: string; percentage?: number }) => {
-      if (!payload?.start || !isEpubCfi(payload.start)) return;
-      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-      saveTimerRef.current = setTimeout(() => {
-        let pct = fallbackPctRef.current;
-        if (typeof payload.percentage === "number" && !Number.isNaN(payload.percentage))
-          pct = Math.round(Math.min(100, Math.max(0, payload.percentage * 100)));
-        persistRef.current(payload.start, pct);
-      }, SAVE_DEBOUNCE_MS);
-    });
-  }, []);
+    r.on("locationChanged", persistLocationChange);
+  }, [persistLocationChange]);
 
   const locationChanged = useCallback((cfi: string) => {
     setLocation(cfi);
@@ -232,14 +175,7 @@ export const EpubViewer = ({
           <CircularProgress size={36} />
         </Box>
       ) : (
-        <ReactReader
-          url={epubBuf}
-          location={location}
-          locationChanged={locationChanged}
-          getRendition={getRendition}
-          epubOptions={{ flow: "paginated" }}
-          readerStyles={readerChromeStyles}
-        />
+        <ReactReader url={epubBuf} location={location} locationChanged={locationChanged} getRendition={getRendition} epubOptions={{ flow: "paginated" }} readerStyles={readerChromeStyles} />
       )}
     </Box>
   );

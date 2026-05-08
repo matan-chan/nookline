@@ -1,100 +1,58 @@
-import type { TtsChunkLimits } from "../../utils/readerText/constants";
-import { extractEpubParagraphs, extractPdfParagraphs } from "../../utils/readerText";
+import { useTtsPlaySpeechAtIndex } from "./useTtsPlaySpeechAtIndex";
+import { useTtsParagraphLoader } from "./useTtsParagraphLoader";
+import type { PdfMarginStripOptsRef, PlayArgs } from "./ttsParagraphPlayArgs";
 import { previewOf } from "./ttsPlaybackConstants";
-import type { PDFDocumentProxy } from "pdfjs-dist";
-import type { Rendition } from "epubjs";
-import { useCallback, type MutableRefObject } from "react";
+import { useCallback } from "react";
 
-export type PdfMarginStripOptsRef = MutableRefObject<{ enabled: boolean; regexes: string[] }>;
+const EPUB_NOT_READY = "EPUB not ready";
+const PDF_NOT_READY = "PDF not ready";
+const NO_TEXT_MSG = "No extractable text on this page/section.";
+const TTS_FAILED_MSG = "TTS failed";
 
-type PlayArgs = {
-  format: "epub" | "pdf";
-  renditionRef: MutableRefObject<Rendition | null>;
-  pdfDocRef: MutableRefObject<PDFDocumentProxy | null>;
-  pdfPageRef: MutableRefObject<number>;
-  parasRef: MutableRefObject<string[]>;
-  anchorRef: MutableRefObject<string>;
-  epubHighlightElsRef: MutableRefObject<(HTMLElement | null)[][]>;
-  pdfParaItemIndicesRef: MutableRefObject<number[][]>;
-  pdfSessionPageRef: MutableRefObject<number | null>;
-  indexRef: MutableRefObject<number>;
-  urlCurRef: MutableRefObject<string | null>;
-  flushServerReadingRef: MutableRefObject<(opts?: { pdfPage?: number }) => void>;
-  audioRef: MutableRefObject<HTMLAudioElement | null>;
-  playingRef: MutableRefObject<boolean>;
-  fetchSpeechBlob: (text: string, signal?: AbortSignal) => Promise<Blob>;
-  playAudioFromUrl: (url: string) => void;
-  prefetchAt: (i: number) => void;
-  stopPlayback: () => void;
-  revoke: (u: string | null) => void;
-  setErr: (v: string | null) => void;
-  setTotalParas: (v: number) => void;
-  setParaIndex: (v: number) => void;
-  setPreview: (v: string) => void;
-  setPdfHighlightPage: (v: number | null) => void;
-  setPdfHighlightItemIndices: (v: number[]) => void;
-  setBusy: (v: boolean) => void;
-  setPlaying: (v: boolean) => void;
-  chunkLimitsRef: MutableRefObject<TtsChunkLimits>;
-  pdfMarginStripOptsRef: PdfMarginStripOptsRef;
-};
+export type { PdfMarginStripOptsRef };
 
-export const useTtsParagraphPlaybackPlay = ({
-  format,
-  renditionRef,
-  pdfDocRef,
-  pdfPageRef,
-  parasRef,
-  anchorRef,
-  epubHighlightElsRef,
-  pdfParaItemIndicesRef,
-  pdfSessionPageRef,
-  indexRef,
-  urlCurRef,
-  flushServerReadingRef,
-  audioRef,
-  playingRef,
-  fetchSpeechBlob,
-  playAudioFromUrl,
-  prefetchAt,
-  stopPlayback,
-  revoke,
-  setErr,
-  setTotalParas,
-  setParaIndex,
-  setPreview,
-  setPdfHighlightPage,
-  setPdfHighlightItemIndices,
-  setBusy,
-  setPlaying,
-  chunkLimitsRef,
-  pdfMarginStripOptsRef,
-}: PlayArgs) => {
-  const loadSource = useCallback(async () => {
-    const lim = chunkLimitsRef.current;
-    if (format === "epub") {
-      const r = renditionRef.current;
-      if (!r) return null;
-      return extractEpubParagraphs(r, lim);
-    }
-    const doc = pdfDocRef.current;
-    const page = pdfPageRef.current || 1;
-    if (!doc) return null;
-    const { enabled, regexes } = pdfMarginStripOptsRef.current;
-    const pdfOpts = enabled && regexes.length > 0 ? { marginLineRegexes: regexes } : undefined;
-    return extractPdfParagraphs(doc, page, lim, pdfOpts);
-  }, [format, renditionRef, pdfDocRef, pdfPageRef, chunkLimitsRef, pdfMarginStripOptsRef]);
+export const useTtsParagraphPlaybackPlay = (args: PlayArgs) => {
+  const {
+    format,
+    parasRef,
+    anchorRef,
+    epubHighlightElsRef,
+    pdfParaItemIndicesRef,
+    pdfSessionPageRef,
+    pdfPageRef,
+    indexRef,
+    urlCurRef,
+    flushServerReadingRef,
+    audioRef,
+    playingRef,
+    fetchSpeechBlob,
+    playAudioFromUrl,
+    prefetchAt,
+    stopPlayback,
+    revoke,
+    setErr,
+    setTotalParas,
+    setParaIndex,
+    setPreview,
+    setPdfHighlightPage,
+    setPdfHighlightItemIndices,
+    setBusy,
+    setPlaying,
+  } = args;
+
+  const loadSource = useTtsParagraphLoader(args);
+  const playSpeechAtIndex = useTtsPlaySpeechAtIndex(args);
 
   const beginPlayback = useCallback(async () => {
     setErr(null);
     const extracted = await loadSource();
     if (!extracted) {
-      setErr(format === "epub" ? "EPUB not ready" : "PDF not ready");
+      setErr(format === "epub" ? EPUB_NOT_READY : PDF_NOT_READY);
       return;
     }
     const { paragraphs: paras, anchor: anc } = extracted;
     if (paras.length === 0) {
-      setErr("No extractable text on this page/section.");
+      setErr(NO_TEXT_MSG);
       return;
     }
     stopPlayback();
@@ -126,7 +84,7 @@ export const useTtsParagraphPlaybackPlay = ({
       playAudioFromUrl(urlCurRef.current);
       prefetchAt(start + 1);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "TTS failed");
+      setErr(e instanceof Error ? e.message : TTS_FAILED_MSG);
     } finally {
       setBusy(false);
     }
@@ -153,52 +111,19 @@ export const useTtsParagraphPlaybackPlay = ({
     (delta: number) => {
       const paras = parasRef.current;
       if (!paras.length) return;
-      stopPlayback();
       const ni = Math.min(paras.length - 1, Math.max(0, indexRef.current + delta));
-      indexRef.current = ni;
-      setParaIndex(ni);
-      flushServerReadingRef.current();
-      setPreview(previewOf(paras[ni]));
-      setPdfHighlightItemIndices(pdfParaItemIndicesRef.current[ni] ?? []);
-      setBusy(true);
-      setErr(null);
-      fetchSpeechBlob(paras[ni])
-        .then((blob) => {
-          revoke(urlCurRef.current);
-          urlCurRef.current = URL.createObjectURL(blob);
-          playAudioFromUrl(urlCurRef.current);
-          prefetchAt(ni + 1);
-        })
-        .catch((e) => setErr(e instanceof Error ? e.message : "TTS failed"))
-        .finally(() => setBusy(false));
+      playSpeechAtIndex(ni);
     },
-    [fetchSpeechBlob, playAudioFromUrl, prefetchAt, stopPlayback]
+    [playSpeechAtIndex],
   );
 
   const restartSection = useCallback(() => {
-    const paras = parasRef.current;
-    if (!paras.length) {
+    if (!parasRef.current.length) {
       void beginPlayback();
       return;
     }
-    stopPlayback();
-    indexRef.current = 0;
-    setParaIndex(0);
-    flushServerReadingRef.current();
-    setPreview(previewOf(paras[0]));
-    setPdfHighlightItemIndices(pdfParaItemIndicesRef.current[0] ?? []);
-    setBusy(true);
-    setErr(null);
-    fetchSpeechBlob(paras[0])
-      .then((blob) => {
-        revoke(urlCurRef.current);
-        urlCurRef.current = URL.createObjectURL(blob);
-        playAudioFromUrl(urlCurRef.current);
-        prefetchAt(1);
-      })
-      .catch((e) => setErr(e instanceof Error ? e.message : "TTS failed"))
-      .finally(() => setBusy(false));
-  }, [beginPlayback, fetchSpeechBlob, playAudioFromUrl, prefetchAt, stopPlayback]);
+    playSpeechAtIndex(0);
+  }, [beginPlayback, playSpeechAtIndex]);
 
   return { loadSource, beginPlayback, togglePlay, goParagraph, restartSection };
 };
