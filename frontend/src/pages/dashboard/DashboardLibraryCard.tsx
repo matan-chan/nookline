@@ -1,4 +1,5 @@
 import { useAuth } from "../../auth/AuthContext";
+import { usePdfToEpubSetting } from "../../hooks/usePdfToEpubSetting";
 import { dashboardLibrarySyncToastMessage } from "./dashboardLibraryCardSyncToast";
 import { dashboardHomeRefetch, SYNC_LIBRARY_FROM_DISK } from "./dashboardQueries";
 import { coverCardColumnHoverSx } from "../../utils/layout/staggerGridSx";
@@ -27,6 +28,7 @@ const TOAST_AUTOHIDE_MS = 8000;
 const DashboardLibraryCard = ({ library, onRequestDelete, onEditSettings }: Props) => {
   const { t } = useTranslation("dashboard");
   const { user } = useAuth();
+  const pdfToEpubOn = usePdfToEpubSetting();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [toast, setToast] = useState<{ msg: string; severity: "success" | "error" } | null>(null);
   const stackBooks = library.previewBooks ?? [];
@@ -44,6 +46,10 @@ const DashboardLibraryCard = ({ library, onRequestDelete, onEditSettings }: Prop
 
   const runSync = () => {
     closeMenu();
+    if (pdfToEpubOn) {
+      const ok = window.confirm("PDF→EPUB conversion is enabled. Refetch may start background conversions for newly discovered PDFs. Continue?");
+      if (!ok) return;
+    }
     syncLibrary({ variables: { libraryId: library.id } });
   };
 

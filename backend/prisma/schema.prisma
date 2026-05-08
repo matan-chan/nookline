@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
 }
 
 datasource db {
@@ -42,6 +43,7 @@ model AppCustomization {
   id              Int      @id @default(1)
   siteName        String?
   faviconRelPath  String?
+  convertPdfToEpub Boolean @default(false)
   updatedAt       DateTime @updatedAt
 }
 

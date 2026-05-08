@@ -86,5 +86,7 @@
   "readerAppearanceSection": "Reading appearance",
   "readerAppearanceSectionHint": "Independent from the app theme — affects PDF and EPUB pages only.",
   "readerDarkDocumentLabel": "Dark document",
-  "readerDarkDocumentHint": "Shows EPUB text and PDF pages as light text on a dark background."
+  "readerDarkDocumentHint": "Shows EPUB text and PDF pages as light text on a dark background.",
+  "pdfToEpubLabel": "Convert uploaded PDFs to EPUB",
+  "pdfToEpubHint": "Warning: slow and quality varies. When enabled, uploads and library refetch may trigger background conversions, increasing CPU and disk usage."
 }

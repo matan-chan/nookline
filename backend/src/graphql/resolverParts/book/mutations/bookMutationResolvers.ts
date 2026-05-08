@@ -5,6 +5,7 @@ import { requireGqlUser } from "../../../gqlContext";
 import { unlinkBookMainAndCacheArtifacts } from "../../../../services/book/bookDiskArtifacts";
 import { enrichBookRecord } from "../../../../services/openLibrary/openLibraryEnrichment";
 import { createBookRecord } from "../../../../services/book/createBookRecord";
+import { enqueuePdfToEpubForBook } from "../../../../services/epub/pdfToEpubQueue";
 import { beLog } from "../../../../utils/beLog";
 import { serializeBook, serializeProgress } from "../../../resolverSerialize";
 import { deleteBookmarksHighlightsProgressForBooks } from "../cleanup/bookCleanup";
@@ -18,6 +19,7 @@ export const bookMutationResolvers = (prisma: PrismaClient) => ({
     if (Number.isFinite(lid)) await assertLibraryOwnedBy(prisma, u.id, lid);
     else throw new Error("Library required");
     const row = await createBookRecord(prisma, input);
+    void enqueuePdfToEpubForBook(prisma, row.id);
     return serializeBook(row);
   },
 

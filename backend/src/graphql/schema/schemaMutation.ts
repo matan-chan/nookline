@@ -30,6 +30,7 @@ export const graphqlSchemaMutation = `
     updateTtsSettings(input: UpdateTtsSettingsInput!): TtsSettings!
 
     updateAppCustomization(siteName: String!): AppCustomization!
+    updatePdfConversionSettings(convertPdfToEpub: Boolean!): AppCustomization!
 
     resetAppCustomization: AppCustomization!
   }

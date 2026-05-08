@@ -7,6 +7,7 @@ import { inferFromFilenameSlug, stripUploadTimestamp } from "../book/bookFilenam
 import { inferAndPersistPdfMarginStripRegexes } from "../pdf/bookPdfMarginStripPersist";
 import { applyLocalBookFallback } from "../book/bookLocalFallback";
 import { getUploadBaseDir, resolveLibraryContentDir } from "./libraryPathResolve";
+import { enqueuePdfToEpubForBook } from "../epub/pdfToEpubQueue";
 
 const ALLOWED_EXT = new Set([".pdf", ".epub"]);
 const MAX_TITLE_LEN = 500;
@@ -46,7 +47,10 @@ const importNewBooksFromPaths = async (
   const added: Book[] = [];
   for (const absPath of diskFiles) {
     const book = await tryCreateBookFromDiskFile(db, libraryId, absPath, rootReal, seenKeys);
-    if (book) added.push(book);
+    if (book) {
+      added.push(book);
+      void enqueuePdfToEpubForBook(db, book.id);
+    }
   }
   return added;
 };

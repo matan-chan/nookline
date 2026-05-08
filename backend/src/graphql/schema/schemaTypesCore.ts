@@ -16,6 +16,7 @@ export const graphqlSchemaTypesCore = `
     hasOverrides: Boolean!
     faviconUrl: String
     customLibraryBanners: [CustomLibraryBannerRef!]!
+    convertPdfToEpub: Boolean!
   }
 
   type Library {

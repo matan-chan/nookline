@@ -1,7 +1,15 @@
 #!/bin/sh
 set -e
 
+if [ "$(id -u)" = "0" ]; then
+  mkdir -p /data
+  chown -R app:app /data 2>/dev/null || true
+fi
+
 if [ -n "${JWT_SECRET:-}" ] || [ -n "${AUTH_SECRET:-}" ]; then
+  if [ "$(id -u)" = "0" ]; then
+    exec su app -s /bin/sh -c "$*"
+  fi
   exec "$@"
 fi
 
@@ -16,4 +24,7 @@ else
   echo "nookline: generated JWT_SECRET and wrote $SECRET_FILE (persists on this volume)" >&2
 fi
 
+if [ "$(id -u)" = "0" ]; then
+  exec su app -s /bin/sh -c "$*"
+fi
 exec "$@"

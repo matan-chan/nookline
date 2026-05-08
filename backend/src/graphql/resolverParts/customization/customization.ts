@@ -50,6 +50,7 @@ const serializeAppCustomization = (row: AppCustomization | null, banners: Custom
       id: b.id,
       url: `/api/files/branding/library-banner/${b.id}`,
     })),
+    convertPdfToEpub: (row as any)?.convertPdfToEpub === true,
   };
 };
 
@@ -77,6 +78,19 @@ export const customizationMutationResolvers = (prisma: PrismaClient) => ({
     return serializeAppCustomization(row, banners);
   },
 
+  updatePdfConversionSettings: async (_: unknown, { convertPdfToEpub }: { convertPdfToEpub: boolean }, ctx: GqlContext) => {
+    beLog("mutation_updatePdfConversionSettings");
+    requireGqlAdmin(ctx);
+    await prisma.appCustomization.upsert({
+      where: { id: 1 },
+      update: { convertPdfToEpub: convertPdfToEpub === true } as any,
+      create: { id: 1, convertPdfToEpub: convertPdfToEpub === true } as any,
+    });
+    const row = await prisma.appCustomization.findUnique({ where: { id: 1 } });
+    const banners = await prisma.customLibraryBanner.findMany({ orderBy: { id: "asc" } });
+    return serializeAppCustomization(row, banners);
+  },
+
   resetAppCustomization: async (_: unknown, __: unknown, ctx: GqlContext) => {
     beLog("mutation_resetAppCustomization");
     requireGqlAdmin(ctx);
@@ -86,7 +100,7 @@ export const customizationMutationResolvers = (prisma: PrismaClient) => ({
       await tx.customLibraryBanner.deleteMany({});
       await tx.appCustomization.upsert({
         where: { id: 1 },
-        update: { siteName: null, faviconRelPath: null },
+        update: { siteName: null, faviconRelPath: null, convertPdfToEpub: false } as any,
         create: { id: 1 },
       });
     });

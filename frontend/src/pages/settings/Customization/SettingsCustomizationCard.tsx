@@ -10,6 +10,7 @@ import { SettingsCustomizationSiteName } from "./components/SettingsCustomizatio
 import { SettingsAppearanceToggle } from "./components/SettingsAppearanceToggle";
 import { SettingsTimezoneSelector } from "./components/SettingsTimezoneSelector";
 import { SettingsReaderDarkDocToggle } from "./components/SettingsReaderDarkDocToggle";
+import { SettingsPdfToEpubToggle } from "./components/SettingsPdfToEpubToggle";
 import { useAppCustomizationData } from "./hooks/useAppCustomizationData";
 import { SettingsCard } from "../SettingsPrimitives";
 import { useMutation } from "@apollo/client";
@@ -59,6 +60,8 @@ const SettingsCustomizationCard = ({ ttsData, ttsLoading }: SettingsCustomizatio
   const faviconUrl = cust.data?.appCustomization?.faviconUrl ?? null;
   const banners = cust.data?.appCustomization?.customLibraryBanners ?? [];
 
+  const onPdfToEpubChange = (_: unknown, checked: boolean) => cust.setConvertPdfToEpub(checked);
+
   return (
     <SettingsCard>
       <Stack spacing={2}>
@@ -67,6 +70,8 @@ const SettingsCustomizationCard = ({ ttsData, ttsLoading }: SettingsCustomizatio
         <SettingsReaderDarkDocToggle t={t} checked={readerDarkDocumentOn} disabled={userId === 0 || (ttsLoading && ttsData == null)} onChange={onReaderDarkDocumentChange} />
 
         <SettingsTimezoneSelector t={t} effectiveTimeZone={effectiveTimeZone} storedTimeZone={storedTimeZone} onSetTimeZone={setTimeZone} onClearTimeZone={clearToDeviceTimeZone} />
+
+        <SettingsPdfToEpubToggle t={t} checked={cust.convertPdfToEpub} disabled={cust.savingPdfToEpub} onChange={onPdfToEpubChange} />
 
         <input ref={faviconInputRef} type="file" accept=".ico,.png,.jpg,.jpeg,.webp,.image/svg+xml,.svg" hidden onChange={cust.onFaviconFile} />
         <input ref={bannerInputRef} type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg,.webp" hidden onChange={cust.onBannerFile} />

@@ -6,6 +6,7 @@ export const APP_CUSTOMIZATION = gql`
       siteName
       hasOverrides
       faviconUrl
+      convertPdfToEpub
       customLibraryBanners {
         id
         url
@@ -20,6 +21,22 @@ export const UPDATE_APP_CUSTOMIZATION = gql`
       siteName
       hasOverrides
       faviconUrl
+      convertPdfToEpub
+      customLibraryBanners {
+        id
+        url
+      }
+    }
+  }
+`;
+
+export const UPDATE_PDF_CONVERSION_SETTINGS = gql`
+  mutation UpdatePdfConversionSettings($convertPdfToEpub: Boolean!) {
+    updatePdfConversionSettings(convertPdfToEpub: $convertPdfToEpub) {
+      siteName
+      hasOverrides
+      faviconUrl
+      convertPdfToEpub
       customLibraryBanners {
         id
         url
@@ -34,6 +51,7 @@ export const RESET_APP_CUSTOMIZATION = gql`
       siteName
       hasOverrides
       faviconUrl
+      convertPdfToEpub
       customLibraryBanners {
         id
         url

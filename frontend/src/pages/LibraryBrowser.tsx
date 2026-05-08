@@ -1,6 +1,7 @@
 import { useAuth } from "../auth/AuthContext";
 import AddBookModal from "../components/AddBookModal";
 import type { LayoutOutletContext, LibraryNavItem } from "../components/Layout";
+import { usePdfToEpubSetting } from "../hooks/usePdfToEpubSetting";
 import { getSeriesCoverUrl } from "../utils/cover/cover";
 import { LibraryBrowserToolbar } from "./library/LibraryBrowserToolbar";
 import { LIBRARY_BROWSER_QUERY, LIBRARY_DELETE_BOOK, LIBRARY_DELETE_SERIES, SYNC_LIBRARY_FROM_DISK } from "./library/libraryQueries";
@@ -28,6 +29,7 @@ const toNavItem = (lib: LibraryBrowserLibrary): LibraryNavItem => ({
 const LibraryBrowser = () => {
   const { t } = useTranslation("library");
   const { user } = useAuth();
+  const pdfToEpubOn = usePdfToEpubSetting();
   const { openEditLibrary, setLibraryPendingDelete } = useOutletContext<LayoutOutletContext>();
   const { id } = useParams<{ id: string }>();
   const libraryId = parseInt(id ?? "1");
@@ -66,11 +68,17 @@ const LibraryBrowser = () => {
       refetchLabel: syncing ? t("heroMenuRefetchBusy") : t("heroMenuRefetch"),
       editLabel: t("heroMenuEdit"),
       deleteLabel: t("heroMenuDelete"),
-      onRefetch: () => syncLibrary({ variables: { libraryId: library.id } }),
+      onRefetch: () => {
+        if (pdfToEpubOn) {
+          const ok = window.confirm("PDF→EPUB conversion is enabled. Refetch may start background conversions for newly discovered PDFs. Continue?");
+          if (!ok) return;
+        }
+        syncLibrary({ variables: { libraryId: library.id } });
+      },
       onEdit: () => openEditLibrary(toNavItem(library)),
       onDelete: () => setLibraryPendingDelete(toNavItem(library)),
     };
-  }, [library, openEditLibrary, setLibraryPendingDelete, syncLibrary, syncing, t]);
+  }, [library, openEditLibrary, pdfToEpubOn, setLibraryPendingDelete, syncLibrary, syncing, t]);
 
   const query = search.toLowerCase();
 
