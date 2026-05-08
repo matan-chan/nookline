@@ -4,6 +4,11 @@ set -e
 if [ "$(id -u)" = "0" ]; then
   mkdir -p /data
   chown -R app:app /data 2>/dev/null || true
+  if [ -n "${UPLOAD_DIR:-}" ]; then
+    mkdir -p "${UPLOAD_DIR}" 2>/dev/null || true
+    chown -R app:app "${UPLOAD_DIR}" 2>/dev/null ||
+      echo "nookline: could not chown UPLOAD_DIR=${UPLOAD_DIR}; set volume fsGroup writable by UID $(id -u app 2>/dev/null || echo app) or run as root" >&2
+  fi
 fi
 
 if [ -n "${JWT_SECRET:-}" ] || [ -n "${AUTH_SECRET:-}" ]; then

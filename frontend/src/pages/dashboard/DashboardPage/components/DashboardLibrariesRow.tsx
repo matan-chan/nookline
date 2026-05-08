@@ -24,7 +24,7 @@ export const DashboardLibrariesRow = ({ t, libraries, onRequestDelete, onEditSet
   if (libraries.length === 0) return null;
   return (
     <Box component="section">
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
         {t("libraries")}
       </Typography>
       <Box
@@ -40,6 +40,7 @@ export const DashboardLibrariesRow = ({ t, libraries, onRequestDelete, onEditSet
           pb: 0.5,
           mx: { xs: -2, sm: -3, md: -4 },
           px: { xs: 2, sm: 3, md: 4 },
+          py: { xs: 1, sm: 1.5, md: 2 },
           WebkitOverflowScrolling: "touch",
           ...staggerGridChildrenSx,
         }}

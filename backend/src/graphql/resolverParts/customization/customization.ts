@@ -35,12 +35,8 @@ const normalizeSiteNameForStorage = (raw: string) => {
 };
 
 const serializeAppCustomization = (row: AppCustomization | null, banners: CustomLibraryBanner[]) => {
-  const faviconUrl =
-    row?.faviconRelPath != null && row.faviconRelPath.length > 0 ? faviconUrlFromRow(row.updatedAt) : null;
-  const hasOverrides =
-    Boolean((row?.siteName ?? "").trim()) ||
-    Boolean((row?.faviconRelPath ?? "").trim()) ||
-    banners.length > 0;
+  const faviconUrl = row?.faviconRelPath != null && row.faviconRelPath.length > 0 ? faviconUrlFromRow(row.updatedAt) : null;
+  const hasOverrides = Boolean((row?.siteName ?? "").trim()) || Boolean((row?.faviconRelPath ?? "").trim()) || banners.length > 0;
 
   return {
     siteName: resolveSiteName(row?.siteName),

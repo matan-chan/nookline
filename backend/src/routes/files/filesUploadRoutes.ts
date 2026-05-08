@@ -37,20 +37,25 @@ const extractPdfMetadataForUpload = async (absPath: string, size: number) => {
 };
 
 const handleUpload = async (req: Request, res: Response) => {
-  beLog("route_post_upload");
-  if ((await requireUser(req, res)) == null) return;
-  if (!req.file) {
-    res.status(400).json({ error: "No file received" });
-    return;
+  try {
+    beLog("route_post_upload");
+    if ((await requireUser(req, res)) == null) return;
+    if (!req.file) {
+      res.status(400).json({ error: "No file received" });
+      return;
+    }
+    const ext = extname(req.file.originalname).toLowerCase();
+    const pdfMeta = ext === ".pdf" ? await extractPdfMetadataForUpload(req.file.path, req.file.size) : null;
+    res.json({
+      path: req.file.path,
+      filename: req.file.originalname,
+      size: req.file.size,
+      ...(pdfMeta ? pdfMeta : {}),
+    });
+  } catch (e) {
+    beLogErr("route_post_upload", e);
+    if (!res.headersSent) res.status(500).json({ error: "Upload failed" });
   }
-  const ext = extname(req.file.originalname).toLowerCase();
-  const pdfMeta = ext === ".pdf" ? await extractPdfMetadataForUpload(req.file.path, req.file.size) : null;
-  res.json({
-    path: req.file.path,
-    filename: req.file.originalname,
-    size: req.file.size,
-    ...(pdfMeta ? pdfMeta : {}),
-  });
 };
 
 const validateUploadPreviewLibrary = async (req: Request, res: Response) => {
