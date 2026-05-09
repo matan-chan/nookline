@@ -47,7 +47,7 @@ if errorlevel 1 (
 )
 
 echo Committing version bumps...
-git add frontend/package.json frontend/package-lock.json backend/package.json
+git add frontend/package.json frontend/package-lock.json backend/package.json backend/package-lock.json
 git commit -m "chore: bump version to %NEWVER%"
 if errorlevel 1 (
   echo Commit failed.
@@ -56,7 +56,7 @@ if errorlevel 1 (
 
 echo Tagging v%NEWVER% ...
 set "GIT_RELEASE_TAG=v%NEWVER%"
-powershell -NoProfile -Command "git tag $env:GIT_RELEASE_TAG; exit $LASTEXITCODE"
+git tag %GIT_RELEASE_TAG%
 if errorlevel 1 (
   echo Tag creation failed (tag may already exist).
   exit /b 1
@@ -70,7 +70,7 @@ if errorlevel 1 (
 )
 
 echo Pushing tag %GIT_RELEASE_TAG% ...
-powershell -NoProfile -Command "git push origin $env:GIT_RELEASE_TAG; exit $LASTEXITCODE"
+git push origin %GIT_RELEASE_TAG%
 if errorlevel 1 (
   echo Tag push failed.
   exit /b 1
