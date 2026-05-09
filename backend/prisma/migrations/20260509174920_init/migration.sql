@@ -5,6 +5,7 @@ CREATE TABLE "User" (
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "isAdmin" BOOLEAN NOT NULL DEFAULT false,
+    "avatarRelPath" TEXT,
     "ttsMode" TEXT NOT NULL DEFAULT 'kokoro',
     "ttsCustomBaseUrl" TEXT,
     "ttsCustomApiKey" TEXT,
@@ -13,22 +14,45 @@ CREATE TABLE "User" (
     "ttsSpeed" REAL NOT NULL DEFAULT 1.0,
     "ttsPitch" REAL NOT NULL DEFAULT 1.0,
     "ttsChunkMinChars" INTEGER NOT NULL DEFAULT 200,
-    "ttsChunkMaxChars" INTEGER NOT NULL DEFAULT 3000,
+    "ttsChunkMaxChars" INTEGER NOT NULL DEFAULT 300,
     "ttsChunkPeriodExtra" INTEGER NOT NULL DEFAULT 1500,
     "ttsReaderShowPage" BOOLEAN NOT NULL DEFAULT true,
     "ttsReaderShowTitle" BOOLEAN NOT NULL DEFAULT true,
+    "ttsReaderStripPdfMargins" BOOLEAN NOT NULL DEFAULT true,
+    "ttsReaderDarkDocument" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
 
 -- CreateTable
+CREATE TABLE "AppCustomization" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT DEFAULT 1,
+    "siteName" TEXT,
+    "faviconRelPath" TEXT,
+    "convertPdfToEpub" BOOLEAN NOT NULL DEFAULT false,
+    "updatedAt" DATETIME NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "CustomLibraryBanner" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "relPath" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CreateTable
 CREATE TABLE "Library" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "userId" INTEGER NOT NULL DEFAULT 1,
     "name" TEXT NOT NULL,
     "path" TEXT NOT NULL,
     "type" TEXT NOT NULL DEFAULT 'NOVEL',
+    "bannerIndex" INTEGER NOT NULL DEFAULT 0,
+    "customLibraryBannerId" INTEGER,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "Library_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "Library_customLibraryBannerId_fkey" FOREIGN KEY ("customLibraryBannerId") REFERENCES "CustomLibraryBanner" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -59,6 +83,16 @@ CREATE TABLE "Book" (
     "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "Book_libraryId_fkey" FOREIGN KEY ("libraryId") REFERENCES "Library" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "Book_seriesId_fkey" FOREIGN KEY ("seriesId") REFERENCES "Series" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "BookFavorite" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "userId" INTEGER NOT NULL,
+    "bookId" INTEGER NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "BookFavorite_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "BookFavorite_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -118,6 +152,12 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Book_libraryId_filePath_key" ON "Book"("libraryId", "filePath");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "BookFavorite_userId_bookId_key" ON "BookFavorite"("userId", "bookId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ReadingProgress_userId_bookId_key" ON "ReadingProgress"("userId", "bookId");

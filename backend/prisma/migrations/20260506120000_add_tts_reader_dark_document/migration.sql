@@ -1,1 +1,0 @@
-ALTER TABLE "User" ADD COLUMN "ttsReaderDarkDocument" BOOLEAN NOT NULL DEFAULT false;
