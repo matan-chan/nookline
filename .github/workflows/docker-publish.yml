@@ -39,16 +39,24 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Read package version for image tags
+        id: pkg_version
+        shell: bash
+        working-directory: ${{ matrix.context }}
+        run: |
+          v=$(node -p "require('./package.json').version")
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
       - id: meta
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ env.OWNER_LC }}/${{ matrix.image }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+            type=raw,value=v${{ steps.pkg_version.outputs.version }},enable=${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=ref,event=tag
-            type=sha
 
       - uses: docker/build-push-action@v6
         with:
@@ -69,6 +77,8 @@ jobs:
           - image: nookline-backend
           - image: nookline-frontend
     steps:
+      - uses: actions/checkout@v4
+
       - name: Set lowercase owner for GHCR
         run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
 
@@ -77,13 +87,16 @@ jobs:
         shell: bash
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          IMAGE_NAME: ${{ matrix.image }}
         run: |
-          short=$(echo "$GITHUB_SHA" | cut -c1-7)
-          tag="sha-$short"
           if [[ "$GITHUB_REF" =~ ^refs/tags/v ]]; then
             tag="${GITHUB_REF_NAME#v}"
           elif [[ "$GITHUB_REF" == "refs/heads/$DEFAULT_BRANCH" ]]; then
             tag="latest"
+          else
+            pkg=frontend/package.json
+            if [[ "$IMAGE_NAME" == "nookline-backend" ]]; then pkg=backend/package.json; fi
+            tag=$(node -p "require(\"./$pkg\").version")
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "Scan ghcr tag: $tag" >&2
