@@ -1,0 +1,21 @@
+{
+  "greetingMorning": "Good morning, {{username}}",
+  "greetingAfternoon": "Good afternoon, {{username}}",
+  "greetingEvening": "Good evening, {{username}}",
+  "greetingNight": "Good night, {{username}}",
+  "welcomeSubtitle": "Welcome back to your library",
+  "addLibrary": "Add a library",
+  "libraries": "Libraries",
+  "libraryMoreOptionsAria": "Library options",
+  "refetchLibrary": "Refetch",
+  "editLibrarySettings": "Edit settings",
+  "deleteLibrary": "Delete library",
+  "librarySyncNone": "No new books found in that folder.",
+  "librarySyncAddedList": "Added: {{titles}}",
+  "librarySyncAddedMany": "Added {{count}} books.",
+  "librarySyncFailed": "Could not scan the library folder.",
+  "favorites": "Favorites",
+  "onDeck": "On Deck",
+  "recentlyAdded": "Recently Added",
+  "emptyRecentlyAdded": "No books yet. Add a library to get started."
+}

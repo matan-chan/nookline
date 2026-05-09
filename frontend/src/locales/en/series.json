@@ -1,0 +1,15 @@
+{
+  "notFound": "Series not found.",
+  "seriesLabel": "Series",
+  "volumeCount_one": "{{count}} volume",
+  "volumeCount_other": "{{count}} volumes",
+  "removeSeries": "Remove series",
+  "removeSeriesTitle": "Remove series?",
+  "removeSeriesMessage_one": "“{{title}}” and its volume will be removed. This cannot be undone.",
+  "removeSeriesMessage_other": "“{{title}}” and all {{count}} volumes will be removed. This cannot be undone.",
+  "removeSeriesConfirm": "Remove series",
+  "seeMore": "See more",
+  "seeLess": "See less",
+  "volumesHeading": "Volumes",
+  "volumeOptionsAria": "Volume options"
+}

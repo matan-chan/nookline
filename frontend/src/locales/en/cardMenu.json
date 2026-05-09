@@ -1,0 +1,10 @@
+{
+  "moreOptions": "More options",
+  "menuRemove": "Remove",
+  "confirmRemoveBookTitle": "Remove book?",
+  "confirmRemoveBookMessage": "“{{title}}” will be removed from your library. This cannot be undone.",
+  "confirmRemoveSeriesTitle": "Remove series?",
+  "confirmRemoveSeriesMessage": "“{{title}}” and all its volumes will be removed. This cannot be undone.",
+  "confirmRemoveVolumeTitle": "Remove volume?",
+  "confirmRemoveVolumeMessage": "“{{title}}” will be removed from this series. This cannot be undone."
+}

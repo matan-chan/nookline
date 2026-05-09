@@ -1,0 +1,19 @@
+{
+  "brandName": "Nookline",
+  "brandTagline": "Your library",
+  "openMenuAria": "Open navigation menu",
+  "pinSidebar": "Pin sidebar open",
+  "unpinSidebar": "Unpin sidebar",
+  "navHome": "Home",
+  "navBookmarks": "Bookmarks",
+  "navSettings": "Settings",
+  "librariesSection": "Libraries",
+  "addLibraryAria": "Add library",
+  "addFirstLibrary": "+ Add your first library",
+  "userName": "User",
+  "userRole": "Admin",
+  "deleteLibraryAria": "Delete library {{name}}",
+  "deleteLibraryTitle": "Delete library?",
+  "deleteLibraryMessage": "“{{name}}” and all books and series in it will be permanently removed. This cannot be undone.",
+  "deleteLibraryConfirm": "Delete library"
+}

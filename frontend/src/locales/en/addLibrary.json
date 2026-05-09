@@ -1,0 +1,17 @@
+{
+  "title": "Add Library",
+  "editTitle": "Edit library",
+  "saving": "Saving…",
+  "saveChanges": "Save changes",
+  "nameLabel": "Library Name",
+  "namePlaceholder": "e.g. My Novels",
+  "pathLabel": "Folder Path",
+  "pathPlaceholder": "e.g. /data/books/novels",
+  "pathHint": "The folder on the server where your files are stored.",
+  "typeLabel": "Type",
+  "bannerBuiltIn": "Built-in banners",
+  "bannerUploaded": "Uploaded banners",
+  "errorRequired": "Name and path are required.",
+  "adding": "Adding…",
+  "submit": "Add Library"
+}
