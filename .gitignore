@@ -56,3 +56,5 @@ utputFormat
 # User uploads (books, libraries, avatars, derived assets)
 backend/uploads/**
 !backend/uploads/.gitkeep
+
+.cursor

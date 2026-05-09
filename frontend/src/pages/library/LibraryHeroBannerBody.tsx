@@ -64,13 +64,16 @@ export const LibraryHeroBannerBody = ({ loading, library, t, menu, menuAnchor, s
           <Stack direction="row" alignItems="center" flexWrap="wrap" columnGap={0.5} rowGap={0.25}>
             <Typography
               component="h1"
-              sx={{
+              sx={(th) => ({
                 typography: { xs: "h4", sm: "h3", md: "h2" },
                 fontWeight: 800,
-                color: "common.white",
+                color: th.palette.mode === "dark" ? th.palette.common.white : th.palette.text.primary,
                 lineHeight: 1.12,
-                textShadow: "0 2px 24px rgba(0,0,0,0.45)",
-              }}
+                textShadow:
+                  th.palette.mode === "dark"
+                    ? "0 2px 24px rgba(0,0,0,0.45)"
+                    : "0 1px 0 rgba(255,255,255,0.6), 0 0 24px rgba(255,255,255,0.55)",
+              })}
             >
               {name}
             </Typography>
@@ -82,12 +85,17 @@ export const LibraryHeroBannerBody = ({ loading, library, t, menu, menuAnchor, s
                   aria-haspopup="true"
                   aria-expanded={Boolean(menuAnchor)}
                   onClick={(e) => setMenuAnchor(e.currentTarget)}
-                  sx={{
-                    color: alpha("#fff", 0.92),
+                  sx={(th) => ({
+                    color: th.palette.mode === "dark" ? alpha(th.palette.common.white, 0.92) : th.palette.text.primary,
                     p: 0.35,
                     ml: { xs: -0.25, sm: 0 },
-                    "&:hover": { bgcolor: alpha("#fff", 0.14) },
-                  }}
+                    "&:hover": {
+                      bgcolor:
+                        th.palette.mode === "dark"
+                          ? alpha(th.palette.common.white, 0.14)
+                          : alpha(th.palette.text.primary, 0.08),
+                    },
+                  })}
                 >
                   <MoreVert sx={{ fontSize: "1.35rem" }} />
                 </IconButton>
@@ -158,19 +166,40 @@ export const LibraryHeroBannerBody = ({ loading, library, t, menu, menuAnchor, s
                 rowGap: 1,
               }}
             >
-              <Stack direction="row" alignItems="center" spacing={0.75} sx={{ color: alpha("#fff", 0.88) }}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={0.75}
+                sx={(th) => ({
+                  color: th.palette.mode === "dark" ? alpha(th.palette.common.white, 0.88) : th.palette.text.secondary,
+                })}
+              >
                 <ViewModuleOutlined sx={{ fontSize: 18, opacity: 0.9 }} />
                 <Typography variant="body2" sx={{ fontWeight: 500, fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
                   {t("heroStatSeries", { count: seriesCount })}
                 </Typography>
               </Stack>
-              <Stack direction="row" alignItems="center" spacing={0.75} sx={{ color: alpha("#fff", 0.88) }}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={0.75}
+                sx={(th) => ({
+                  color: th.palette.mode === "dark" ? alpha(th.palette.common.white, 0.88) : th.palette.text.secondary,
+                })}
+              >
                 <MenuBookOutlined sx={{ fontSize: 18, opacity: 0.9 }} />
                 <Typography variant="body2" sx={{ fontWeight: 500, fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
                   {t("heroStatStandalone", { count: standaloneCount })}
                 </Typography>
               </Stack>
-              <Stack direction="row" alignItems="center" spacing={0.75} sx={{ color: alpha("#fff", 0.88) }}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={0.75}
+                sx={(th) => ({
+                  color: th.palette.mode === "dark" ? alpha(th.palette.common.white, 0.88) : th.palette.text.secondary,
+                })}
+              >
                 <LibraryBooksOutlined sx={{ fontSize: 18, opacity: 0.9 }} />
                 <Typography variant="body2" sx={{ fontWeight: 500, fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
                   {t("heroStatVolumes", { count: totalSeriesVolumes })}
