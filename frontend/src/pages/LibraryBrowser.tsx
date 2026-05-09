@@ -114,7 +114,7 @@ const LibraryBrowser = () => {
       </Snackbar>
       <Box
         sx={{
-          mx: { xs: -2, sm: -3, md: -4 },
+          mx: { xs: -3, sm: -4, md: -5 },
           mt: { xs: 0, sm: 0, md: -4 },
         }}
       >
