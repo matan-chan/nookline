@@ -4,21 +4,25 @@ Organize your books, read them in your browser, and turn pages with optional rea
 
 ---
 
-<img src="./demo/readme/library-browser-ultrawide.png" alt="" width="100%" />
+<img src="./demo/readme/preview/library-browser-ultrawide.png" alt="Nookline library browser on ultrawide" width="100%" />
 
 <table>
 <tbody>
 <tr valign="top">
-<td width="50%"><img src="./demo/readme/dashboard-home-monitor.png" alt="" width="100%" /></td>
-<td width="50%"><img src="./demo/readme/dashboard-mobile-hand.png" alt="" width="100%" /></td>
+<td width="50%"><img src="./demo/readme/preview/dashboard-home-monitor.png" alt="Home dashboard on desktop" width="100%" loading="lazy" /></td>
+<td width="50%"><img src="./demo/readme/preview/dashboard-mobile-hand.png" alt="Home dashboard on phone" width="100%" loading="lazy" /></td>
 </tr>
 <tr valign="top">
-<td width="50%"><img src="./demo/readme/book-detail-tablet-cozy.png" alt="" width="100%" /></td>
-<td width="50%"><img src="./demo/readme/reader-ai-panel-laptop.png" alt="" width="100%" /></td>
+<td width="50%"><img src="./demo/readme/preview/book-detail-tablet-cozy.png" alt="Book detail on tablet" width="100%" loading="lazy" /></td>
+<td width="50%"><img src="./demo/readme/preview/reader-ai-panel-laptop.png" alt="Reader with AI reader on laptop" width="100%" loading="lazy" /></td>
 </tr>
 <tr valign="top">
-<td width="50%"><img src="./demo/readme/library-browser-iphone.png" alt="" width="100%" /></td>
-<td width="50%"><img src="./demo/readme/reader-mobile-hand.png" alt="" width="100%" /></td>
+<td width="50%"><img src="./demo/readme/preview/reader-ai-panel-mobile-transit.png" alt="AI reader on mobile" width="100%" loading="lazy" /></td>
+<td width="50%"><img src="./demo/readme/preview/library-browser-phone-desk.jpg" alt="Library browser at a desk" width="100%" loading="lazy" /></td>
+</tr>
+<tr valign="top">
+<td width="50%"><img src="./demo/readme/preview/library-browser-iphone.png" alt="Library browser on phone" width="100%" loading="lazy" /></td>
+<td width="50%"><img src="./demo/readme/preview/reader-mobile-hand.png" alt="Reader on phone" width="100%" loading="lazy" /></td>
 </tr>
 </tbody>
 </table>

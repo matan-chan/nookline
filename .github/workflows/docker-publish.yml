@@ -102,7 +102,7 @@ jobs:
           echo "Scan ghcr tag: $tag" >&2
 
       - name: Scan image (Trivy)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: ghcr.io/${{ env.OWNER_LC }}/${{ matrix.image }}:${{ steps.scan_tag.outputs.tag }}
           format: table
