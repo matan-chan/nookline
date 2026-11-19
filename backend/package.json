@@ -1,6 +1,6 @@
 {
   "name": "nookline-backend",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "scripts": {
     "typecheck:test": "tsc --noEmit -p test/tsconfig.json",
     "test": "bun test",

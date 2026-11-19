@@ -4,7 +4,7 @@ COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile --production
 COPY . .
 
-FROM node:22.14.0-alpine3.20 AS prisma-gen
+FROM node:22-bookworm-slim AS prisma-gen
 WORKDIR /app
 COPY --from=builder /app/package.json /app/bun.lock ./
 COPY --from=builder /app/node_modules ./node_modules
