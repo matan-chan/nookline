@@ -1,4 +1,4 @@
-FROM oven/bun:1.1.38 AS builder
+FROM oven/bun:1.2.23-debian AS builder
 WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile --production
@@ -12,7 +12,7 @@ COPY --from=builder /app/prisma ./prisma
 ENV DATABASE_URL=file:/tmp/nookline-build.db
 RUN npm i --no-save prisma@5.22.0 && npx prisma generate
 
-FROM oven/bun:1.1.38 AS runtime
+FROM oven/bun:1.2.23-debian AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends curl poppler-utils calibre && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 RUN groupadd -r app && useradd -r -g app -d /app app
