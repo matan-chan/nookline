@@ -23,7 +23,13 @@ export const PdfZoomMenu = ({ zoom, setZoom }: Props) => {
         aria-haspopup="true"
         aria-expanded={open}
         onClick={(e) => setAnchor(e.currentTarget)}
-        sx={{ flexShrink: 0, color: "text.secondary" }}
+        sx={{
+          flexShrink: 0,
+          color: "#6d28d9",
+          opacity: 1,
+          "&:hover": { color: "#5b21b6" },
+          "& .MuiSvgIcon-root": { fontSize: 22, opacity: 1 },
+        }}
       >
         <MoreVert fontSize="small" />
       </IconButton>

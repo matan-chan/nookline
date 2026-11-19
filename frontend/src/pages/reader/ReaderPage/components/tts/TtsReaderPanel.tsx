@@ -1,13 +1,11 @@
-import { ttsReaderPanelCompactMainPaperSx, ttsReaderPanelCompactRowSx, ttsReaderPanelExpandedPaperSx } from "./ttsReaderPanelStyles";
+import { ttsReaderPanelExpandedPaperSx } from "./ttsReaderPanelStyles";
 import { useTtsParagraphPlayback } from "../../../../../hooks/useTtsParagraphPlayback";
 import { DEFAULT_TTS_VOICE_ID } from "../../../../../hooks/tts/constants/ttsPlaybackConstants";
-import { TtsReaderPanelCompactClose } from "./TtsReaderPanelCompactClose";
 import { TtsReaderPanelErrorMessage } from "./TtsReaderPanelErrorMessage";
 import { TtsReaderPanelTransportRow } from "./TtsReaderPanelTransportRow";
-import { TTS_READER_PANEL_MOTION_MS } from "./ttsReaderPanelConstants";
 import { TtsReaderPanelVoiceSpeed } from "./TtsReaderPanelVoiceSpeed";
 import { TtsReaderPanelHeader } from "./TtsReaderPanelHeader";
-import { Box, Collapse, Paper } from "@mui/material";
+import { Paper } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 
@@ -64,7 +62,6 @@ export const TtsReaderPanel = ({
   const showPage = tts?.readerShowPage !== false;
   const showTitle = tts?.readerShowTitle !== false;
 
-  const engineLabel = tts?.mode === "custom" ? t("engineCustom") : t("engineKokoro");
   const isKokoroEngine = tts?.mode !== "custom";
 
   const mergedVoices = useMemo(() => {
@@ -83,23 +80,26 @@ export const TtsReaderPanel = ({
   if (!open) return null;
 
   const { playing, busy, err, paraIndex, totalParas, togglePlay, goParagraph } = playback;
-  const compactPlaybackBar = playing;
 
-  const chunkPart = totalParas > 0 ? t("chunkProgress", { current: paraIndex + 1, total: totalParas }) : t("chunkNone");
-
-  const pagePart = showPage && readerFormat === "pdf" && pdfPage >= 1 ? (pdfNumPages >= 1 ? t("metaPdfPageOf", { page: pdfPage, total: pdfNumPages }) : t("metaPdfPageOnly", { page: pdfPage })) : "";
-  const metaLineText = pagePart
-    ? `${t("metaLine", { engine: engineLabel, model: tts?.model ?? t("modelFallback"), chunk: chunkPart })} · ${pagePart}`
-    : t("metaLine", { engine: engineLabel, model: tts?.model ?? t("modelFallback"), chunk: chunkPart });
+  const pageProgressLabel =
+    showPage && readerFormat === "pdf" && pdfPage >= 1 && pdfNumPages >= 1 ? `${pdfPage} / ${pdfNumPages}` : null;
 
   const errorFooter = isKokoroEngine ? t("ttsErrorFooterKokoro") : t("ttsErrorFooterCustom");
 
-  const panelBody = (
-    <>
-      <TtsReaderPanelHeader hidden={compactPlaybackBar} playing={playing} onClose={onClose} showTitle={showTitle} bookTitle={bookTitle} metaLineText={metaLineText} panelTitle={t("aiReaderPanelTitle")} closeLabel={tc("close")} />
+  return (
+    <Paper elevation={8} sx={(th) => ttsReaderPanelExpandedPaperSx(th)}>
+      <TtsReaderPanelHeader
+        hidden={false}
+        playing={playing}
+        onClose={onClose}
+        showTitle={showTitle}
+        bookTitle={bookTitle}
+        panelTitle={t("aiReaderPanelTitle")}
+        closeLabel={tc("close")}
+      />
       {err ? <TtsReaderPanelErrorMessage message={err} footer={errorFooter} /> : null}
       <TtsReaderPanelTransportRow
-        compact={compactPlaybackBar}
+        compact={false}
         playing={playing}
         busy={busy}
         totalParas={totalParas}
@@ -115,27 +115,19 @@ export const TtsReaderPanel = ({
         onTogglePlay={() => togglePlay()}
         onScrollToReading={onScrollToReading}
         scrollToReadingEnabled={scrollToReadingEnabled}
+        pageProgressLabel={pageProgressLabel}
       />
-      <Collapse in={!compactPlaybackBar} timeout={TTS_READER_PANEL_MOTION_MS} collapsedSize={0} easing={{ exit: "easeInOut" as const, enter: "easeInOut" as const }}>
-        <TtsReaderPanelVoiceSpeed t={t} mergedVoices={mergedVoices} selectVoiceValue={selectVoiceValue} voice={voice} setVoice={setVoice} commitPlayback={commitPlayback} isKokoroEngine={isKokoroEngine} speed={speed} setSpeed={setSpeed} />
-      </Collapse>
-    </>
-  );
-
-  if (compactPlaybackBar) {
-    return (
-      <Box sx={(th) => ttsReaderPanelCompactRowSx(th)}>
-        <Paper elevation={8} sx={(th) => ttsReaderPanelCompactMainPaperSx(th)}>
-          {panelBody}
-        </Paper>
-        <TtsReaderPanelCompactClose onClose={onClose} closeLabel={tc("close")} />
-      </Box>
-    );
-  }
-
-  return (
-    <Paper elevation={8} sx={(th) => ttsReaderPanelExpandedPaperSx(th)}>
-      {panelBody}
+      <TtsReaderPanelVoiceSpeed
+        t={t}
+        mergedVoices={mergedVoices}
+        selectVoiceValue={selectVoiceValue}
+        voice={voice}
+        setVoice={setVoice}
+        commitPlayback={commitPlayback}
+        isKokoroEngine={isKokoroEngine}
+        speed={speed}
+        setSpeed={setSpeed}
+      />
     </Paper>
   );
 };

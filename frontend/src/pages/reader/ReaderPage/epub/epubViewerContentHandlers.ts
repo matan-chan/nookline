@@ -65,6 +65,13 @@ export const registerEpubContentHandlers = ({ rendition, epubPickDocsRef, epubRe
     epubReadingDocsRef.current.add(doc);
     ensureEpubReadingSurfaceStylesInjected(doc, readerDarkDocumentRef.current);
     ensureEpubTtsHighlightStylesInjected(doc);
+    doc.addEventListener(
+      "selectstart",
+      (e) => {
+        e.preventDefault();
+      },
+      true,
+    );
     doc.addEventListener("click", buildClickHandler(doc, () => onPickRef.current), true);
     doc.addEventListener("contextmenu", buildContextHandler(contents, rendition, () => onCtxRef.current), true);
   });

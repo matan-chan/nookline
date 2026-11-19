@@ -32,6 +32,7 @@ const ReaderPage = () => {
   }, [bookId]);
 
   const [aiOpen, setAiOpen] = useState(searchParams.get("ai") === "1");
+  const [readerPanelOpen, setReaderPanelOpen] = useState(searchParams.get("ai") === "1");
   const doc = useReaderDocState(bookId);
 
   const { data: highlightsData } = useQuery<{
@@ -65,9 +66,10 @@ const ReaderPage = () => {
 
   const tts = useReaderTtsSettings({ userId, bookId, aiOpen, bookMetadata: book?.metadata ?? null });
 
-  const openAiPanel = useCallback(() => setAiOpen(true), []);
-  const toggleAi = useCallback(() => setAiOpen((p) => !p), []);
-  const closeAi = useCallback(() => setAiOpen(false), []);
+  const openAiPanel = useCallback(() => {
+    setAiOpen(true);
+    setReaderPanelOpen(true);
+  }, []);
 
   const saveProgress = useReaderProgressSaver({ bookId, numericBookId, userId });
 
@@ -93,6 +95,32 @@ const ReaderPage = () => {
     pdfMarginStripEnabled: tts.pdfMarginStripEnabled,
     pdfMarginStripRegexes: tts.pdfMarginStripRegexes,
   });
+
+  const openReaderFromWave = useCallback(() => {
+    setReaderPanelOpen(true);
+    if (!aiOpen) {
+      setAiOpen(true);
+      requestAnimationFrame(() => void ttsPlayback.togglePlay());
+    }
+  }, [aiOpen, ttsPlayback]);
+
+  const openReaderPanelFromWave = useCallback(() => {
+    setReaderPanelOpen(true);
+    if (!aiOpen) setAiOpen(true);
+  }, [aiOpen]);
+
+  const togglePlayFromWave = useCallback(() => {
+    if (!aiOpen) setAiOpen(true);
+    requestAnimationFrame(() => void ttsPlayback.togglePlay());
+  }, [aiOpen, ttsPlayback]);
+
+  const closeReaderPanel = useCallback(() => setReaderPanelOpen(false), []);
+
+  const closeAi = useCallback(() => {
+    if (ttsPlayback.playing) ttsPlayback.togglePlay();
+    setAiOpen(false);
+    setReaderPanelOpen(false);
+  }, [ttsPlayback]);
 
   const progress = book?.readingProgressForUser;
   const savedPosition = progress?.position ?? null;
@@ -133,13 +161,17 @@ const ReaderPage = () => {
         bgcolor: "background.default",
       }}
     >
-      <ReaderContent
+      <Box sx={{ display: "flex", minHeight: 0, flex: 1, flexDirection: "column" }}>
+        <ReaderContent
         bookLoading={bookLoading}
         fileExt={fileExt}
         bookId={bookId}
         backHref={backHref}
         aiOpen={aiOpen}
-        onAiToggle={toggleAi}
+        readerPanelOpen={readerPanelOpen}
+        onAiToggle={openReaderFromWave}
+        onAiTap={togglePlayFromWave}
+        onAiLongPress={openReaderPanelFromWave}
         pdfStoredPage={pdfStoredPage}
         savedPosition={savedPosition}
         fallbackPct={fallbackPct}
@@ -163,13 +195,15 @@ const ReaderPage = () => {
         bookmarkResumeSig={scrollSig}
         ttsPlayback={ttsPlayback}
         decodedBm={decodedBm}
-      />
+        />
+      </Box>
 
       <ReaderOverlays
         bookmarks={bookmarks}
         t={t}
         bookId={bookId}
-        aiOpen={aiOpen}
+        readerPanelOpen={readerPanelOpen}
+        onCloseReaderPanel={closeReaderPanel}
         onCloseAi={closeAi}
         ttsPlayback={ttsPlayback}
         ttsData={tts.ttsData}

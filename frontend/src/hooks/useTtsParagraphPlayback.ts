@@ -149,5 +149,6 @@ export const useTtsParagraphPlayback = (args: UseTtsParagraphPlaybackArgs) => {
     seekFromPdfClick,
     seekFromEpubClick,
     scrollToCurrentReading,
+    audioRef: s.audioRef,
   };
 };

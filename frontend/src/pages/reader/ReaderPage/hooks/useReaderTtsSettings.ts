@@ -1,6 +1,7 @@
 import { getStoredToken } from "../../../../auth/authStorage";
 import { DEFAULT_TTS_CHUNK_LIMITS } from "../../../../utils/readerText/constants";
 import { parsePdfMarginStripRegexesFromBookMetadata } from "../../../../utils/pdf/parsePdfMarginStripRegexesFromBookMetadata";
+import { clampTtsSpeed } from "../../../../hooks/tts/constants/ttsSpeed";
 import { DEFAULT_TTS_VOICE_ID } from "../../../../hooks/tts/constants/ttsPlaybackConstants";
 import { UPDATE_TTS_SETTINGS } from "../../../settings/Tts/settingsQueries";
 import { READER_TTS_SETTINGS } from "../../readerQueries";
@@ -58,10 +59,10 @@ export const useReaderTtsSettings = ({ userId, bookId, aiOpen, bookMetadata }: A
       const s = ttsData?.ttsSettings;
       if (!s) return;
       const voiceVal = (patch.voice ?? voice).trim() || DEFAULT_TTS_VOICE_ID;
-      const speedVal = patch.speed !== undefined ? patch.speed : speed;
+      const speedVal = clampTtsSpeed(patch.speed !== undefined ? patch.speed : speed);
       const pitchVal = typeof s.pitch === "number" ? s.pitch : 1;
       if (patch.voice !== undefined) setVoice(patch.voice);
-      if (patch.speed !== undefined) setSpeed(patch.speed);
+      if (patch.speed !== undefined) setSpeed(speedVal);
       void updateTtsSettings({
         variables: { input: { userId, mode: s.mode, voice: voiceVal, model: s.model?.trim() || "kokoro", speed: speedVal, pitch: pitchVal } },
       });
@@ -88,7 +89,7 @@ export const useReaderTtsSettings = ({ userId, bookId, aiOpen, bookMetadata }: A
     const s = ttsData.ttsSettings;
     const v = s.voice?.trim();
     setVoice(v && v.length > 0 ? v : DEFAULT_TTS_VOICE_ID);
-    setSpeed(typeof s.speed === "number" ? s.speed : 1);
+    setSpeed(clampTtsSpeed(typeof s.speed === "number" ? s.speed : 1));
     hydratedRef.current = true;
   }, [aiOpen, ttsData?.ttsSettings]);
 

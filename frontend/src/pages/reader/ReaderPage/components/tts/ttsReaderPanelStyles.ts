@@ -10,17 +10,22 @@ export const sharedTtsPanelSurface = (th: Theme) => ({
   boxShadow: `0 0 40px 0 ${alpha(th.palette.primary.main, 0.08)}`,
 });
 
-export const ttsPlayPauseIconButtonSx = (th: Theme) => ({
+const compactTransportControlSize = { xs: 32, sm: 34 } as const;
+
+export const ttsPlayPauseIconButtonSx = (th: Theme, compact = false) => ({
   flexShrink: 0,
-  width: { xs: 30, sm: 32 },
-  height: { xs: 30, sm: 32 },
+  width: compact ? compactTransportControlSize : { xs: 30, sm: 32 },
+  height: compact ? compactTransportControlSize : { xs: 30, sm: 32 },
   p: 0,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
   color: th.palette.primary.contrastText,
   borderRadius: "50%",
   background: th.palette.mode === "light" ? `linear-gradient(135deg, ${th.palette.primary.main}, #5b21b6)` : "linear-gradient(135deg, #ba9eff, #8455ef)",
   "&:hover": { filter: "brightness(1.08)" },
   "&:disabled": { opacity: 0.5 },
-  "& .MuiSvgIcon-root": { fontSize: { xs: 20, sm: 22 } },
+  "& .MuiSvgIcon-root": { fontSize: compact ? { xs: 20, sm: 22 } : { xs: 20, sm: 22 } },
 });
 
 export const ttsReaderPanelExpandedPaperSx = (th: Theme) => ({
@@ -62,11 +67,13 @@ export const ttsReaderPanelCompactRowSx = (th: Theme) => ({
 export const ttsReaderPanelCompactMainPaperSx = (th: Theme) => ({
   ...sharedTtsPanelSurface(th),
   width: "max-content",
-  maxWidth: "min(125px, calc(100vw - 16px))",
+  minWidth: { xs: 132, sm: 138 },
+  maxWidth: "min(148px, calc(100vw - 16px))",
   display: "flex",
   flexDirection: "column",
+  alignItems: "stretch",
   gap: { xs: 0.5, sm: 0.75 },
-  p: { xs: "8px 10px", sm: "9px 12px" },
+  p: { xs: "8px 12px", sm: "9px 12px" },
   overflow: "hidden",
   transition: th.transitions.create(["max-width", "width", "padding", "gap"], {
     duration: TTS_READER_PANEL_MOTION_MS,
@@ -85,10 +92,19 @@ export const ttsReaderPanelCompactClosePaperSx = (th: Theme) => ({
 
 export const chunkNavIconButtonSx = (theme: Theme, compact = false) => ({
   flexShrink: 0,
-  width: compact ? { xs: 28, sm: 30 } : { xs: 34, sm: 40 },
-  height: compact ? { xs: 28, sm: 30 } : { xs: 34, sm: 40 },
-  minWidth: compact ? { xs: 28, sm: 30 } : { xs: 34, sm: 40 },
-  ...(compact ? { p: 0, fontSize: 17, "& .MuiSvgIcon-root": { fontSize: "1rem" } } : {}),
+  width: compact ? compactTransportControlSize : { xs: 34, sm: 40 },
+  height: compact ? compactTransportControlSize : { xs: 34, sm: 40 },
+  minWidth: compact ? compactTransportControlSize : { xs: 34, sm: 40 },
+  ...(compact
+    ? {
+        p: 0,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: "50%",
+        "& .MuiSvgIcon-root": { fontSize: { xs: 20, sm: 22 } },
+      }
+    : {}),
   color: "text.primary",
   bgcolor: theme.surfaces.highest,
   transition: theme.transitions.create("background-color", { duration: theme.transitions.duration.shortest }),

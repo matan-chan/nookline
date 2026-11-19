@@ -11,7 +11,36 @@ type Args = {
   onPdfBookmarkContext: PdfBookViewerProps["onPdfBookmarkContext"];
 };
 
+const isPdfTextLayerTarget = (target: EventTarget | null) => {
+  if (!(target instanceof Element)) return false;
+  return !!target.closest(".textLayer");
+};
+
+const clearDocumentSelection = () => {
+  const sel = document.getSelection();
+  if (!sel) return;
+  if (!sel.isCollapsed) sel.removeAllRanges();
+};
+
 export const usePdfBookViewerInteractions = ({ scrollRef, ttsTextLayerTick, onPdfTextPick, onPdfBookmarkContext }: Args) => {
+  useEffect(() => {
+    const root = scrollRef.current;
+    if (!root) return;
+    const onSelectStart = (e: Event) => {
+      if (isPdfTextLayerTarget(e.target)) e.preventDefault();
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!isPdfTextLayerTarget(e.target)) return;
+      clearDocumentSelection();
+    };
+    root.addEventListener("selectstart", onSelectStart);
+    root.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      root.removeEventListener("selectstart", onSelectStart);
+      root.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [scrollRef, ttsTextLayerTick]);
+
   useEffect(() => {
     if (!onPdfTextPick) return;
     const root = scrollRef.current;
@@ -19,6 +48,7 @@ export const usePdfBookViewerInteractions = ({ scrollRef, ttsTextLayerTick, onPd
     const onClick = (e: MouseEvent) => {
       if (e.button !== 0) return;
       const target = e.target;
+      if (isPdfTextLayerTarget(target)) clearDocumentSelection();
       const runPick = () => {
         if (documentHasNonCollapsedTextSelection(document)) return;
         const pick = pdfTextPickFromMouseEvent(root, target);

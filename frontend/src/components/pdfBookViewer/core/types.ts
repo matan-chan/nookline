@@ -1,5 +1,5 @@
 import type { PDFDocumentProxy } from "pdfjs-dist";
-import type { MutableRefObject } from "react";
+import type { MutableRefObject, RefObject } from "react";
 import type { PdfHighlightStored } from "../../../utils/reader/readerHighlightPosition";
 
 export type PdfBookViewerProps = {
@@ -10,13 +10,18 @@ export type PdfBookViewerProps = {
   onPersistProgress: (position: string, percentage: number) => void;
   suppressScrollProgressPersist?: boolean;
   aiOpen: boolean;
+  readerPanelOpen: boolean;
   onAiToggle: () => void;
+  onAiTap?: () => void;
+  onAiLongPress?: () => void;
   onPdfDocumentLoad?: (doc: PDFDocumentProxy) => void;
   onReadingPageChange?: (page: number, source?: "scroll" | "tts" | "button") => void;
   ttsHighlightPage?: number | null;
   ttsHighlightItemIndices?: number[];
   ttsTextLayerTick?: number;
   ttsPlaying?: boolean;
+  ttsBusy?: boolean;
+  ttsAudioRef?: RefObject<HTMLAudioElement | null>;
   pdfNavigateRef?: MutableRefObject<((page: number) => void) | null>;
   pdfScrollToReadingRef?: MutableRefObject<(() => void) | null>;
   ttsReadingPageFallback?: number | null;

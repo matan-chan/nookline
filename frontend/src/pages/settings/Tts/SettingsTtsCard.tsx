@@ -1,3 +1,4 @@
+import { clampTtsSpeed, formatTtsSpeedLabel, TTS_SPEED_MAX, TTS_SPEED_MIN, TTS_SPEED_STEP } from "../../../hooks/tts/constants/ttsSpeed";
 import { SettingsTtsCardProviderFields } from "./components/SettingsTtsCardProviderFields";
 import { SettingsTtsCardChunkSection } from "./components/SettingsTtsCardChunkSection";
 import { SettingsTtsCardReaderPrefs } from "./components/SettingsTtsCardReaderPrefs";
@@ -112,7 +113,15 @@ export const SettingsTtsCard = ({
         <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.08em", display: "block", mb: 1 }}>
           {t("playbackSection")}
         </Typography>
-        <RangeField label={t("speed")} value={speed} min={0.5} max={2} step={0.1} onChange={setSpeed} />
+        <RangeField
+          label={t("speed")}
+          value={clampTtsSpeed(speed)}
+          min={TTS_SPEED_MIN}
+          max={TTS_SPEED_MAX}
+          step={TTS_SPEED_STEP}
+          onChange={(v) => setSpeed(clampTtsSpeed(v))}
+          formatValue={(v) => `${formatTtsSpeedLabel(v)}×`}
+        />
       </Box>
       <SettingsTtsCardChunkSection
         t={t}

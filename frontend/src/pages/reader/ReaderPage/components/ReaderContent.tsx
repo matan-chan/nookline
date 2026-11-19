@@ -12,6 +12,8 @@ type BookHighlight = { id: number; startPos: string; endPos: string; text: strin
 
 type TtsRuntime = {
   playing: boolean;
+  busy: boolean;
+  audioRef?: React.RefObject<HTMLAudioElement | null>;
   pdfHighlightPage: number | null;
   pdfHighlightItemIndices: number[];
   pdfTextLayerTick: number;
@@ -26,7 +28,10 @@ type Props = {
   bookId: string | undefined;
   backHref: string;
   aiOpen: boolean;
+  readerPanelOpen: boolean;
   onAiToggle: () => void;
+  onAiTap?: () => void;
+  onAiLongPress?: () => void;
   pdfStoredPage: number | null;
   savedPosition: string | null;
   fallbackPct: number;
@@ -53,7 +58,19 @@ type Props = {
 };
 
 export const ReaderContent = (props: Props) => {
-  if (props.bookLoading) return <ReaderLoadingView backHref={props.backHref} aiOpen={props.aiOpen} onAiToggle={props.onAiToggle} />;
+  if (props.bookLoading)
+    return (
+      <ReaderLoadingView
+        backHref={props.backHref}
+        readerPanelOpen={props.readerPanelOpen}
+        onAiToggle={props.onAiToggle}
+        onAiTap={props.onAiTap}
+        onAiLongPress={props.onAiLongPress}
+        ttsPlaying={props.ttsPlayback.playing}
+        ttsBusy={props.ttsPlayback.busy}
+        ttsAudioRef={props.ttsPlayback.audioRef}
+      />
+    );
 
   if (props.fileExt === "pdf")
     return (
@@ -66,13 +83,18 @@ export const ReaderContent = (props: Props) => {
         onPersistProgress={props.onPersistProgress}
         suppressScrollProgressPersist={props.aiOpen && props.ttsPlayback.playing}
         aiOpen={props.aiOpen}
+        readerPanelOpen={props.readerPanelOpen}
         onAiToggle={props.onAiToggle}
+        onAiTap={props.onAiTap}
+        onAiLongPress={props.onAiLongPress}
         onPdfDocumentLoad={props.onPdfDocumentLoad}
         onReadingPageChange={props.onReadingPageChange}
         ttsHighlightPage={props.aiOpen ? props.ttsPlayback.pdfHighlightPage : null}
         ttsHighlightItemIndices={props.aiOpen ? props.ttsPlayback.pdfHighlightItemIndices : []}
         ttsTextLayerTick={props.ttsPlayback.pdfTextLayerTick}
         ttsPlaying={props.ttsPlayback.playing}
+        ttsBusy={props.ttsPlayback.busy}
+        ttsAudioRef={props.ttsPlayback.audioRef}
         pdfNavigateRef={props.pdfNavigateRef}
         pdfScrollToReadingRef={props.pdfScrollToReadingRef}
         ttsReadingPageFallback={props.pdfPanelPage}
@@ -99,8 +121,13 @@ export const ReaderContent = (props: Props) => {
       scrollToParagraphIndex={props.scrollToParagraphIndex}
       bookmarkResumeSig={props.bookmarkResumeSig}
       backHref={props.backHref}
-      aiOpen={props.aiOpen}
+      readerPanelOpen={props.readerPanelOpen}
       onAiToggle={props.onAiToggle}
+      onAiTap={props.onAiTap}
+      onAiLongPress={props.onAiLongPress}
+      ttsPlaying={props.ttsPlayback.playing}
+      ttsBusy={props.ttsPlayback.busy}
+      ttsAudioRef={props.ttsPlayback.audioRef}
       readerDarkDocument={props.readerDarkDocument}
     />
   );

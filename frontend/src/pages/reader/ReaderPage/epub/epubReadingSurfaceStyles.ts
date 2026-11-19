@@ -9,6 +9,9 @@ html {
 body {
   background-color: #ffffff !important;
   color: #0f172a !important;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 `;
 
@@ -19,6 +22,9 @@ html {
 body {
   background-color: #121212 !important;
   color: #e2e8f0 !important;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 body *:not(img):not(svg):not(video):not(canvas):not(.${TTS_READING_CLASS}) {
   color: inherit !important;

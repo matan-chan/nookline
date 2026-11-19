@@ -1,15 +1,16 @@
 import { ReaderBookmarkContextMenu } from "./bookmarks/ReaderBookmarkContextMenu";
 import { ReaderBookmarkNameModal } from "./bookmarks/ReaderBookmarkNameModal";
-import { TtsReaderPanel, type TtsPlayback } from "./tts/TtsReaderPanel";
 import type { ReaderBookmarkActions } from "../hooks/useReaderBookmarkActions";
+import { TtsReaderPanel, type TtsPlayback } from "./tts/TtsReaderPanel";
 import type { TFunction } from "i18next";
 
 type Props = {
   bookmarks: ReaderBookmarkActions;
   t: TFunction<"reader">;
   bookId: string | undefined;
-  aiOpen: boolean;
-  onCloseAi: () => void;
+  readerPanelOpen: boolean;
+  onCloseReaderPanel: () => void;
+  onCloseAi?: () => void;
   ttsPlayback: TtsPlayback;
   ttsData:
     | {
@@ -34,7 +35,7 @@ type Props = {
   pdfNumPages: number;
 };
 
-export const ReaderOverlays = ({ bookmarks, t, bookId, aiOpen, onCloseAi, ttsPlayback, ...rest }: Props) => (
+export const ReaderOverlays = ({ bookmarks, t, bookId, readerPanelOpen, onCloseReaderPanel, ttsPlayback, ...rest }: Props) => (
   <>
     <ReaderBookmarkContextMenu
       bookmarkMenu={bookmarks.bookmarkMenu}
@@ -53,10 +54,10 @@ export const ReaderOverlays = ({ bookmarks, t, bookId, aiOpen, onCloseAi, ttsPla
       t={t}
     />
 
-    {bookId && (
+    {bookId ? (
       <TtsReaderPanel
-        open={aiOpen}
-        onClose={onCloseAi}
+        open={readerPanelOpen}
+        onClose={onCloseReaderPanel}
         playback={ttsPlayback}
         ttsData={rest.ttsData}
         voice={rest.voice}
@@ -72,6 +73,6 @@ export const ReaderOverlays = ({ bookmarks, t, bookId, aiOpen, onCloseAi, ttsPla
         onScrollToReading={() => ttsPlayback.scrollToCurrentReading()}
         scrollToReadingEnabled={ttsPlayback.totalParas > 0}
       />
-    )}
+    ) : null}
   </>
 );

@@ -120,7 +120,7 @@ export const PdfDocumentPagesList = ({
         pl: `${PDF_VIEWPORT_PAD}px`,
         pr: `${PDF_VIEWPORT_PAD}px`,
         pt: `${PDF_DOCUMENT_PAGES_LIST_PAD_TOP_PX}px`,
-        pb: `${PDF_DOCUMENT_PAGES_LIST_PAD_TOP_PX}px`,
+        pb: 0,
         ...(fillViewportWhileLoading ? { minHeight: "100%" } : {}),
         transform: "translateZ(0)",
       }}

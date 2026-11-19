@@ -1,3 +1,4 @@
+import type { RefObject } from "react";
 import type { TtsChunkLimits } from "../../../../utils/readerText/constants";
 import { ReaderBottomBar } from "../../../../components/ReaderBottomBar";
 import { Box } from "@mui/material";
@@ -22,8 +23,13 @@ type EpubReaderViewProps = {
   scrollToParagraphIndex?: number | null;
   bookmarkResumeSig?: string;
   backHref: string;
-  aiOpen: boolean;
+  readerPanelOpen: boolean;
   onAiToggle: () => void;
+  onAiTap?: () => void;
+  onAiLongPress?: () => void;
+  ttsPlaying?: boolean;
+  ttsBusy?: boolean;
+  ttsAudioRef?: RefObject<HTMLAudioElement | null>;
   readerDarkDocument?: boolean;
 };
 
@@ -40,11 +46,16 @@ export const EpubReaderView = ({
   scrollToParagraphIndex,
   bookmarkResumeSig,
   backHref,
-  aiOpen,
+  readerPanelOpen,
   onAiToggle,
+  onAiTap,
+  onAiLongPress,
+  ttsPlaying = false,
+  ttsBusy = false,
+  ttsAudioRef,
   readerDarkDocument = false,
 }: EpubReaderViewProps) => (
-  <>
+  <Box sx={{ position: "relative", display: "flex", minHeight: 0, flex: 1, flexDirection: "column" }}>
     <Box sx={{ display: "flex", minHeight: 0, flex: 1, flexDirection: "column" }}>
       <EpubViewer
         key={bookId}
@@ -62,6 +73,6 @@ export const EpubReaderView = ({
         readerDarkDocument={readerDarkDocument}
       />
     </Box>
-    <ReaderBottomBar backHref={backHref} aiOpen={aiOpen} onAiToggle={onAiToggle} />
-  </>
+    <ReaderBottomBar backHref={backHref} readerPanelOpen={readerPanelOpen} onAiToggle={onAiToggle} onAiTap={onAiTap} onAiLongPress={onAiLongPress} ttsPlaying={ttsPlaying} ttsBusy={ttsBusy} ttsAudioRef={ttsAudioRef} />
+  </Box>
 );
