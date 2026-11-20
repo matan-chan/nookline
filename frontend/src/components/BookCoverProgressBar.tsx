@@ -18,6 +18,7 @@ const BookCoverProgressBar = ({ percentage }: Props) => {
         height: 4,
         bgcolor: alpha(t.surfaces.highest, 0.95),
         borderTop: `1px solid ${alpha(t.palette.divider, 0.3)}`,
+        fontVariantNumeric: "tabular-nums",
       })}
     >
       <Box

@@ -1,7 +1,7 @@
 import { BookCoverImg } from "../../components/BookCoverImg";
 import BookCoverProgressBar from "../../components/BookCoverProgressBar";
 import CardOverflowMenu from "../../components/CardOverflowMenu";
-import { COVER_SIZES_VOLUME, getCoverUrl } from "../../utils/cover/cover";
+import { COVER_SIZES_VOLUME, getCoverUrl, getFileExt } from "../../utils/cover/cover";
 import { coverCardColumnHoverSx } from "../../utils/layout/staggerGridSx";
 import { DETAIL_LAVENDER } from "../detail/detailPurpleAccent";
 import { pickVolumeCardSubtitle } from "./seriesVolumeSubtitle";
@@ -15,6 +15,7 @@ export type SeriesVolumeBook = {
   title: string;
   volumeNumber: number | null;
   coverImagePath: string | null;
+  fileExt?: string | null;
   metadata?: string | null;
   createdAt: string;
   readingProgressForUser?: { percentage: number } | null;
@@ -31,6 +32,7 @@ export const SeriesVolumeCard = ({
 }) => {
   const { t } = useTranslation("book");
   const coverUrl = getCoverUrl(book);
+  const fileExt = getFileExt(book);
   const isDiscovery = variant === "discovery";
   const subtitle = isDiscovery ? pickVolumeCardSubtitle(book) : null;
 
@@ -56,9 +58,11 @@ export const SeriesVolumeCard = ({
         }}
       >
         <Box component={Link} to={`/book/${book.id}`} sx={{ position: "absolute", inset: 0, zIndex: 0, display: "block" }}>
-          {coverUrl ? (
+          {coverUrl || fileExt === "pdf" ? (
             <BookCoverImg
-              src={coverUrl}
+              bookId={book.id}
+              fileExt={fileExt}
+              src={coverUrl ?? ""}
               alt={book.title}
               sizes={COVER_SIZES_VOLUME}
               sx={{ width: "100%", height: "100%", objectFit: "cover" }}

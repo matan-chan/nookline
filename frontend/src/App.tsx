@@ -12,7 +12,9 @@ import Dashboard from "./pages/Dashboard";
 import LoginPage from "./pages/LoginPage";
 import Settings from "./pages/Settings";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import { AppAuthLoadingSkeleton } from "./components/loading/AppAuthLoadingSkeleton";
+import { ReaderRouteLoadingSkeleton } from "./components/loading/ReaderRouteLoadingSkeleton";
+import { Box, Button, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 
@@ -23,13 +25,7 @@ const AppRoutes = () => {
   const theme = useTheme();
   const { user, isLoading, needsFirstUser, apiUnavailable, retryConnection } = useAuth();
 
-  if (isLoading) {
-    return (
-      <Box minHeight="100vh" display="flex" alignItems="center" justifyContent="center" bgcolor="background.default">
-        <CircularProgress size={32} />
-      </Box>
-    );
-  }
+  if (isLoading) return <AppAuthLoadingSkeleton />;
 
   if (apiUnavailable) {
     return (
@@ -77,13 +73,7 @@ const AppRoutes = () => {
         path="read/:bookId"
         element={
           user ? (
-            <Suspense
-              fallback={
-                <Box minHeight="100vh" display="flex" alignItems="center" justifyContent="center" bgcolor="background.default">
-                  <CircularProgress size={32} />
-                </Box>
-              }
-            >
+            <Suspense fallback={<ReaderRouteLoadingSkeleton />}>
               <ReaderPage />
             </Suspense>
           ) : (

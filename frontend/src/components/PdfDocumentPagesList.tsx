@@ -108,7 +108,8 @@ export const PdfDocumentPagesList = ({
     },
     [ttsHighlightPage, ttsHighlightSet, ttsTextLayerTick, pdfSavedHighlights]
   );
-  const fillViewportWhileLoading = !layout && !loadError;
+  const waitingForDocument = numPages <= 0 && !loadError;
+  const fillViewportWhileLoading = waitingForDocument;
   const renderDpr = useMemo(() => resolvePdfRenderDevicePixelRatio(), []);
 
   return (
@@ -167,7 +168,7 @@ export const PdfDocumentPagesList = ({
             );
           })}
       </Document>
-      {!layout && !loadError && (
+      {waitingForDocument && (
         <Box sx={{ display: "flex", flex: 1, alignItems: "center", justifyContent: "center", py: 8, color: "text.secondary" }}>
           <CircularProgress size={28} />
         </Box>

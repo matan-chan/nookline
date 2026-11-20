@@ -10,10 +10,13 @@ import { LibraryHeroBanner } from "./library/LibraryHeroBanner";
 import type { LibraryBrowserLibrary, LibrarySortOption } from "./library/libraryBrowserTypes";
 import { sortSeriesForLibraryBrowser, sortStandaloneBooksForLibraryBrowser } from "./library/libraryBrowserSort";
 import { resolveLibraryHeroBackground } from "./library/resolveLibraryHeroBackgroundUrl";
+import { CoverGridLoadingSkeleton } from "../components/loading/CoverGridLoadingSkeleton";
+import { removedBookSnackbarMessage, removedSeriesSnackbarMessage } from "../hooks/deferredDeleteSnackbarLabels";
+import { useDeferredDeleteSnackbar } from "../hooks/useDeferredDeleteSnackbar";
 import { useQuery, useMutation } from "@apollo/client";
-import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui/material";
+import { Alert, Box, Button, Snackbar, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext, useParams } from "react-router-dom";
 
@@ -38,6 +41,10 @@ const LibraryBrowser = () => {
 
   const [addBookOpen, setAddBookOpen] = useState(false);
   const [toast, setToast] = useState<{ msg: string; severity: "success" | "error" } | null>(null);
+  const { schedule: scheduleDelete, snackbar: deleteSnackbar } = useDeferredDeleteSnackbar();
+  const { t: tc } = useTranslation("common");
+  const [hiddenBookIds, setHiddenBookIds] = useState<Set<number>>(new Set());
+  const [hiddenSeriesIds, setHiddenSeriesIds] = useState<Set<number>>(new Set());
 
   const { data, loading, refetch } = useQuery<{ library: LibraryBrowserLibrary }>(LIBRARY_BROWSER_QUERY, {
     variables: { id: libraryId, userId: user?.id ?? 0 },
@@ -82,15 +89,54 @@ const LibraryBrowser = () => {
 
   const query = search.toLowerCase();
 
+  const requestRemoveBook = useCallback(
+    (book: { id: number; title: string }) => {
+      setHiddenBookIds((prev) => new Set(prev).add(book.id));
+      scheduleDelete(
+        removedBookSnackbarMessage(tc, book.title),
+        () => deleteBook({ variables: { id: book.id } }),
+        () =>
+          setHiddenBookIds((prev) => {
+            const next = new Set(prev);
+            next.delete(book.id);
+            return next;
+          })
+      );
+    },
+    [deleteBook, scheduleDelete, tc]
+  );
+
+  const requestRemoveSeries = useCallback(
+    (series: { id: number; title: string }) => {
+      setHiddenSeriesIds((prev) => new Set(prev).add(series.id));
+      scheduleDelete(
+        removedSeriesSnackbarMessage(tc, series.title),
+        () => deleteSeries({ variables: { id: series.id } }),
+        () =>
+          setHiddenSeriesIds((prev) => {
+            const next = new Set(prev);
+            next.delete(series.id);
+            return next;
+          })
+      );
+    },
+    [deleteSeries, scheduleDelete, tc]
+  );
+
   const filteredSeries = useMemo(() => {
-    const rows = (library?.series ?? []).filter((s) => s.title.toLowerCase().includes(query));
+    const rows = (library?.series ?? [])
+      .filter((s) => !hiddenSeriesIds.has(s.id))
+      .filter((s) => s.title.toLowerCase().includes(query));
     return sortSeriesForLibraryBrowser(rows, sort);
-  }, [library?.series, query, sort]);
+  }, [library?.series, query, sort, hiddenSeriesIds]);
 
   const filteredBooks = useMemo(() => {
-    const rows = (library?.books ?? []).filter((b) => !b.seriesId).filter((b) => b.title.toLowerCase().includes(query));
+    const rows = (library?.books ?? [])
+      .filter((b) => !hiddenBookIds.has(b.id))
+      .filter((b) => !b.seriesId)
+      .filter((b) => b.title.toLowerCase().includes(query));
     return sortStandaloneBooksForLibraryBrowser(rows, sort);
-  }, [library?.books, query, sort]);
+  }, [library?.books, query, sort, hiddenBookIds]);
 
   return (
     <Box
@@ -103,6 +149,7 @@ const LibraryBrowser = () => {
         pb: { xs: 2, sm: 3, md: 4 },
       }}
     >
+      {deleteSnackbar}
       <Snackbar open={toast != null} autoHideDuration={4000} onClose={() => setToast(null)} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
         {toast ? (
           <Alert onClose={() => setToast(null)} severity={toast.severity} variant="filled" sx={{ width: "100%" }}>
@@ -123,11 +170,7 @@ const LibraryBrowser = () => {
 
       <LibraryBrowserToolbar t={t} search={search} setSearch={setSearch} sort={sort} setSort={setSort} onAddBook={() => setAddBookOpen(true)} />
 
-      {loading && (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 12 }}>
-          <CircularProgress color="primary" />
-        </Box>
-      )}
+      {loading && !library ? <CoverGridLoadingSkeleton /> : null}
 
       {filteredSeries.length > 0 && (
         <Box component="section">
@@ -145,7 +188,7 @@ const LibraryBrowser = () => {
                 coverUrl={getSeriesCoverUrl({ metadata: s.metadata }, s.books)}
                 to={`/series/${s.id}`}
                 badge={t("volBadge", { count: s.books.length })}
-                onRemove={() => deleteSeries({ variables: { id: s.id } })}
+                onRemove={() => requestRemoveSeries(s)}
                 kind="series"
               />
             ))}
@@ -165,10 +208,11 @@ const LibraryBrowser = () => {
                 id={b.id}
                 title={b.title}
                 coverImagePath={b.coverImagePath}
+                fileExt={b.fileExt}
                 metadata={b.metadata}
                 readPercentage={b.readingProgressForUser != null ? b.readingProgressForUser.percentage : undefined}
                 to={`/book/${b.id}`}
-                onRemove={() => deleteBook({ variables: { id: b.id } })}
+                onRemove={() => requestRemoveBook(b)}
                 kind="book"
               />
             ))}
@@ -178,9 +222,14 @@ const LibraryBrowser = () => {
 
       {!loading && filteredSeries.length === 0 && filteredBooks.length === 0 && (
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", py: 12, gap: 2 }}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" textAlign="center">
             {search ? t("emptyNoResults") : t("emptyLibrary")}
           </Typography>
+          {search ? (
+            <Button variant="text" onClick={() => setSearch("")} sx={{ textTransform: "none" }}>
+              {t("clearSearch")}
+            </Button>
+          ) : null}
           {!search && (
             <Button
               variant="outlined"

@@ -7,6 +7,7 @@ frontend/bun.lock
 # Build output
 dist/
 build/
+backend/target/
 
 # Docker Compose (machine-specific / NPM network — keep local only)
 docker-compose.yml
@@ -62,3 +63,6 @@ backend/uploads/**
 !backend/uploads/.gitkeep
 
 .cursor
+
+graphify-out/
+tmp/

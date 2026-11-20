@@ -3,7 +3,7 @@ import { gql } from "@apollo/client";
 export const BOOK_DETAIL_QUERY = gql`
   query BookDetail($id: Int!, $userId: Int!) {
     book(id: $id) {
-      id title coverImagePath volumeNumber metadata createdAt
+      id title coverImagePath filePath fileExt volumeNumber metadata createdAt
       seriesId
       libraryId
       isFavoriteForUser(userId: $userId)
@@ -20,6 +20,7 @@ export const BOOK_DETAIL_QUERY = gql`
       id
       title
       coverImagePath
+      fileExt
       metadata
       createdAt
     }

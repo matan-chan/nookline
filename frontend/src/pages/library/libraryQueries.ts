@@ -4,8 +4,8 @@ export const LIBRARY_BROWSER_QUERY = gql`
   query Library($id: Int!, $userId: Int!) {
     library(id: $id) {
       id name type path bannerIndex customLibraryBannerId
-      series { id title coverImagePath metadata status createdAt books { id coverImagePath metadata volumeNumber createdAt } }
-      books { id title coverImagePath metadata seriesId createdAt readingProgressForUser(userId: $userId) { percentage } }
+      series { id title coverImagePath metadata status createdAt books { id coverImagePath fileExt metadata volumeNumber createdAt } }
+      books { id title coverImagePath fileExt metadata seriesId createdAt readingProgressForUser(userId: $userId) { percentage } }
     }
   }
 `;

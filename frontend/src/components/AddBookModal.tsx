@@ -62,6 +62,15 @@ const AddBookModal = ({ open, onClose, libraryId, onCreated }: Props) => {
     }
     if (!result && emb && authorEmb) result = await searchOpenLibraryFuzzy(`${emb.replace(/;/g, " ")} ${authorEmb}`, authorEmb).catch(() => null);
     if (!result && emb && authorEmb) result = await searchOpenLibraryFuzzy(emb, authorEmb).catch(() => null);
+    if (!result && detected) result = await searchOpenLibraryFuzzy(detected, authorEmb).catch(() => null);
+    if (!result && detected) {
+      const words = detected.split(/\s+/).filter(Boolean);
+      for (const n of [3, 2] as const) {
+        if (words.length < n) continue;
+        result = await searchOpenLibraryFuzzy(words.slice(0, n).join(" "), authorEmb).catch(() => null);
+        if (result) break;
+      }
+    }
 
     if (result) {
       const data = await enrichMetaWithSeries(result);
@@ -102,17 +111,19 @@ const AddBookModal = ({ open, onClose, libraryId, onCreated }: Props) => {
             filename: string;
             embeddedTitle?: string | null;
             embeddedAuthor?: string | null;
+            suggestedTitle?: string | null;
           };
+          const searchTitle = data.suggestedTitle?.trim() || detected;
           const pdfEmb = ext === "pdf" ? { embeddedTitle: data.embeddedTitle ?? null, embeddedAuthor: data.embeddedAuthor ?? null } : undefined;
           setUpload({
             status: "done",
             path: data.path,
             filename: file.name,
             fileExt: ext!,
-            localPreviewPdf: previewPdfRef.current,
+            localPreviewPdf: ext === "pdf" ? file : null,
             ...(pdfEmb ?? {}),
           });
-          fetchMeta(detected, pdfEmb);
+          fetchMeta(searchTitle, pdfEmb);
         } else {
           const msg = (() => {
             try {
@@ -186,7 +197,7 @@ const AddBookModal = ({ open, onClose, libraryId, onCreated }: Props) => {
 
   return (
     <Modal open={open} onClose={handleClose} title={t("title")}>
-      <Stack spacing={2.5}>
+      <Stack spacing={2.5} sx={{ minWidth: 0, overflow: "hidden" }}>
         <AddBookModalDropArea upload={upload} setUpload={setUpload} inputRef={inputRef} onFileChange={onFileChange} onDrop={onDrop} onReset={handleReset} t={t} />
 
         {isDone && <AddBookModalTitleMeta upload={upload} meta={meta} title={title} setTitle={setTitle} t={t} libraryId={libraryId} />}

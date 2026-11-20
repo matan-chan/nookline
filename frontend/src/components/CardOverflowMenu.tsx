@@ -4,38 +4,21 @@ import { IconButton, ListItemIcon, Menu, MenuItem } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import ConfirmModal from "./ConfirmModal";
-
 type CardOverflowMenuProps = {
   onRemove: () => void;
   variant: "book" | "series" | "volume";
   itemTitle: string;
 };
 
-const CardOverflowMenu = ({ onRemove, variant, itemTitle }: CardOverflowMenuProps) => {
+const CardOverflowMenu = ({ onRemove }: CardOverflowMenuProps) => {
   const { t } = useTranslation("cardMenu");
   const { t: tc } = useTranslation("common");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const menuOpen = Boolean(anchorEl);
-
-  const titleKey =
-    variant === "series" ? "confirmRemoveSeriesTitle" : variant === "volume" ? "confirmRemoveVolumeTitle" : "confirmRemoveBookTitle";
-  const messageKey =
-    variant === "series"
-      ? "confirmRemoveSeriesMessage"
-      : variant === "volume"
-        ? "confirmRemoveVolumeMessage"
-        : "confirmRemoveBookMessage";
 
   const handleRemoveClick = () => {
     setAnchorEl(null);
-    setConfirmOpen(true);
-  };
-
-  const handleConfirm = () => {
     onRemove();
-    setConfirmOpen(false);
   };
 
   return (
@@ -51,12 +34,15 @@ const CardOverflowMenu = ({ onRemove, variant, itemTitle }: CardOverflowMenuProp
         }}
         sx={(th) => ({
           position: "absolute",
-          top: 6,
-          right: 6,
+          top: 4,
+          right: 4,
           zIndex: 20,
+          minWidth: 40,
+          minHeight: 40,
           bgcolor: alpha(th.surfaces.highest, 0.85),
           color: "text.secondary",
           "&:hover": { bgcolor: th.surfaces.highest, color: "text.primary" },
+          "&:focus-visible": { outline: `2px solid ${alpha(th.palette.primary.main, 0.55)}`, outlineOffset: 2 },
         })}
       >
         <MoreVertIcon sx={{ fontSize: 18 }} />
@@ -91,15 +77,6 @@ const CardOverflowMenu = ({ onRemove, variant, itemTitle }: CardOverflowMenuProp
           {tc("remove")}
         </MenuItem>
       </Menu>
-
-      <ConfirmModal
-        open={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        onConfirm={handleConfirm}
-        title={t(titleKey)}
-        message={t(messageKey, { title: itemTitle })}
-        confirmLabel={tc("remove")}
-      />
     </>
   );
 };

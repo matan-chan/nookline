@@ -29,7 +29,11 @@ export const buildNooklineComponents = () => ({
         transition: `transform 0.22s ${buttonHoverEase}, box-shadow 0.22s ${buttonHoverEase}, background-color 0.2s ease`,
         willChange: "transform",
         "&:hover:not(.Mui-disabled)": { transform: "translateY(-2px)" },
-        "&:active:not(.Mui-disabled)": { transform: "translateY(0)", transitionDuration: "0.12s" },
+        "&:active:not(.Mui-disabled)": { transform: "scale(0.97)", transitionDuration: "0.12s" },
+        "@media (prefers-reduced-motion: reduce)": {
+          "&:hover:not(.Mui-disabled)": { transform: "none" },
+          "&:active:not(.Mui-disabled)": { transform: "none" },
+        },
         "&.Mui-disabled": { transform: "none" },
       },
       sizeSmall: { fontSize: "0.8125rem", padding: "6px 12px", borderRadius: "8px" },

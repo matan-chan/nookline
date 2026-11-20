@@ -19,6 +19,7 @@ export type PlayArgs = {
   urlCurRef: MutableRefObject<string | null>;
   flushServerReadingRef: MutableRefObject<(opts?: { pdfPage?: number }) => void>;
   audioRef: MutableRefObject<HTMLAudioElement | null>;
+  playing: boolean;
   playingRef: MutableRefObject<boolean>;
   fetchSpeechBlob: (text: string, signal?: AbortSignal) => Promise<Blob>;
   playAudioFromUrl: (url: string) => void;

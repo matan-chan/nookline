@@ -4,5 +4,8 @@
   "close": "Close",
   "loadingEllipsis": "…",
   "delete": "Delete",
-  "save": "Save"
+  "save": "Save",
+  "undo": "Undo",
+  "removedBook": "Removed “{{title}}”.",
+  "removedSeries": "Removed series “{{title}}”."
 }

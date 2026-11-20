@@ -1,0 +1,147 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+      - "Dockerfile"
+      - "backend/Dockerfile"
+      - ".dockerignore"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+      - "backend/Dockerfile"
+      - ".dockerignore"
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+
+      - name: cargo fmt
+        run: cargo fmt --all -- --check
+
+      - name: cargo clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install poppler (margin-regex fixture tests)
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+
+      - name: Ensure margin PDF fixtures
+        run: |
+          npm install --no-save pdf-lib@1.17.1
+          node scripts/gen_margin_fixtures.mjs
+
+      - name: cargo test
+        env:
+          JWT_SECRET: ci-unit-test-secret-at-least-32-bytes-long
+        run: cargo test --all-targets
+
+      - name: cargo build release
+        run: cargo build --release
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -f backend/Dockerfile -t nookline-backend:ci .
+
+      - name: Run container health
+        run: |
+          cid="$(docker run -d --rm \
+            -e JWT_SECRET=ci-docker-secret-must-be-at-least-32-bytes \
+            -e PORT=4000 \
+            -p 127.0.0.1:4020:4000 \
+            nookline-backend:ci)"
+          trap "docker stop $cid" EXIT
+          for i in $(seq 1 90); do
+            if curl -fsS "http://127.0.0.1:4020/api/health" >/dev/null 2>&1; then
+              break
+            fi
+            sleep 1
+          done
+          curl -fsS "http://127.0.0.1:4020/api/health" | grep -q ok
+          SMOKE_BASE_URL=http://127.0.0.1:4020 bash backend/scripts/smoke.sh
+
+  smoke:
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Prepare test database
+        run: |
+          mkdir -p ../tmp
+          rm -f ../tmp/nookline-ci.db
+          DATABASE_URL="file:../tmp/nookline-ci.db" npx prisma@5.22.0 migrate deploy
+
+      - name: Start Rust backend
+        env:
+          DATABASE_URL: file:../tmp/nookline-ci.db
+          JWT_SECRET: ci-smoke-secret-must-be-at-least-32-bytes-long
+          PORT: 4010
+        run: |
+          cargo run --release &
+          echo $! > ../tmp/rust-backend.pid
+          for i in $(seq 1 60); do
+            if curl -fsS "http://127.0.0.1:4010/api/health" >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl -fsS "http://127.0.0.1:4010/api/health"
+
+      - name: Smoke HTTP + GraphQL
+        env:
+          SMOKE_BASE_URL: http://127.0.0.1:4010
+        run: bash scripts/smoke.sh
+
+      - name: Perf report (JSON)
+        run: |
+          cargo run --release --bin nookline-perf -- \
+            --base-url http://127.0.0.1:4010 \
+            --label rust-ci \
+            --iterations 30 \
+            --warmup 3 \
+            --out ../tmp/perf-rust-ci.json
+          test -s ../tmp/perf-rust-ci.json
+
+      - name: Stop backend
+        if: always()
+        run: |
+          if [ -f ../tmp/rust-backend.pid ]; then
+            kill "$(cat ../tmp/rust-backend.pid)" 2>/dev/null || true
+          fi

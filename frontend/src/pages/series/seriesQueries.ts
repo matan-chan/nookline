@@ -8,7 +8,7 @@ export const SERIES_VIEW_QUERY = gql`
         id
         name
       }
-      books { id title volumeNumber coverImagePath metadata createdAt readingProgressForUser(userId: $userId) { percentage } }
+      books { id title volumeNumber coverImagePath fileExt metadata createdAt readingProgressForUser(userId: $userId) { percentage } }
     }
   }
 `;

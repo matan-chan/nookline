@@ -1,7 +1,7 @@
 import { pickVolumeCardSubtitle } from "../series/seriesVolumeSubtitle";
 import { seriesVolumeRowSx } from "../series/seriesVolumeStyles";
 import { BookCoverImg } from "../../components/BookCoverImg";
-import { COVER_SIZES_RECOMMENDED, getCoverUrl } from "../../utils/cover/cover";
+import { COVER_SIZES_RECOMMENDED, getCoverUrl, getFileExt } from "../../utils/cover/cover";
 import { Box, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -10,6 +10,7 @@ export type RecommendedBookCard = {
   id: number;
   title: string;
   coverImagePath: string | null;
+  fileExt?: string | null;
   metadata: string | null;
   createdAt: string;
 };
@@ -21,6 +22,9 @@ const recommendedRowScrollSx = {
   scrollbarWidth: "none",
   msOverflowStyle: "none",
   "&::-webkit-scrollbar": { display: "none" },
+  scrollSnapType: "x mandatory",
+  WebkitMaskImage: "linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%)",
+  maskImage: "linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%)",
 };
 
 export const BookDetailRecommendedRow = ({ books }: Props) => {
@@ -46,6 +50,7 @@ export const BookDetailRecommendedRow = ({ books }: Props) => {
                 flex: "0 0 auto",
                 width: { xs: 132, sm: 148 },
                 minWidth: { xs: 132, sm: 148 },
+                scrollSnapAlign: "start",
                 "&:hover .rec-cover": { transform: "scale(1.02)" },
               }}
             >
@@ -62,9 +67,11 @@ export const BookDetailRecommendedRow = ({ books }: Props) => {
                 }}
               >
                 <Box component={Link} to={`/book/${book.id}`} sx={{ position: "absolute", inset: 0, display: "block" }}>
-                  {coverUrl ? (
+                  {coverUrl || getFileExt(book) === "pdf" ? (
                     <BookCoverImg
-                      src={coverUrl}
+                      bookId={book.id}
+                      fileExt={getFileExt(book)}
+                      src={coverUrl ?? ""}
                       alt={book.title}
                       sizes={COVER_SIZES_RECOMMENDED}
                       sx={{ width: "100%", height: "100%", objectFit: "cover" }}

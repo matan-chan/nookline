@@ -1,5 +1,6 @@
 import PdfBookViewer from "../../../../components/PdfBookViewer";
 import { ReaderLoadingView } from "../../ReaderLoadingView";
+import { Box } from "@mui/material";
 import { EpubReaderView } from "../epub/EpubReaderView";
 import type { PdfHighlightStored } from "../../../../utils/reader/readerHighlightPosition";
 import type { EpubHighlightMenu } from "../../readerPageTypes";
@@ -74,6 +75,7 @@ export const ReaderContent = (props: Props) => {
 
   if (props.fileExt === "pdf")
     return (
+      <Box sx={{ display: "flex", minHeight: 0, flex: 1, flexDirection: "column", width: "100%" }}>
       <PdfBookViewer
         key={props.bookId}
         bookId={props.bookId ?? ""}
@@ -105,6 +107,7 @@ export const ReaderContent = (props: Props) => {
         bookHighlights={props.bookHighlights}
         readerDarkDocument={props.readerDarkDocument}
       />
+      </Box>
     );
 
   return (

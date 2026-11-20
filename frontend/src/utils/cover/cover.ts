@@ -4,6 +4,8 @@ type BookWithCover = {
   id: number;
   coverImagePath?: string | null;
   metadata?: string | null;
+  filePath?: string | null;
+  fileExt?: string | null;
 };
 
 const OPEN_LIBRARY_COVER_RE =
@@ -62,15 +64,43 @@ export const getSeriesCoverUrl = (
   return typeof sm?.coverUrl === "string" ? optimizedCoverSrc(sm.coverUrl) : null;
 };
 
+const isOpenLibraryFetchFailed = (meta: Record<string, unknown> | null) => {
+  const ol = meta?.openLibrary;
+  if (!ol || typeof ol !== "object") return false;
+  return (ol as { fetchFailed?: boolean }).fetchFailed === true;
+};
+
 export const getCoverUrl = (book: BookWithCover): string | null => {
   if (hasStoredCoverFile(book)) return `/api/files/covers/${book.id}`;
   const meta = parseMetadata(book.metadata);
-  return optimizedCoverSrc(meta?.coverUrl as string | undefined, book.id);
+  const remote = optimizedCoverSrc(meta?.coverUrl as string | undefined, book.id);
+  if (remote && !isOpenLibraryFetchFailed(meta)) return remote;
+  if (getFileExt(book) === "pdf") return null;
+  if (book.id > 0) return `/api/files/covers/${book.id}`;
+  return null;
+};
+
+export const getBookCoverFallbackSrc = (bookId: number) => `/api/files/covers/${bookId}`;
+
+const extFromPath = (path: string | null | undefined): "epub" | "pdf" | null => {
+  if (!path) return null;
+  const lower = path.toLowerCase();
+  if (lower.endsWith(".pdf")) return "pdf";
+  if (lower.endsWith(".epub")) return "epub";
+  return null;
 };
 
 export const getFileExt = (book: BookWithCover): "epub" | "pdf" | null => {
+  const fromField = book.fileExt;
+  if (fromField === "pdf" || fromField === "epub") return fromField;
   const meta = parseMetadata(book.metadata);
-  return meta?.fileExt ?? null;
+  const fromMeta = meta?.fileExt;
+  if (fromMeta === "pdf" || fromMeta === "epub") return fromMeta;
+  return (
+    extFromPath(book.filePath) ??
+    extFromPath(typeof meta?.filePath === "string" ? meta.filePath : null) ??
+    extFromPath(book.coverImagePath)
+  );
 };
 
 /** Keep in sync with backend `COVER_WIDTH_STEPS` (coverOptimization). */

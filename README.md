@@ -81,7 +81,7 @@ Kokoro is also exposed on the host at **http://localhost:8882 → 8880** (see `d
 
 ## Development (without Compose)
 
-See `frontend/` and `backend/` package scripts (`npm`, `bun`). Use a `.env` in each folder as documented in your local setup — **do not commit real secrets.**
+See `frontend/` (`npm`) and `backend/` (`cargo run`, `backend/README.md`). Use a `.env` in each folder as documented in your local setup — **do not commit real secrets.**
 
 Project Name: Nookline
 

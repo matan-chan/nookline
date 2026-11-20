@@ -1,10 +1,9 @@
-import { getStoredToken } from "../../auth/authStorage";
 import { sanitizeLettersDigitsAndWhitespace } from "../../utils/input/sanitizeUserInput";
-import { BookCoverImg } from "../BookCoverImg";
-import { optimizedCoverSrc } from "../../utils/cover/cover";
-import { Box, CircularProgress, Stack, TextField, Typography } from "@mui/material";
+import { AddBookModalCoverThumb } from "./AddBookModalCoverThumb";
+import { Box, Stack, TextField, Typography } from "@mui/material";
 import type { TFunction } from "i18next";
-import type { Dispatch, SetStateAction } from "react";
+import { truncateMiddle } from "../../utils/text/truncateMiddle";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import type { MetaState, UploadState } from "./addBookModalTypes";
 
 type Props = {
@@ -16,16 +15,10 @@ type Props = {
   libraryId: number;
 };
 
-const uploadPreviewSrc = (libraryId: number, absPath: string) => {
-  const tok = getStoredToken();
-  const u = new URL("/api/files/upload-preview", window.location.origin);
-  u.searchParams.set("libraryId", String(libraryId));
-  u.searchParams.set("path", absPath);
-  if (tok) u.searchParams.set("token", tok);
-  return u.pathname + u.search;
-};
+export const AddBookModalTitleMeta = ({ upload, meta, title, setTitle, t, libraryId }: Props) => {
+  const [titleFocused, setTitleFocused] = useState(false);
 
-export const AddBookModalTitleMeta = ({ upload, meta, title, setTitle, t, libraryId }: Props) => (
+  return (
   <Stack direction="row" spacing={1.5}>
     <Box
       sx={{
@@ -37,24 +30,7 @@ export const AddBookModalTitleMeta = ({ upload, meta, title, setTitle, t, librar
         overflow: "hidden",
       }}
     >
-      {meta.status === "found" && meta.data.coverUrl ? (
-        <BookCoverImg
-          src={optimizedCoverSrc(meta.data.coverUrl) ?? meta.data.coverUrl}
-          alt=""
-          sizes="56px"
-          sx={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      ) : upload.fileExt === "pdf" && upload.path ? (
-        <BookCoverImg src={uploadPreviewSrc(libraryId, upload.path)} alt="" sizes="56px" sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
-      ) : (
-        <Box sx={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          {meta.status === "searching" ? (
-            <CircularProgress size={18} thickness={4} />
-          ) : (
-            <Typography color="text.secondary">📄</Typography>
-          )}
-        </Box>
-      )}
+      <AddBookModalCoverThumb key={upload.path} upload={upload} meta={meta} libraryId={libraryId} />
     </Box>
 
     <Stack spacing={1} sx={{ flex: 1, minWidth: 0 }}>
@@ -63,8 +39,23 @@ export const AddBookModalTitleMeta = ({ upload, meta, title, setTitle, t, librar
         size="small"
         fullWidth
         placeholder={t("titlePlaceholder")}
-        value={title}
+        value={titleFocused || title.length <= 64 ? title : truncateMiddle(title, 64)}
         onChange={(e) => setTitle(sanitizeLettersDigitsAndWhitespace(e.target.value))}
+        onFocus={() => setTitleFocused(true)}
+        onBlur={() => setTitleFocused(false)}
+        slotProps={{
+          htmlInput: {
+            title,
+            sx: {
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            },
+          },
+        }}
+        sx={{
+          "& .MuiInputBase-root": { minWidth: 0 },
+        }}
       />
       {meta.status === "searching" && (
         <Typography variant="caption" color="text.secondary">
@@ -72,7 +63,13 @@ export const AddBookModalTitleMeta = ({ upload, meta, title, setTitle, t, librar
         </Typography>
       )}
       {meta.status === "found" && (
-        <Typography variant="caption" color="text.secondary">
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          title={[meta.data.author, meta.data.year, meta.data.genre].filter(Boolean).join(" · ")}
+          noWrap
+          sx={{ maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis" }}
+        >
           {meta.data.author && <span>{t("lineAuthor", { author: meta.data.author })}</span>}
           {meta.data.year && <span>{t("lineYear", { year: meta.data.year })}</span>}
           {meta.data.genre && <span>{t("lineGenre", { genre: meta.data.genre })}</span>}
@@ -97,4 +94,5 @@ export const AddBookModalTitleMeta = ({ upload, meta, title, setTitle, t, librar
       )}
     </Stack>
   </Stack>
-);
+  );
+};

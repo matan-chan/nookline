@@ -1,11 +1,13 @@
 import { useAuth } from "../auth/AuthContext";
-import ConfirmModal from "../components/ConfirmModal";
+import { BookDetailLoadingSkeleton } from "../components/loading/BookDetailLoadingSkeleton";
+import { removedBookSnackbarMessage, removedSeriesSnackbarMessage } from "../hooks/deferredDeleteSnackbarLabels";
+import { useDeferredDeleteSnackbar } from "../hooks/useDeferredDeleteSnackbar";
 import { isOpenLibraryEnrichmentCurrent } from "../utils/openLibrary/openLibraryMeta";
 import { getSeriesCoverUrl } from "../utils/cover/cover";
 import { useQuery, useMutation } from "@apollo/client";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { SeriesDiscoveryHero } from "./series/SeriesDiscoveryHero";
 import { SeriesVolumeCard, type SeriesVolumeBook } from "./series/SeriesVolumeCard";
@@ -25,18 +27,20 @@ type Series = {
 
 const SeriesView = () => {
   const { t } = useTranslation("series");
+  const { t: tc } = useTranslation("common");
   const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const seriesId = parseInt(id ?? "0");
-  const [removeSeriesOpen, setRemoveSeriesOpen] = useState(false);
+  const { schedule, snackbar } = useDeferredDeleteSnackbar();
+  const [hiddenBookIds, setHiddenBookIds] = useState<Set<number>>(new Set());
 
   const { data, loading, refetch } = useQuery<{ series: Series }>(SERIES_VIEW_QUERY, {
     variables: { id: seriesId, userId: user?.id ?? 0 },
     skip: user == null,
   });
 
-  const [deleteSeries, { loading: deletingSeries }] = useMutation(SERIES_DELETE_SERIES);
+  const [deleteSeries] = useMutation(SERIES_DELETE_SERIES);
   const [deleteBook] = useMutation(SERIES_DELETE_BOOK, { onCompleted: () => refetch() });
   const [enrichSeries] = useMutation(SERIES_ENRICH);
 
@@ -66,17 +70,46 @@ const SeriesView = () => {
     };
   }, [loading, seriesId, data?.series?.metadata, enrichSeries, refetch]);
 
-  const handleRemoveSeriesConfirm = async () => {
+  const handleRemoveSeries = useCallback(() => {
     if (!series) return;
-    await deleteSeries({ variables: { id: series.id } });
-    setRemoveSeriesOpen(false);
-    navigate(`/library/${series.libraryId}`);
-  };
+    schedule(
+      removedSeriesSnackbarMessage(tc, series.title),
+      async () => {
+        await deleteSeries({ variables: { id: series.id } });
+        navigate(`/library/${series.libraryId}`);
+      }
+    );
+  }, [deleteSeries, navigate, schedule, series, tc]);
 
-  if (loading)
+  const requestRemoveVolume = useCallback(
+    (book: SeriesVolumeBook) => {
+      setHiddenBookIds((prev) => new Set(prev).add(book.id));
+      schedule(
+        removedBookSnackbarMessage(tc, book.title),
+        () => deleteBook({ variables: { id: book.id } }),
+        () =>
+          setHiddenBookIds((prev) => {
+            const next = new Set(prev);
+            next.delete(book.id);
+            return next;
+          })
+      );
+    },
+    [deleteBook, schedule, tc]
+  );
+
+  const sortedBooks = useMemo(
+    () =>
+      [...(series?.books ?? [])]
+        .filter((b) => !hiddenBookIds.has(b.id))
+        .sort((a, b) => (a.volumeNumber ?? 0) - (b.volumeNumber ?? 0)),
+    [hiddenBookIds, series?.books]
+  );
+
+  if (loading && !series)
     return (
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 320 }}>
-        <CircularProgress />
+      <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+        <BookDetailLoadingSkeleton />
       </Box>
     );
 
@@ -88,8 +121,6 @@ const SeriesView = () => {
         </Typography>
       </Box>
     );
-
-  const sortedBooks = [...series.books].sort((a, b) => (a.volumeNumber ?? 0) - (b.volumeNumber ?? 0));
 
   const seriesMeta = series.metadata
     ? (() => {
@@ -113,6 +144,7 @@ const SeriesView = () => {
         minHeight: "100%",
       }}
     >
+      {snackbar}
       <SeriesDiscoveryHero
         series={series}
         volumeCount={series.books.length}
@@ -120,17 +152,7 @@ const SeriesView = () => {
         seriesMeta={seriesMeta}
         coverUrl={seriesHeroCover}
         t={t}
-        onRemoveClick={() => setRemoveSeriesOpen(true)}
-      />
-
-      <ConfirmModal
-        open={removeSeriesOpen}
-        onClose={() => setRemoveSeriesOpen(false)}
-        onConfirm={handleRemoveSeriesConfirm}
-        title={t("removeSeriesTitle")}
-        message={series ? t("removeSeriesMessage", { count: series.books.length, title: series.title }) : ""}
-        confirmLabel={t("removeSeriesConfirm")}
-        loading={deletingSeries}
+        onRemoveClick={handleRemoveSeries}
       />
 
       <Box sx={{ mx: { xs: 1.5, sm: 2.5, md: 4 } }}>
@@ -141,7 +163,7 @@ const SeriesView = () => {
         </Box>
         <Box sx={seriesVolumeRowSx}>
           {sortedBooks.map((book) => (
-            <SeriesVolumeCard key={book.id} book={book} variant="discovery" onRemove={() => deleteBook({ variables: { id: book.id } })} />
+            <SeriesVolumeCard key={book.id} book={book} variant="discovery" onRemove={() => requestRemoveVolume(book)} />
           ))}
         </Box>
       </Box>

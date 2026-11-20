@@ -15,6 +15,9 @@
   "librarySyncAddedMany": "Added {{count}} books.",
   "librarySyncFailed": "Could not scan the library folder.",
   "favorites": "Favorites",
+  "continueReading": "Continue reading",
+  "continueReadingCta": "Continue",
+  "readingProgress": "Progress",
   "onDeck": "On Deck",
   "recentlyAdded": "Recently Added",
   "emptyRecentlyAdded": "No books yet. Add a library to get started."

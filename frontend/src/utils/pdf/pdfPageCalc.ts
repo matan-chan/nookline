@@ -147,6 +147,23 @@ export const shouldRenderPdfListPage = (pageNum: number, numPages: number, windo
   return false;
 };
 
+export const measurePdfScrollViewport = (scrollEl: HTMLElement | null, shellEl: HTMLElement | null): { w: number; h: number } => {
+  const scrollW = scrollEl?.clientWidth ?? 0;
+  const scrollH = scrollEl?.clientHeight ?? 0;
+  if (scrollW >= PDF_MIN_LAYOUT_DIMENSION && scrollH >= PDF_MIN_LAYOUT_DIMENSION) return { w: scrollW, h: scrollH };
+
+  const shellW = shellEl?.clientWidth ?? 0;
+  const shellH = shellEl?.clientHeight ?? 0;
+  if (shellW >= PDF_MIN_LAYOUT_DIMENSION && shellH >= PDF_MIN_LAYOUT_DIMENSION) return { w: shellW, h: shellH };
+
+  const docW = scrollEl?.ownerDocument?.documentElement?.clientWidth ?? 0;
+  const winW = typeof window !== "undefined" ? window.innerWidth : 0;
+  const winH = typeof window !== "undefined" ? window.innerHeight : 0;
+  const w = Math.max(scrollW, shellW, docW, winW, PDF_MIN_LAYOUT_DIMENSION);
+  const h = Math.max(scrollH, shellH, winH, PDF_MIN_LAYOUT_DIMENSION);
+  return { w, h };
+};
+
 export const pdfPageRasterWidthAndScale = (
   desiredCssWidth: number,
   layoutPageWidth: number,

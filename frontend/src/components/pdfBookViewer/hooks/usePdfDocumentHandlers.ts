@@ -1,4 +1,4 @@
-import { collectPdfPageAspectRatios, logPdfDocumentLoadError } from "../logic/pdfBookViewerLogic";
+import { collectPdfPageAspectRatios, collectPdfPageAspectRatiosFast, logPdfDocumentLoadError } from "../logic/pdfBookViewerLogic";
 import { runPostErrorPdfFileProbe } from "../logic/runPostErrorPdfFileProbe";
 import type { PdfListRenderWindow } from "../../../utils/pdf/pdfPageCalc";
 import type { PDFDocumentProxy } from "pdfjs-dist";
@@ -22,13 +22,17 @@ export const usePdfDocumentHandlers = ({ bookId, t, initialScrollDoneRef, bookma
   const handleDocumentLoad = useCallback(
     async (doc: PDFDocumentProxy) => {
       setLoadError(null);
-      setAspects(null);
       setListRenderWindow({ start: 1, end: 1 });
       onPdfDocumentLoad?.(doc);
-      setNumPages(doc.numPages);
+      const pageCount = doc.numPages;
+      setNumPages(pageCount);
       initialScrollDoneRef.current = false;
       bookmarkDomScrollDoneRef.current = false;
-      setAspects(await collectPdfPageAspectRatios(doc));
+      const primed = await collectPdfPageAspectRatiosFast(doc);
+      setAspects(primed);
+      void collectPdfPageAspectRatios(doc).then((full) => {
+        if (full.length === pageCount) setAspects(full);
+      });
     },
     [onPdfDocumentLoad, initialScrollDoneRef, bookmarkDomScrollDoneRef]
   );

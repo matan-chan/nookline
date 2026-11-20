@@ -1,0 +1,10 @@
+.git
+.github
+graphify-out
+**/target
+**/node_modules
+frontend
+backend/src
+backend/benchmarks
+backend/test
+**/*.md

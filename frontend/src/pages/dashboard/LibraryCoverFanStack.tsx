@@ -103,7 +103,7 @@ export const LibraryCoverFanStack = ({ books, libraryName }: { books: DashboardL
             }}
           >
             {url ? (
-              <BookCoverImg src={url} alt={book.title} sx={{ width: "100%", height: "100%", objectFit: "cover", display: "block", verticalAlign: "top" }} />
+              <BookCoverImg bookId={book.id} src={url} alt={book.title} sx={{ width: "100%", height: "100%", objectFit: "cover", display: "block", verticalAlign: "top" }} />
             ) : (
               <FallbackBookTile title={book.title} />
             )}

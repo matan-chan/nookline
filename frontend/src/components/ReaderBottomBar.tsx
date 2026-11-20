@@ -42,7 +42,7 @@ export const ReaderBottomBar = ({
     disabled: ttsBusy,
     onShort: onAiTap ?? onAiToggle,
     onLong: onAiLongPress ?? onAiToggle,
-    onDesktopClick: onAiToggle,
+    onDesktopClick: onAiTap ?? onAiToggle,
   });
 
   return (
@@ -99,7 +99,7 @@ export const ReaderBottomBar = ({
         onPointerLeave={wavePress.onPointerLeave}
         onContextMenu={wavePress.onContextMenu}
         aria-label={t("aiReader")}
-        aria-pressed={readerPanelOpen}
+        aria-pressed={readerPanelOpen || ttsPlaying}
         disabled={ttsBusy}
         sx={{
           justifySelf: "center",

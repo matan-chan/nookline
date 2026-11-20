@@ -2,7 +2,7 @@ import { BookCoverImg } from "../../components/BookCoverImg";
 import BookCoverProgressBar from "../../components/BookCoverProgressBar";
 import CardOverflowMenu from "../../components/CardOverflowMenu";
 import { coverCardColumnHoverSx } from "../../utils/layout/staggerGridSx";
-import { getCoverUrl } from "../../utils/cover/cover";
+import { getCoverUrl, getFileExt } from "../../utils/cover/cover";
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { Link } from "react-router-dom";
@@ -11,6 +11,7 @@ export type DashboardBookCover = {
   id: number;
   title: string;
   coverImagePath: string | null;
+  fileExt?: string | null;
   metadata: string | null;
   createdAt?: string;
   readingProgressForUser?: { percentage: number } | null;
@@ -18,6 +19,7 @@ export type DashboardBookCover = {
 
 export const DashboardBookCard = ({ book, percentage, onRemove }: { book: DashboardBookCover; percentage?: number; onRemove: () => void }) => {
   const coverUrl = getCoverUrl(book);
+  const fileExt = getFileExt(book);
   return (
     <Box sx={coverCardColumnHoverSx}>
       <Box
@@ -33,8 +35,8 @@ export const DashboardBookCard = ({ book, percentage, onRemove }: { book: Dashbo
         }}
       >
         <Box component={Link} to={`/book/${book.id}`} sx={{ position: "absolute", inset: 0, zIndex: 0, display: "block" }}>
-          {coverUrl ? (
-            <BookCoverImg src={coverUrl} alt={book.title} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          {coverUrl || fileExt === "pdf" ? (
+            <BookCoverImg bookId={book.id} fileExt={fileExt} src={coverUrl ?? ""} alt={book.title} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
             <Box
               sx={(t) => ({

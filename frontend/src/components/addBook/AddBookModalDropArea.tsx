@@ -5,10 +5,13 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import FileDownloadOutlined from "@mui/icons-material/FileDownloadOutlined";
+import UploadFileOutlined from "@mui/icons-material/UploadFileOutlined";
 import { alpha } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
 import type { TFunction } from "i18next";
 import type { Dispatch, RefObject, SetStateAction } from "react";
+import { truncateMiddle } from "../../utils/text/truncateMiddle";
 import type { UploadState } from "./addBookModalTypes";
 
 type Props = {
@@ -75,9 +78,11 @@ export const AddBookModalDropArea = ({ upload, setUpload, inputRef, onFileChange
 
       {(upload.status === "idle" || upload.status === "dragging") && (
         <>
-          <Typography component="span" sx={{ fontSize: "1.5rem" }}>
-            {upload.status === "dragging" ? "⬇" : "📄"}
-          </Typography>
+          {upload.status === "dragging" ? (
+            <FileDownloadOutlined sx={{ fontSize: 32, color: "primary.main" }} />
+          ) : (
+            <UploadFileOutlined sx={{ fontSize: 32, color: "text.secondary" }} />
+          )}
           <Box sx={{ textAlign: "center" }}>
             <Typography variant="body2">{upload.status === "dragging" ? t("dropHere") : t("dropPrompt")}</Typography>
             <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
@@ -101,10 +106,10 @@ export const AddBookModalDropArea = ({ upload, setUpload, inputRef, onFileChange
       )}
 
       {upload.status === "done" && (
-        <Stack alignItems="center" sx={{ px: 2, gap: 0.5 }}>
+        <Stack alignItems="center" sx={{ px: 2, gap: 0.5, width: "100%", minWidth: 0 }}>
           <Typography sx={{ color: "secondary.main", fontSize: "1.25rem" }}>✓</Typography>
-          <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: "100%" }}>
-            {upload.filename}
+          <Typography variant="caption" color="text.secondary" title={upload.filename} sx={{ maxWidth: "100%", textAlign: "center" }}>
+            {truncateMiddle(upload.filename, 56)}
           </Typography>
           <Button
             size="small"

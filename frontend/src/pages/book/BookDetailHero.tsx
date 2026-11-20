@@ -14,6 +14,9 @@ type Book = {
   id: number;
   title: string;
   coverImagePath: string | null;
+  filePath?: string | null;
+  fileExt?: string | null;
+  metadata: string | null;
   volumeNumber: number | null;
   createdAt: string;
   seriesId: number | null;
@@ -55,7 +58,15 @@ export const BookDetailHero = ({
         alignItems={{ xs: "center", md: "stretch" }}
         sx={{ mx: { xs: 1.5, sm: 2.5, md: 4 } }}
       >
-        <BookDetailHeroCover title={book.title} coverUrl={coverUrl} />
+        <BookDetailHeroCover
+          bookId={book.id}
+          title={book.title}
+          coverUrl={coverUrl}
+          coverImagePath={book.coverImagePath}
+          metadata={book.metadata}
+          fileExt={book.fileExt}
+          filePath={book.filePath}
+        />
 
         <Stack
           gap={{ xs: 2, md: 0 }}
@@ -91,6 +102,9 @@ export const BookDetailHero = ({
                   fontWeight: 800,
                   color: "text.primary",
                   lineHeight: 1.15,
+                  width: "100%",
+                  maxWidth: "100%",
+                  overflowWrap: "anywhere",
                 }}
               >
                 {book.title}
@@ -126,15 +140,17 @@ export const BookDetailHero = ({
             ) : null}
           </Box>
 
-          <BookDetailHeroActions
-            book={book}
-            compactActions={compactActions}
-            t={t}
-            onRemoveClick={onRemoveClick}
-            isFavorite={isFavorite}
-            favoriteBusy={favoriteBusy}
-            onToggleFavorite={onToggleFavorite}
-          />
+          <Box sx={{ display: { xs: "none", md: "block" } }}>
+            <BookDetailHeroActions
+              book={book}
+              compactActions={compactActions}
+              t={t}
+              onRemoveClick={onRemoveClick}
+              isFavorite={isFavorite}
+              favoriteBusy={favoriteBusy}
+              onToggleFavorite={onToggleFavorite}
+            />
+          </Box>
         </Stack>
       </Stack>
     </Box>

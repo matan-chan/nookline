@@ -33,7 +33,9 @@ const Layout = () => {
 
   const expanded = railHovered || railPinned;
 
-  const { data, refetch } = useQuery<{ libraries: LibraryNavItem[] }>(LIBRARIES_QUERY);
+  const { data, refetch } = useQuery<{ libraries: LibraryNavItem[] }>(LIBRARIES_QUERY, {
+    errorPolicy: "all",
+  });
   const [deleteLibrary, { loading: deletingLibrary }] = useMutation(DELETE_LIBRARY, {
     refetchQueries: user ? [{ query: LIBRARIES_QUERY }, dashboardHomeRefetch(user.id)] : [{ query: LIBRARIES_QUERY }],
     awaitRefetchQueries: true,

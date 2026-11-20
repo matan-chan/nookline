@@ -12,7 +12,7 @@ import { useReaderTtsSettings } from "./ReaderPage/hooks/useReaderTtsSettings";
 import { useReaderDocState } from "./ReaderPage/hooks/useReaderDocState";
 import { useReaderNavParams } from "./useReaderNavParams";
 import { useQuery } from "@apollo/client";
-import { Box, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { useState, useCallback, useMemo } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 const ReaderPage = () => {
   const theme = useTheme();
   const { t } = useTranslation("reader");
+  const { t: tBook } = useTranslation("book");
   const { user } = useAuth();
   const userId = user?.id ?? 0;
   const { bookId } = useParams<{ bookId: string }>();
@@ -59,9 +60,11 @@ const ReaderPage = () => {
     variables: { id: numericBookId ?? 0, userId },
     skip: !bookId || user == null,
     fetchPolicy: "cache-and-network",
+    errorPolicy: "all",
   });
 
   const book = data?.book;
+  const showBookLoading = bookLoading && !book;
   const fileExt = book ? book.fileExt ?? getFileExt(book) : null;
 
   const tts = useReaderTtsSettings({ userId, bookId, aiOpen, bookMetadata: book?.metadata ?? null });
@@ -151,6 +154,13 @@ const ReaderPage = () => {
     readerDarkDocument: tts.readerDarkDocument,
   });
 
+  if (!showBookLoading && bookId && !book)
+    return (
+      <Box sx={{ display: "flex", minHeight: "50vh", alignItems: "center", justifyContent: "center", p: 3 }}>
+        <Typography color="text.secondary">{tBook("notFound")}</Typography>
+      </Box>
+    );
+
   return (
     <Box
       sx={{
@@ -163,7 +173,7 @@ const ReaderPage = () => {
     >
       <Box sx={{ display: "flex", minHeight: 0, flex: 1, flexDirection: "column" }}>
         <ReaderContent
-        bookLoading={bookLoading}
+        bookLoading={showBookLoading}
         fileExt={fileExt}
         bookId={bookId}
         backHref={backHref}

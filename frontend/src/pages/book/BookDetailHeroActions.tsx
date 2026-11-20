@@ -53,12 +53,12 @@ export const BookDetailHeroActions = ({ book, compactActions, t, onRemoveClick, 
           py: { xs: 0.75, md: 1.25 },
           fontSize: { xs: "0.8125rem", md: "0.9375rem" },
           minHeight: { xs: 36, md: 48 },
-          boxShadow: `0 8px 28px ${alpha("#7c3aed", 0.38)}`,
+          boxShadow: (th) => `0 8px 28px ${alpha("#7c3aed", th.palette.mode === "dark" ? 0.28 : 0.38)}`,
           "&:hover": {
             background: DETAIL_READ_GRADIENT,
             opacity: 0.95,
-            boxShadow: `0 10px 32px ${alpha("#7c3aed", 0.48)}`,
           },
+          "&:active": { transform: "scale(0.97)" },
         }}
       >
         {compactActions ? t("readNowShort") : t("readNow")}

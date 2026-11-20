@@ -1,4 +1,4 @@
-import { buildPdfFitViewportLayout, PDF_VIEWPORT_PAD, type PdfFitViewportLayout } from "../../../utils/pdf/pdfPageCalc";
+import { buildPdfFitViewportLayout, PDF_DEFAULT_PAGE_ASPECT_RATIO, PDF_MIN_LAYOUT_DIMENSION, PDF_VIEWPORT_PAD, type PdfFitViewportLayout } from "../../../utils/pdf/pdfPageCalc";
 import { decodePdfHighlight, isPdfHighlightStartPos } from "../../../utils/reader/readerHighlightPosition";
 import type { PdfSavedHighlightRow } from "../../../utils/pdf/pdfTextLayerSavedHighlightHtml";
 import type { PDFDocumentProxy } from "pdfjs-dist";
@@ -42,11 +42,14 @@ export const derivePinnedPdfPages = (
 };
 
 export const derivePdfViewerLayout = (aspects: number[] | null, numPages: number, viewportW: number, viewportH: number): PdfFitViewportLayout | null => {
-  if (!aspects || numPages <= 0 || viewportW <= 0 || viewportH <= 0) return null;
+  if (numPages <= 0) return null;
+  const vw = Math.max(viewportW, PDF_MIN_LAYOUT_DIMENSION);
+  const vh = Math.max(viewportH, PDF_MIN_LAYOUT_DIMENSION);
   const pad = PDF_VIEWPORT_PAD * 2;
-  const availW = Math.max(0, viewportW - pad);
-  const availH = Math.max(0, viewportH - pad);
-  return buildPdfFitViewportLayout(aspects, availW, availH, numPages);
+  const availW = Math.max(0, vw - pad);
+  const availH = Math.max(0, vh - pad);
+  const aspectList = aspects?.length ? aspects : Array(numPages).fill(PDF_DEFAULT_PAGE_ASPECT_RATIO);
+  return buildPdfFitViewportLayout(aspectList, availW, availH, numPages);
 };
 
 export const derivePdfScaledOffsets = (layout: PdfFitViewportLayout | null, numPages: number, zoom: number): number[] | null => {
@@ -54,6 +57,22 @@ export const derivePdfScaledOffsets = (layout: PdfFitViewportLayout | null, numP
   const off: number[] = [0];
   for (let i = 0; i < numPages; i++) off.push(off[i] + layout.heights[i] * zoom);
   return off;
+};
+
+export const collectPdfPageAspectRatiosFast = async (doc: PDFDocumentProxy): Promise<number[]> => {
+  const n = doc.numPages;
+  if (n <= 0) return [];
+  let ratio = PDF_DEFAULT_PAGE_ASPECT_RATIO;
+  try {
+    const page = await doc.getPage(1);
+    const vp = page.getViewport({ scale: 1 });
+    const rw = Math.max(vp.width, MIN_PDF_PAGE_DIMENSION_EPS);
+    const r = vp.height / rw;
+    if (Number.isFinite(r) && r > 0) ratio = r;
+  } catch {
+    /* default */
+  }
+  return Array(n).fill(ratio);
 };
 
 export const collectPdfPageAspectRatios = async (doc: PDFDocumentProxy): Promise<number[]> => {

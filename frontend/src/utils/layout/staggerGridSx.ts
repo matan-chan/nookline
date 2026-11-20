@@ -1,3 +1,4 @@
+import { nooklineMotion, reducedMotionMedia } from "../../theme/nooklineMotion";
 import { keyframes, type SxProps, type Theme } from "@mui/material/styles";
 
 const staggerFadeUp = keyframes`
@@ -11,8 +12,8 @@ const staggerFadeUp = keyframes`
   }
 `;
 
-const STAGGER_STEP_MS = 40;
-const STAGGER_MAX_CHILDREN = 32;
+const STAGGER_STEP_MS = nooklineMotion.staggerStepMs;
+const STAGGER_MAX_CHILDREN = nooklineMotion.staggerMaxChildren;
 
 const staggerDelayRows = Object.fromEntries(
   Array.from({ length: STAGGER_MAX_CHILDREN }, (_, i) => [
@@ -23,7 +24,8 @@ const staggerDelayRows = Object.fromEntries(
 
 export const staggerGridChildrenSx = {
   "& > *": {
-    animation: `${staggerFadeUp} 0.45s cubic-bezier(0.4, 0, 0.2, 1) backwards`,
+    animation: `${staggerFadeUp} 0.4s ${nooklineMotion.easeOut} backwards`,
+    [reducedMotionMedia]: { animation: "none" },
   },
   ...staggerDelayRows,
 };
@@ -34,7 +36,12 @@ export const coverCardColumnHoverSx: SxProps<Theme> = {
   display: "flex",
   flexDirection: "column",
   gap: 1,
-  transition: `transform 0.22s ${cardColumnEase}`,
+  transition: `transform ${nooklineMotion.cardHoverMs}ms ${cardColumnEase}`,
   "&:hover": { transform: "translateY(-3px)" },
   "&:hover .cover, &:hover .lib-cover": { transform: "scale(1.02)" },
+  [reducedMotionMedia]: {
+    transition: "none",
+    "&:hover": { transform: "none" },
+    "&:hover .cover, &:hover .lib-cover": { transform: "none" },
+  },
 };

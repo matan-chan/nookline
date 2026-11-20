@@ -19,6 +19,7 @@
   "heroStatVolumes_other": "{{count}} volumes in series",
   "addBook": "+ Add Book",
   "searchPlaceholder": "Search…",
+  "clearSearch": "Clear search",
   "sortLabel": "Sort",
   "sortTitle": "Title A–Z",
   "sortNewest": "Newest",

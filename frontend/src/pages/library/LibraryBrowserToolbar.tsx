@@ -2,6 +2,7 @@ import { Box, Button, Drawer, FormControl, IconButton, InputLabel, List, ListIte
 import { sanitizeLettersDigitsAndWhitespace } from "../../utils/input/sanitizeUserInput";
 import type { LibrarySortOption } from "./libraryBrowserTypes";
 import SwapVert from "@mui/icons-material/SwapVert";
+import Clear from "@mui/icons-material/Clear";
 import Add from "@mui/icons-material/Add";
 import type { TFunction } from "i18next";
 import { useState } from "react";
@@ -47,6 +48,13 @@ export const LibraryBrowserToolbar = ({ t, search, setSearch, sort, setSort, onA
           value={search}
           onChange={(e) => setSearch(sanitizeLettersDigitsAndWhitespace(e.target.value))}
           inputProps={{ "aria-label": t("searchPlaceholder") }}
+          InputProps={{
+            endAdornment: search ? (
+              <IconButton size="small" aria-label={t("clearSearch")} onClick={() => setSearch("")}>
+                <Clear sx={{ fontSize: 18 }} />
+              </IconButton>
+            ) : undefined,
+          }}
           sx={{
             flex: 1,
             minWidth: 0,
@@ -120,7 +128,20 @@ export const LibraryBrowserToolbar = ({ t, search, setSearch, sort, setSort, onA
           {t("addBook")}
         </Button>
 
-        <TextField size="small" placeholder={t("searchPlaceholder")} value={search} onChange={(e) => setSearch(sanitizeLettersDigitsAndWhitespace(e.target.value))} sx={{ width: 192, minWidth: 0 }} />
+        <TextField
+          size="small"
+          placeholder={t("searchPlaceholder")}
+          value={search}
+          onChange={(e) => setSearch(sanitizeLettersDigitsAndWhitespace(e.target.value))}
+          InputProps={{
+            endAdornment: search ? (
+              <IconButton size="small" aria-label={t("clearSearch")} onClick={() => setSearch("")}>
+                <Clear sx={{ fontSize: 18 }} />
+              </IconButton>
+            ) : undefined,
+          }}
+          sx={{ width: 220, minWidth: 0 }}
+        />
 
         <FormControl size="small" sx={{ minWidth: 140 }}>
           <InputLabel id="sort-label">{t("sortLabel")}</InputLabel>

@@ -1,4 +1,12 @@
-import { pdfListRenderWindowFromScroll, pdfOneBasedVisiblePageFromScroll, pdfProgressPercent, resolvePdfInitialPage, PDF_LIST_VIEWPORT_MARGIN_PAGES, PDF_LIST_VIEWPORT_MARGIN_PAGES_LARGE } from "../../../utils/pdf/pdfPageCalc";
+import {
+  measurePdfScrollViewport,
+  pdfListRenderWindowFromScroll,
+  pdfOneBasedVisiblePageFromScroll,
+  pdfProgressPercent,
+  resolvePdfInitialPage,
+  PDF_LIST_VIEWPORT_MARGIN_PAGES,
+  PDF_LIST_VIEWPORT_MARGIN_PAGES_LARGE,
+} from "../../../utils/pdf/pdfPageCalc";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePdfZoomPinchAndKeys } from "./usePdfZoomPinchAndKeys";
@@ -72,13 +80,27 @@ export const usePdfBookViewer = ({
   scaledOffsetsRef.current = scaledOffsets;
 
   useLayoutEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => setViewport({ w: el.clientWidth, h: el.clientHeight }));
-    ro.observe(el);
-    setViewport({ w: el.clientWidth, h: el.clientHeight });
-    return () => ro.disconnect();
-  }, []);
+    const scrollEl = scrollRef.current;
+    if (!scrollEl) return;
+
+    const syncViewport = () => setViewport(measurePdfScrollViewport(scrollRef.current, shellRef.current));
+
+    syncViewport();
+    const ro = new ResizeObserver(syncViewport);
+    ro.observe(scrollEl);
+    const shellEl = shellRef.current;
+    if (shellEl) ro.observe(shellEl);
+
+    const onWinResize = () => syncViewport();
+    window.addEventListener("resize", onWinResize);
+    const raf = requestAnimationFrame(() => requestAnimationFrame(syncViewport));
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", onWinResize);
+      cancelAnimationFrame(raf);
+    };
+  }, [numPages, aspects]);
 
   const schedulePersist = useCallback(
     (page: number, total: number) => {
@@ -129,12 +151,12 @@ export const usePdfBookViewer = ({
 
   useLayoutEffect(() => {
     const el = scrollRef.current;
-    if (!el || !scaledOffsets || numPages <= 0 || aspects == null || initialScrollDoneRef.current) return;
+    if (!el || !scaledOffsets || numPages <= 0 || !layout || initialScrollDoneRef.current) return;
     initialScrollDoneRef.current = true;
     const initial = resolvePdfInitialPage(numPages, storedPage, savedPosition, fallbackPercentage);
     el.scrollTo({ top: scaledOffsets[initial - 1] ?? 0, behavior: "auto" });
     syncVisiblePageFromScroll();
-  }, [scaledOffsets, numPages, aspects, storedPage, savedPosition, fallbackPercentage, syncVisiblePageFromScroll]);
+  }, [scaledOffsets, numPages, layout, storedPage, savedPosition, fallbackPercentage, syncVisiblePageFromScroll]);
 
   usePdfBookmarkScroll({
     scrollRef,

@@ -1,7 +1,7 @@
 import { BookCoverImg } from "../../components/BookCoverImg";
 import BookCoverProgressBar from "../../components/BookCoverProgressBar";
 import CardOverflowMenu from "../../components/CardOverflowMenu";
-import { getCoverUrl } from "../../utils/cover/cover";
+import { getCoverUrl, getFileExt } from "../../utils/cover/cover";
 import { coverCardColumnHoverSx, staggerGridChildrenSx } from "../../utils/layout/staggerGridSx";
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
@@ -24,6 +24,7 @@ export const LibraryCoverCard = ({
   title,
   coverImagePath,
   metadata,
+  fileExt: fileExtProp,
   coverUrl: coverOverride,
   readPercentage,
   to,
@@ -35,6 +36,7 @@ export const LibraryCoverCard = ({
   title: string;
   coverImagePath: string | null;
   metadata?: string | null;
+  fileExt?: string | null;
   coverUrl?: string | null;
   readPercentage?: number | null;
   to: string;
@@ -43,6 +45,7 @@ export const LibraryCoverCard = ({
   kind: "book" | "series";
 }) => {
   const coverUrl = coverOverride ?? getCoverUrl({ id, coverImagePath, metadata });
+  const fileExt = kind === "book" ? getFileExt({ id, coverImagePath, metadata, fileExt: fileExtProp }) : null;
   return (
     <Box sx={coverCardColumnHoverSx}>
       <Box
@@ -57,8 +60,14 @@ export const LibraryCoverCard = ({
         }}
       >
         <Box component={Link} to={to} sx={{ position: "absolute", inset: 0, zIndex: 0, display: "block" }}>
-          {coverUrl ? (
-            <BookCoverImg src={coverUrl} alt={title} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          {coverUrl || fileExt === "pdf" ? (
+            <BookCoverImg
+              bookId={kind === "book" ? id : undefined}
+              fileExt={fileExt}
+              src={coverUrl ?? ""}
+              alt={title}
+              sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
           ) : (
             <Box sx={(t) => ({ display: "flex", height: "100%", width: "100%", alignItems: "center", justifyContent: "center", bgcolor: t.surfaces.high, px: 1 })}>
               <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>

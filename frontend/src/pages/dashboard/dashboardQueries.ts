@@ -13,6 +13,7 @@ export const DASHBOARD_HOME_QUERY = gql`
         id
         title
         coverImagePath
+        fileExt
         metadata
       }
     }
@@ -20,6 +21,7 @@ export const DASHBOARD_HOME_QUERY = gql`
       id
       title
       coverImagePath
+      fileExt
       metadata
       readingProgressForUser(userId: $userId) {
         percentage
@@ -30,6 +32,7 @@ export const DASHBOARD_HOME_QUERY = gql`
         id
         title
         coverImagePath
+        fileExt
         metadata
       }
       progress {
@@ -40,6 +43,7 @@ export const DASHBOARD_HOME_QUERY = gql`
       id
       title
       coverImagePath
+      fileExt
       metadata
       createdAt
       readingProgressForUser(userId: $userId) {

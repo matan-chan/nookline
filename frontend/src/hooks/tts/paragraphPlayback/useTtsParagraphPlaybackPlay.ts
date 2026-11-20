@@ -25,6 +25,7 @@ export const useTtsParagraphPlaybackPlay = (args: PlayArgs) => {
     flushServerReadingRef,
     audioRef,
     playingRef,
+    playing,
     fetchSpeechBlob,
     playAudioFromUrl,
     prefetchAt,
@@ -92,20 +93,21 @@ export const useTtsParagraphPlaybackPlay = (args: PlayArgs) => {
 
   const togglePlay = useCallback(() => {
     const a = audioRef.current;
-    if (a && !a.paused && playingRef.current) {
-      a.pause();
+    const hasSession = parasRef.current.length > 0;
+    if (playing || (a && !a.paused && playingRef.current)) {
+      a?.pause();
       playingRef.current = false;
       setPlaying(false);
       return;
     }
-    if (a && a.paused && parasRef.current.length > 0) {
+    if (a && a.paused && hasSession) {
       void a.play();
       playingRef.current = true;
       setPlaying(true);
       return;
     }
     void beginPlayback();
-  }, [beginPlayback]);
+  }, [beginPlayback, playing]);
 
   const goParagraph = useCallback(
     (delta: number) => {

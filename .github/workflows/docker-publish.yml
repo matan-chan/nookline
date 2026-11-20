@@ -21,9 +21,13 @@ jobs:
       matrix:
         include:
           - image: nookline-backend
-            context: ./backend
+            context: .
+            dockerfile: backend/Dockerfile
+            version_file: backend/Cargo.toml
           - image: nookline-frontend
             context: ./frontend
+            dockerfile: Dockerfile
+            version_file: frontend/package.json
 
     steps:
       - uses: actions/checkout@v4
@@ -42,9 +46,13 @@ jobs:
       - name: Read package version for image tags
         id: pkg_version
         shell: bash
-        working-directory: ${{ matrix.context }}
         run: |
-          v=$(node -p "require('./package.json').version")
+          vf="${{ matrix.version_file }}"
+          if [[ "$vf" == *.toml ]]; then
+            v=$(grep -E '^version\s*=' "$vf" | head -1 | sed -E 's/.*"([^"]+)".*/\1/')
+          else
+            v=$(node -p "require('./$vf').version")
+          fi
           echo "version=$v" >> "$GITHUB_OUTPUT"
 
       - id: meta
@@ -61,6 +69,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -94,9 +103,11 @@ jobs:
           elif [[ "$GITHUB_REF" == "refs/heads/$DEFAULT_BRANCH" ]]; then
             tag="latest"
           else
-            pkg=frontend/package.json
-            if [[ "$IMAGE_NAME" == "nookline-backend" ]]; then pkg=backend/package.json; fi
-            tag=$(node -p "require(\"./$pkg\").version")
+            if [[ "$IMAGE_NAME" == "nookline-backend" ]]; then
+              tag=$(grep -E '^version\s*=' backend/Cargo.toml | head -1 | sed -E 's/.*"([^"]+)".*/\1/')
+            else
+              tag=$(node -p "require(\"./frontend/package.json\").version")
+            fi
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "Scan ghcr tag: $tag" >&2
@@ -115,7 +126,7 @@ jobs:
           vuln-type: os,library
           severity: CRITICAL
           ignore-unfixed: true
-          exit-code: 0
+          exit-code: 1
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')

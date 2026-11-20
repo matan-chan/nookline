@@ -2,6 +2,7 @@ export type DashboardLibraryPreviewBook = {
   id: number;
   title: string;
   coverImagePath: string | null;
+  fileExt?: string | null;
   metadata: string | null;
 };
 
