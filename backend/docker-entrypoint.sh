@@ -31,8 +31,8 @@ else
 fi
 
 if [ -n "${DATABASE_URL:-}" ] && [ -d /app/prisma/migrations ]; then
-  if command -v prisma >/dev/null 2>&1; then
-    prisma migrate deploy --schema=/app/prisma/schema.prisma
+  if command -v node >/dev/null 2>&1 && [ -f /app/node_modules/prisma/build/index.js ]; then
+    node /app/node_modules/prisma/build/index.js migrate deploy --schema=/app/prisma/schema.prisma
   fi
 fi
 

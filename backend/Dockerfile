@@ -16,8 +16,9 @@ RUN apt-get update \
 RUN groupadd -r app && useradd -r -g app -d /app -s /usr/sbin/nologin app
 WORKDIR /app
 COPY --from=build /build/target/release/nookline-backend /usr/local/bin/nookline-backend
+COPY --from=prisma /usr/local/bin/node /usr/local/bin/node
 COPY --from=prisma /prisma/prisma /app/prisma
-COPY --from=prisma /prisma/node_modules/.bin/prisma /usr/local/bin/prisma
+COPY --from=prisma /prisma/node_modules /app/node_modules
 COPY backend/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh \
     && mkdir -p /data /books \
