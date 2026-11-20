@@ -21,16 +21,11 @@ pub async fn load_existing_file_path_keys(
     pool: &SqlitePool,
     library_id: i64,
 ) -> Result<HashSet<String>, sqlx::Error> {
-    let paths: Vec<String> = sqlx::query_scalar(
-        r#"SELECT filePath FROM Book WHERE libraryId = ?"#,
-    )
-    .bind(library_id)
-    .fetch_all(pool)
-    .await?;
-    Ok(paths
-        .into_iter()
-        .map(|p| canonical_path_key(&p))
-        .collect())
+    let paths: Vec<String> = sqlx::query_scalar(r#"SELECT filePath FROM Book WHERE libraryId = ?"#)
+        .bind(library_id)
+        .fetch_all(pool)
+        .await?;
+    Ok(paths.into_iter().map(|p| canonical_path_key(&p)).collect())
 }
 
 fn canonical_path_key(p: &str) -> String {
@@ -81,7 +76,10 @@ pub async fn resolve_series_id_for_create(
     Ok(Some(id))
 }
 
-pub async fn create_book_record(pool: &SqlitePool, input: CreateBookInput) -> Result<BookRow, sqlx::Error> {
+pub async fn create_book_record(
+    pool: &SqlitePool,
+    input: CreateBookInput,
+) -> Result<BookRow, sqlx::Error> {
     let series_id = resolve_series_id_for_create(
         pool,
         input.library_id,
@@ -108,14 +106,16 @@ pub async fn create_book_record(pool: &SqlitePool, input: CreateBookInput) -> Re
 
 async fn post_create_book_pipeline(pool: &SqlitePool, book_id: i64) {
     let _ = crate::services::book::local_fallback::apply_local_book_fallback(pool, book_id).await;
-    crate::services::pdf::infer_and_persist_pdf_margin_strip_regexes(pool, book_id)
-        .await;
+    crate::services::pdf::infer_and_persist_pdf_margin_strip_regexes(pool, book_id).await;
     let _ = crate::services::epub::enqueue_pdf_to_epub_for_book(pool, book_id).await;
 }
 
 async fn fetch_book_row(pool: &SqlitePool, id: i64) -> Result<BookRow, sqlx::Error> {
     let q = format!("{BOOK_SELECT} WHERE id = ?");
-    sqlx::query_as::<_, BookRow>(&q).bind(id).fetch_one(pool).await
+    sqlx::query_as::<_, BookRow>(&q)
+        .bind(id)
+        .fetch_one(pool)
+        .await
 }
 
 #[derive(sqlx::FromRow)]
@@ -131,12 +131,10 @@ pub async fn load_library_books_for_artifact_cleanup(
     pool: &SqlitePool,
     library_id: i64,
 ) -> Result<Vec<BookArtifactRow>, sqlx::Error> {
-    sqlx::query_as(
-        r#"SELECT id, filePath, coverImagePath FROM Book WHERE libraryId = ?"#,
-    )
-    .bind(library_id)
-    .fetch_all(pool)
-    .await
+    sqlx::query_as(r#"SELECT id, filePath, coverImagePath FROM Book WHERE libraryId = ?"#)
+        .bind(library_id)
+        .fetch_all(pool)
+        .await
 }
 
 pub fn unlink_library_books_disk_artifacts(lib_path: &str, rows: &[BookArtifactRow]) {
@@ -161,12 +159,11 @@ pub async fn delete_book_for_user(
     let Some(book) = row else {
         return Ok(false);
     };
-    if let Ok(Some(lib_path)) = sqlx::query_scalar::<_, String>(
-        r#"SELECT path FROM Library WHERE id = ?"#,
-    )
-    .bind(book.library_id)
-    .fetch_optional(pool)
-    .await
+    if let Ok(Some(lib_path)) =
+        sqlx::query_scalar::<_, String>(r#"SELECT path FROM Library WHERE id = ?"#)
+            .bind(book.library_id)
+            .fetch_optional(pool)
+            .await
     {
         crate::services::book::unlink_book_disk_artifacts(
             &crate::services::book::BookDiskArtifactInput {
@@ -187,7 +184,10 @@ pub async fn delete_book_for_user(
     Ok(true)
 }
 
-pub async fn delete_book_children(pool: &mut sqlx::SqliteConnection, book_id: i64) -> Result<(), sqlx::Error> {
+pub async fn delete_book_children(
+    pool: &mut sqlx::SqliteConnection,
+    book_id: i64,
+) -> Result<(), sqlx::Error> {
     sqlx::query(r#"DELETE FROM Bookmark WHERE bookId = ?"#)
         .bind(book_id)
         .execute(&mut *pool)

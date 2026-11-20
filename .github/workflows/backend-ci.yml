@@ -114,7 +114,7 @@ jobs:
           JWT_SECRET: ci-smoke-secret-must-be-at-least-32-bytes-long
           PORT: 4010
         run: |
-          cargo run --release &
+          cargo run --release --bin nookline-backend &
           echo $! > ../tmp/rust-backend.pid
           for i in $(seq 1 60); do
             if curl -fsS "http://127.0.0.1:4010/api/health" >/dev/null; then

@@ -16,7 +16,11 @@ fn is_already_enriched(meta: &Value) -> bool {
     let Some(ol) = meta.get("openLibrary") else {
         return false;
     };
-    if ol.get("fetchFailed").and_then(|v| v.as_bool()).unwrap_or(false) {
+    if ol
+        .get("fetchFailed")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false)
+    {
         return false;
     }
     if ol.get("enrichedAt").and_then(|v| v.as_str()).is_none() {
@@ -26,7 +30,10 @@ fn is_already_enriched(meta: &Value) -> bool {
 }
 
 fn hint_from_book_meta(meta: &Value) -> (Option<String>, Option<String>) {
-    let author = meta.get("author").and_then(|v| v.as_str()).map(String::from);
+    let author = meta
+        .get("author")
+        .and_then(|v| v.as_str())
+        .map(String::from);
     let hint = meta
         .get("openLibraryWorkKey")
         .and_then(|v| v.as_str())
@@ -65,7 +72,12 @@ async fn resolve_work_key(title: &str, author: Option<&str>, hint: Option<&str>)
     }
     let url = search_by_title_url(title, author);
     let data = fetch_json(&url).await.ok()??;
-    let key = data.get("docs")?.as_array()?.first()?.get("key")?.as_str()?;
+    let key = data
+        .get("docs")?
+        .as_array()?
+        .first()?
+        .get("key")?
+        .as_str()?;
     if key.starts_with("/works/") {
         return Some(key.to_string());
     }
@@ -118,15 +130,14 @@ async fn load_work_bundle(work_key: &str) -> Option<(Value, Value)> {
         .and_then(|r| r.get("summary"))
         .and_then(|s| s.get("count"))
         .and_then(|v| v.as_i64());
-    let description = normalize_description(&work["description"])
-        .or_else(|| {
-            work.get("excerpts")
-                .and_then(|e| e.as_array())
-                .and_then(|a| a.first())
-                .and_then(|x| x.get("excerpt"))
-                .and_then(|e| e.as_str())
-                .map(|s| s.to_string())
-        });
+    let description = normalize_description(&work["description"]).or_else(|| {
+        work.get("excerpts")
+            .and_then(|e| e.as_array())
+            .and_then(|a| a.first())
+            .and_then(|x| x.get("excerpt"))
+            .and_then(|e| e.as_str())
+            .map(|s| s.to_string())
+    });
     let enrichment = json!({
         "enrichedAt": chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
         "workKey": work_key,
@@ -142,8 +153,7 @@ async fn load_work_bundle(work_key: &str) -> Option<(Value, Value)> {
 
 async fn post_enrich_book_pipeline(pool: &SqlitePool, book_id: i64) {
     let _ = crate::services::book::local_fallback::apply_local_book_fallback(pool, book_id).await;
-    crate::services::pdf::infer_and_persist_pdf_margin_strip_regexes(pool, book_id)
-        .await;
+    crate::services::pdf::infer_and_persist_pdf_margin_strip_regexes(pool, book_id).await;
     let _ = crate::services::epub::enqueue_pdf_to_epub_for_book(pool, book_id).await;
 }
 
@@ -227,12 +237,7 @@ pub async fn enrich_book_record(
         return Ok(Some(book));
     }
     let (author, hint) = hint_from_book_meta(&meta);
-    let work_key = resolve_work_key(
-        &book.title,
-        author.as_deref(),
-        hint.as_deref(),
-    )
-    .await;
+    let work_key = resolve_work_key(&book.title, author.as_deref(), hint.as_deref()).await;
     let Some(work_key) = work_key else {
         let stub = search_failed_stub(&meta);
         sqlx::query(r#"UPDATE Book SET metadata = ?, updatedAt = datetime('now') WHERE id = ?"#)
@@ -382,7 +387,10 @@ mod tests {
             "sourceVersion": OL_META_VERSION,
         });
         let merged = merge_book_meta(&existing, &enrichment, "/works/OL1W");
-        assert_eq!(merged.get("openLibraryWorkKey").and_then(|v| v.as_str()), Some("/works/OL1W"));
+        assert_eq!(
+            merged.get("openLibraryWorkKey").and_then(|v| v.as_str()),
+            Some("/works/OL1W")
+        );
         assert_eq!(merged.get("author").and_then(|v| v.as_str()), Some("A"));
         assert_eq!(
             merged
@@ -395,7 +403,11 @@ mod tests {
 
     #[test]
     fn merge_series_sets_open_library_block() {
-        let merged = merge_series_meta(&json!({}), &json!({ "workKey": "/works/OL1W" }), "/works/OL1W");
+        let merged = merge_series_meta(
+            &json!({}),
+            &json!({ "workKey": "/works/OL1W" }),
+            "/works/OL1W",
+        );
         assert_eq!(
             merged.get("openLibraryWorkKey").and_then(|v| v.as_str()),
             Some("/works/OL1W")
@@ -485,11 +497,11 @@ mod tests {
             enrichment.get("workKey").and_then(|v| v.as_str()),
             Some("/works/OLZ")
         );
-        assert_eq!(enrichment.get("ratingsAverage").and_then(|v| v.as_f64()), Some(3.0));
         assert_eq!(
-            work.get("title").and_then(|v| v.as_str()),
-            Some("Book")
+            enrichment.get("ratingsAverage").and_then(|v| v.as_f64()),
+            Some(3.0)
         );
+        assert_eq!(work.get("title").and_then(|v| v.as_str()), Some("Book"));
         let subjects = enrichment
             .get("subjects")
             .and_then(|v| v.as_array())

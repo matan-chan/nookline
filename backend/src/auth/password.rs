@@ -53,7 +53,10 @@ pub fn validate_password_strength(plain: &str) -> Result<(), &'static str> {
     let upper = t.chars().any(|c| c.is_ascii_uppercase());
     let digit = t.chars().any(|c| c.is_ascii_digit());
     let special = t.chars().any(|c| !c.is_alphanumeric());
-    let classes = [lower, upper, digit, special].iter().filter(|&&x| x).count();
+    let classes = [lower, upper, digit, special]
+        .iter()
+        .filter(|&&x| x)
+        .count();
     if classes < 3 {
         return Err("Use at least three of: lower case, upper case, digits, symbols.");
     }

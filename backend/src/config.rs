@@ -10,7 +10,10 @@ const WEAK_SECRETS: &[&str] = &[
 ];
 
 pub fn assert_production_signing_secret() {
-    if std::env::var("NODE_ENV").map(|v| v == "production").unwrap_or(false) {
+    if std::env::var("NODE_ENV")
+        .map(|v| v == "production")
+        .unwrap_or(false)
+    {
         let s = jwt_signing_secret();
         let lower = s.to_lowercase();
         if s.len() < 32 || WEAK_SECRETS.iter().any(|w| lower == *w) {

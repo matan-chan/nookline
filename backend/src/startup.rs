@@ -45,10 +45,9 @@ async fn repair_legacy_ms_datetimes(pool: &SqlitePool) -> Result<(), sqlx::Error
 
 async fn repair_absolute_book_paths(pool: &SqlitePool) -> Result<(), sqlx::Error> {
     use crate::util::paths::normalize_stored_upload_path;
-    let rows: Vec<(i64, String)> =
-        sqlx::query_as(r#"SELECT id, filePath FROM Book"#)
-            .fetch_all(pool)
-            .await?;
+    let rows: Vec<(i64, String)> = sqlx::query_as(r#"SELECT id, filePath FROM Book"#)
+        .fetch_all(pool)
+        .await?;
     for (id, fp) in rows {
         let next = normalize_stored_upload_path(&fp);
         if next.is_empty() || next == fp {
@@ -82,8 +81,12 @@ async fn repair_absolute_book_paths(pool: &SqlitePool) -> Result<(), sqlx::Error
 }
 
 async fn ensure_legacy_libraries_admin(pool: &SqlitePool) -> Result<(), sqlx::Error> {
-    let user_count: i64 = sqlx::query_scalar(r#"SELECT COUNT(*) FROM User"#).fetch_one(pool).await?;
-    let lib_count: i64 = sqlx::query_scalar(r#"SELECT COUNT(*) FROM Library"#).fetch_one(pool).await?;
+    let user_count: i64 = sqlx::query_scalar(r#"SELECT COUNT(*) FROM User"#)
+        .fetch_one(pool)
+        .await?;
+    let lib_count: i64 = sqlx::query_scalar(r#"SELECT COUNT(*) FROM Library"#)
+        .fetch_one(pool)
+        .await?;
     if user_count > 0 || lib_count == 0 {
         return Ok(());
     }
@@ -102,11 +105,10 @@ async fn ensure_legacy_libraries_admin(pool: &SqlitePool) -> Result<(), sqlx::Er
     .bind(hashed)
     .execute(pool)
     .await?;
-    let uid: Option<i64> =
-        sqlx::query_scalar(r#"SELECT id FROM User WHERE username = ?"#)
-            .bind(username)
-            .fetch_optional(pool)
-            .await?;
+    let uid: Option<i64> = sqlx::query_scalar(r#"SELECT id FROM User WHERE username = ?"#)
+        .bind(username)
+        .fetch_optional(pool)
+        .await?;
     if let Some(id) = uid {
         sqlx::query(r#"UPDATE Library SET userId = ?"#)
             .bind(id)

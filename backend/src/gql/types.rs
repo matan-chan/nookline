@@ -81,7 +81,9 @@ impl LibraryGql {
     #[graphql(name = "previewBook")]
     async fn preview_book(&self, ctx: &Context<'_>) -> Result<Option<BookGql>> {
         let books = self.books(ctx).await?;
-        Ok(books.into_iter().max_by(|a, b| a.0.created_at.cmp(&b.0.created_at)))
+        Ok(books
+            .into_iter()
+            .max_by(|a, b| a.0.created_at.cmp(&b.0.created_at)))
     }
 
     #[graphql(name = "previewBooks")]
@@ -90,9 +92,7 @@ impl LibraryGql {
         ctx: &Context<'_>,
         #[graphql(default = 3)] limit: Option<i32>,
     ) -> Result<Vec<BookGql>> {
-        let cap = limit
-            .unwrap_or(3)
-            .clamp(1, 5) as usize;
+        let cap = limit.unwrap_or(3).clamp(1, 5) as usize;
         let mut books = self.books(ctx).await?;
         books.sort_by(|a, b| b.0.created_at.cmp(&a.0.created_at));
         books.truncate(cap);

@@ -4,7 +4,7 @@ mod token;
 
 pub use helpers::{email_for_username, is_valid_username, normalize_username};
 pub use password::{hash_password, validate_password_strength, verify_password_scrypt};
-pub use token::{create_auth_token, bearer_token, verify_auth_token, AUTH_TOKEN_TTL_MS};
+pub use token::{bearer_token, create_auth_token, verify_auth_token, AUTH_TOKEN_TTL_MS};
 
 use sqlx::FromRow;
 use sqlx::SqlitePool;

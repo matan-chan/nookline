@@ -1,4 +1,3 @@
-
 use crate::util::paths::{resolve_library_content_dir, upload_base_dir};
 
 pub fn remove_library_disk_folder_if_safe(library_path: &str) {

@@ -107,14 +107,21 @@ fn resolve_scan_root(configured_path: &str) -> Result<PathBuf, String> {
     }
     let meta = std::fs::metadata(&root).map_err(|e| e.to_string())?;
     if !meta.is_dir() {
-        return Err(format!("Library path is not a directory: {}", root.display()));
+        return Err(format!(
+            "Library path is not a directory: {}",
+            root.display()
+        ));
     }
     std::fs::canonicalize(&root).map_err(|e| format!("Library path is not accessible: {e}"))
 }
 
 fn collect_book_paths(root: &Path) -> Result<Vec<String>, String> {
     let mut out = Vec::new();
-    for ent in WalkDir::new(root).follow_links(false).into_iter().filter_map(|e| e.ok()) {
+    for ent in WalkDir::new(root)
+        .follow_links(false)
+        .into_iter()
+        .filter_map(|e| e.ok())
+    {
         if !ent.file_type().is_file() {
             continue;
         }

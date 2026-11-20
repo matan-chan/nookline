@@ -15,33 +15,22 @@ async fn series_attach_creates_once_and_reuses() {
     let work = json!({
         "series": [{ "name": "Saga", "position": "2" }]
     });
-    let a = resolve_series_attachment_from_work(
-        &env.state.pool,
-        lib.id,
-        None,
-        None,
-        &json!({}),
-        &work,
-    )
-    .await;
-    let b = resolve_series_attachment_from_work(
-        &env.state.pool,
-        lib.id,
-        None,
-        None,
-        &json!({}),
-        &work,
-    )
-    .await;
+    let a =
+        resolve_series_attachment_from_work(&env.state.pool, lib.id, None, None, &json!({}), &work)
+            .await;
+    let b =
+        resolve_series_attachment_from_work(&env.state.pool, lib.id, None, None, &json!({}), &work)
+            .await;
     let sid = a.series_id.expect("series a");
     assert_eq!(b.series_id, Some(sid));
     assert_eq!(b.volume_number, Some(2.0));
-    let count: i64 = sqlx::query_scalar(r#"SELECT COUNT(*) FROM Series WHERE libraryId = ? AND title = ?"#)
-        .bind(lib.id)
-        .bind("Saga")
-        .fetch_one(&env.state.pool)
-        .await
-        .expect("count");
+    let count: i64 =
+        sqlx::query_scalar(r#"SELECT COUNT(*) FROM Series WHERE libraryId = ? AND title = ?"#)
+            .bind(lib.id)
+            .bind("Saga")
+            .fetch_one(&env.state.pool)
+            .await
+            .expect("count");
     assert_eq!(count, 1);
 }
 

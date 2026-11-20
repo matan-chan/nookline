@@ -19,7 +19,10 @@ const fn health_text() -> &'static str {
 
 async fn http_health() -> impl IntoResponse {
     (
-        [(header::CONTENT_TYPE, HeaderValue::from_static("text/plain; charset=utf-8"))],
+        [(
+            header::CONTENT_TYPE,
+            HeaderValue::from_static("text/plain; charset=utf-8"),
+        )],
         health_text(),
     )
 }

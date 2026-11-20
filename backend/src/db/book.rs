@@ -31,7 +31,10 @@ pub(crate) const BOOK_SELECT_JOIN: &str = concat!(
     "CASE WHEN typeof(Book.createdAt) = 'integer' THEN datetime(Book.createdAt / 1000, 'unixepoch') ELSE Book.createdAt END AS createdAt "
 );
 
-pub async fn books_for_library(pool: &SqlitePool, library_id: i64) -> Result<Vec<BookRow>, sqlx::Error> {
+pub async fn books_for_library(
+    pool: &SqlitePool,
+    library_id: i64,
+) -> Result<Vec<BookRow>, sqlx::Error> {
     let q = format!("{BOOK_SELECT} WHERE libraryId = ? ORDER BY createdAt DESC");
     sqlx::query_as::<_, BookRow>(&q)
         .bind(library_id)
@@ -39,7 +42,11 @@ pub async fn books_for_library(pool: &SqlitePool, library_id: i64) -> Result<Vec
         .await
 }
 
-pub async fn book_for_user(pool: &SqlitePool, user_id: i64, book_id: i64) -> Result<Option<BookRow>, sqlx::Error> {
+pub async fn book_for_user(
+    pool: &SqlitePool,
+    user_id: i64,
+    book_id: i64,
+) -> Result<Option<BookRow>, sqlx::Error> {
     let q = format!(
         "{BOOK_SELECT} WHERE Book.id = ? AND Book.libraryId IN (SELECT id FROM Library WHERE userId = ?)"
     );
@@ -55,16 +62,14 @@ pub async fn recently_added_for_user(
     user_id: i64,
     limit: i64,
 ) -> Result<Vec<BookRow>, sqlx::Error> {
-    sqlx::query_as::<_, BookRow>(
-        &format!(
-            "{BOOK_SELECT_JOIN}
+    sqlx::query_as::<_, BookRow>(&format!(
+        "{BOOK_SELECT_JOIN}
         FROM Book
         INNER JOIN Library ON Book.libraryId = Library.id
         WHERE Library.userId = ?
         ORDER BY Book.createdAt DESC
         LIMIT ?"
-        ),
-    )
+    ))
     .bind(user_id)
     .bind(limit)
     .fetch_all(pool)

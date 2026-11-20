@@ -1,8 +1,8 @@
 use async_graphql::{Context, InputObject, Object, Result};
 
 use crate::db::{
-    create_library, delete_library_owned, normalize_library_banner_index, random_library_banner_index,
-    update_library,
+    create_library, delete_library_owned, normalize_library_banner_index,
+    random_library_banner_index, update_library,
 };
 use crate::gql::types::{require_user, BookGql, LibraryGql};
 use crate::services::library_disk_sync::sync_library_books_from_disk;
@@ -72,9 +72,10 @@ impl LibraryMutation {
         let state = ctx.data_unchecked::<AppState>();
         let user = require_user(ctx)?;
         let banner = normalize_library_banner_index(input.banner_index);
-        let custom_patch = input
-            .custom_library_banner_id
-            .map(|id| if id > 0 { Some(id as i64) } else { None });
+        let custom_patch =
+            input
+                .custom_library_banner_id
+                .map(|id| if id > 0 { Some(id as i64) } else { None });
         let row = update_library(
             &state.pool,
             user.id,

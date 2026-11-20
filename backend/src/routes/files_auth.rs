@@ -19,17 +19,10 @@ pub fn auth_header_or_query_token(headers: &HeaderMap) -> Option<String> {
     None
 }
 
-pub async fn require_user(
-    state: &AppState,
-    headers: &HeaderMap,
-) -> Option<Arc<AuthUser>> {
-    auth_user_from_request(
-        &state.pool,
-        &state.jwt_secret,
-        bearer_from_headers(headers),
-    )
-    .await
-    .map(Arc::new)
+pub async fn require_user(state: &AppState, headers: &HeaderMap) -> Option<Arc<AuthUser>> {
+    auth_user_from_request(&state.pool, &state.jwt_secret, bearer_from_headers(headers))
+        .await
+        .map(Arc::new)
 }
 
 pub async fn require_user_for_cover(
@@ -43,19 +36,12 @@ pub async fn require_user_for_cover(
             .filter(|t| !t.is_empty())
             .map(|t| format!("Bearer {t}"))
     });
-    auth_user_from_request(
-        &state.pool,
-        &state.jwt_secret,
-        auth.as_deref(),
-    )
-    .await
-    .map(Arc::new)
+    auth_user_from_request(&state.pool, &state.jwt_secret, auth.as_deref())
+        .await
+        .map(Arc::new)
 }
 
-pub async fn require_admin(
-    state: &AppState,
-    headers: &HeaderMap,
-) -> Option<Arc<AuthUser>> {
+pub async fn require_admin(state: &AppState, headers: &HeaderMap) -> Option<Arc<AuthUser>> {
     let u = require_user(state, headers).await?;
     if !u.is_admin {
         return None;

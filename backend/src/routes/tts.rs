@@ -58,10 +58,7 @@ async fn speech(
         ))?;
     let user_id = body.user_id.unwrap_or(0);
     if user_id != user.id {
-        return Err((
-            StatusCode::FORBIDDEN,
-            Json(json!({ "error": "Forbidden" })),
-        ));
+        return Err((StatusCode::FORBIDDEN, Json(json!({ "error": "Forbidden" }))));
     }
     let text = body.text.as_deref().unwrap_or("");
     if text.trim().is_empty() {
@@ -149,10 +146,10 @@ async fn speech(
         )
     })?;
     Ok((
-        [(axum::http::header::CONTENT_TYPE, ct), (
-            axum::http::header::CACHE_CONTROL,
-            "no-store".to_string(),
-        )],
+        [
+            (axum::http::header::CONTENT_TYPE, ct),
+            (axum::http::header::CACHE_CONTROL, "no-store".to_string()),
+        ],
         bytes.to_vec(),
     ))
 }
@@ -177,10 +174,7 @@ async fn voices(
         Json(json!({ "error": "userId required" })),
     ))?;
     if user_id != user.id {
-        return Err((
-            StatusCode::FORBIDDEN,
-            Json(json!({ "error": "Forbidden" })),
-        ));
+        return Err((StatusCode::FORBIDDEN, Json(json!({ "error": "Forbidden" }))));
     }
     let target = resolve_tts_target(&state.pool, user_id)
         .await
@@ -207,7 +201,10 @@ async fn voices(
         let code = StatusCode::from_u16(status.as_u16()).unwrap_or(StatusCode::BAD_GATEWAY);
         return Ok(Response::builder()
             .status(code)
-            .header(axum::http::header::CONTENT_TYPE, "text/plain; charset=utf-8")
+            .header(
+                axum::http::header::CONTENT_TYPE,
+                "text/plain; charset=utf-8",
+            )
             .body(Body::from(text))
             .unwrap());
     }

@@ -24,10 +24,8 @@ async fn anonymous_libraries_empty_and_tts_forbidden() {
         "variables": { "u": 99999 }
     });
     let (_, bad_val) = post_json(router, "POST", "/api/graphql", Some(bad), Some(&token)).await;
-    assert!(
-        bad_val
-            .get("errors")
-            .and_then(|e| e.as_array())
-            .is_some_and(|a| !a.is_empty())
-    );
+    assert!(bad_val
+        .get("errors")
+        .and_then(|e| e.as_array())
+        .is_some_and(|a| !a.is_empty()));
 }

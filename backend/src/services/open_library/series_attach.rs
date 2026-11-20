@@ -76,7 +76,10 @@ async fn series_info_from_work_json(work: &Value) -> Option<SeriesInfo> {
 
 async fn resolve_series_from_isbns(isbns: &[String]) -> Option<SeriesInfo> {
     for raw in isbns.iter().take(5) {
-        let isbn: String = raw.chars().filter(|c| c.is_ascii_digit() || *c == 'x' || *c == 'X').collect();
+        let isbn: String = raw
+            .chars()
+            .filter(|c| c.is_ascii_digit() || *c == 'x' || *c == 'X')
+            .collect();
         if isbn.is_empty() {
             continue;
         }
@@ -112,7 +115,10 @@ fn parse_volume(raw: Option<&Value>) -> Option<f64> {
         return Some(n);
     }
     let s = raw.as_str().unwrap_or("");
-    let cleaned: String = s.chars().filter(|c| c.is_ascii_digit() || *c == '.').collect();
+    let cleaned: String = s
+        .chars()
+        .filter(|c| c.is_ascii_digit() || *c == '.')
+        .collect();
     cleaned.parse().ok()
 }
 
@@ -181,10 +187,7 @@ mod tests {
     async fn series_info_from_embedded_json() {
         let work = work_with_series("Inner", "1");
         let info = series_info_from_work_json(&work).await;
-        assert_eq!(
-            info.as_ref().map(|i| i.title.as_str()),
-            Some("Inner")
-        );
+        assert_eq!(info.as_ref().map(|i| i.title.as_str()), Some("Inner"));
         assert_eq!(info.and_then(|i| i.volume), Some(1.0));
     }
 
@@ -220,10 +223,7 @@ mod tests {
             .mount(&server)
             .await;
         let out = resolve_series_from_isbns(&["978-1234567890".to_string()]).await;
-        assert_eq!(
-            out.as_ref().map(|s| s.title.as_str()),
-            Some("ISBN Series")
-        );
+        assert_eq!(out.as_ref().map(|s| s.title.as_str()), Some("ISBN Series"));
         assert_eq!(out.and_then(|s| s.volume), Some(3.0));
         restore_ol_origin(prev);
     }

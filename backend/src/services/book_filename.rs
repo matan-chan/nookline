@@ -93,16 +93,36 @@ pub fn infer_from_filename_slug(slug: &str) -> FilenameInference {
     if let Ok(re) = regex::Regex::new(r"(?i)^(.{2,80}?)\s*[-–—]\s+(.{2,200})$") {
         if let Some(cap) = re.captures(&s) {
             return FilenameInference {
-                suggested_author: Some(cap.get(1).map(|m| m.as_str().trim()).unwrap_or("").to_string()),
-                suggested_title: Some(cap.get(2).map(|m| m.as_str().trim()).unwrap_or("").to_string()),
+                suggested_author: Some(
+                    cap.get(1)
+                        .map(|m| m.as_str().trim())
+                        .unwrap_or("")
+                        .to_string(),
+                ),
+                suggested_title: Some(
+                    cap.get(2)
+                        .map(|m| m.as_str().trim())
+                        .unwrap_or("")
+                        .to_string(),
+                ),
             };
         }
     }
     if let Ok(re) = regex::Regex::new(r"(?i)^(.{2,200}?)\s+by\s+(.{2,80})$") {
         if let Some(cap) = re.captures(&s) {
             return FilenameInference {
-                suggested_title: Some(cap.get(1).map(|m| m.as_str().trim()).unwrap_or("").to_string()),
-                suggested_author: Some(cap.get(2).map(|m| m.as_str().trim()).unwrap_or("").to_string()),
+                suggested_title: Some(
+                    cap.get(1)
+                        .map(|m| m.as_str().trim())
+                        .unwrap_or("")
+                        .to_string(),
+                ),
+                suggested_author: Some(
+                    cap.get(2)
+                        .map(|m| m.as_str().trim())
+                        .unwrap_or("")
+                        .to_string(),
+                ),
             };
         }
     }
@@ -110,8 +130,18 @@ pub fn infer_from_filename_slug(slug: &str) -> FilenameInference {
         if let Some(cap) = re.captures(&s) {
             if cap.get(2).map(|m| m.as_str().trim().len()).unwrap_or(0) > 2 {
                 return FilenameInference {
-                    suggested_author: Some(cap.get(1).map(|m| m.as_str().trim()).unwrap_or("").to_string()),
-                    suggested_title: Some(cap.get(2).map(|m| m.as_str().trim()).unwrap_or("").to_string()),
+                    suggested_author: Some(
+                        cap.get(1)
+                            .map(|m| m.as_str().trim())
+                            .unwrap_or("")
+                            .to_string(),
+                    ),
+                    suggested_title: Some(
+                        cap.get(2)
+                            .map(|m| m.as_str().trim())
+                            .unwrap_or("")
+                            .to_string(),
+                    ),
                 };
             }
         }
@@ -148,7 +178,11 @@ fn infer_from_catalog_hyphen_slug(raw_slug: &str) -> Option<FilenameInference> {
     if !slug.contains('-') {
         return None;
     }
-    let parts: Vec<&str> = slug.split('-').map(str::trim).filter(|p| !p.is_empty()).collect();
+    let parts: Vec<&str> = slug
+        .split('-')
+        .map(str::trim)
+        .filter(|p| !p.is_empty())
+        .collect();
     if parts.len() < 3 {
         return None;
     }
@@ -184,8 +218,25 @@ fn infer_from_catalog_hyphen_slug(raw_slug: &str) -> Option<FilenameInference> {
 fn author_particle(w: &str) -> bool {
     matches!(
         w.to_ascii_lowercase().as_str(),
-        "de" | "del" | "della" | "di" | "da" | "das" | "dos" | "du" | "der" | "den" | "la" | "le"
-            | "les" | "el" | "van" | "von" | "st" | "ste" | "mac" | "mc"
+        "de" | "del"
+            | "della"
+            | "di"
+            | "da"
+            | "das"
+            | "dos"
+            | "du"
+            | "der"
+            | "den"
+            | "la"
+            | "le"
+            | "les"
+            | "el"
+            | "van"
+            | "von"
+            | "st"
+            | "ste"
+            | "mac"
+            | "mc"
     )
 }
 
@@ -264,7 +315,10 @@ mod tests {
     #[test]
     fn title_looks_like_raw_filename_cases() {
         assert!(title_looks_like_raw_filename("my_book", "my_book"));
-        assert!(!title_looks_like_raw_filename("Pride and Prejudice", "random_slug"));
+        assert!(!title_looks_like_raw_filename(
+            "Pride and Prejudice",
+            "random_slug"
+        ));
     }
 
     #[test]
@@ -273,10 +327,7 @@ mod tests {
             "cnzrj4sazlgn6spcwfw5l0az-0046-don-quixote-miguel-de-cervantes",
         );
         assert_eq!(inf.suggested_title.as_deref(), Some("Don Quixote"));
-        assert_eq!(
-            inf.suggested_author.as_deref(),
-            Some("Miguel de Cervantes")
-        );
+        assert_eq!(inf.suggested_author.as_deref(), Some("Miguel de Cervantes"));
     }
 
     #[test]
@@ -291,11 +342,15 @@ mod tests {
     #[test]
     fn infer_by_author_patterns() {
         assert_eq!(
-            infer_from_filename_slug("Doe - The Tale").suggested_author.as_deref(),
+            infer_from_filename_slug("Doe - The Tale")
+                .suggested_author
+                .as_deref(),
             Some("Doe")
         );
         assert_eq!(
-            infer_from_filename_slug("The Tale by Jane").suggested_title.as_deref(),
+            infer_from_filename_slug("The Tale by Jane")
+                .suggested_title
+                .as_deref(),
             Some("The Tale")
         );
         let bracket = infer_from_filename_slug("[Doe] Story");

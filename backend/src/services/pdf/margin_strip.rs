@@ -39,7 +39,12 @@ pub async fn infer_and_persist_pdf_margin_strip_regexes(pool: &SqlitePool, book_
         return;
     };
     let abs = crate::util::paths::resolve_book_file_on_disk(&row.library_path, &row.file_path);
-    if !abs.extension().and_then(|e| e.to_str()).unwrap_or("").eq_ignore_ascii_case("pdf") {
+    if !abs
+        .extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("")
+        .eq_ignore_ascii_case("pdf")
+    {
         return;
     }
     if !abs.exists() {
@@ -74,11 +79,12 @@ pub async fn infer_and_persist_pdf_margin_strip_regexes(pool: &SqlitePool, book_
     if let Some(obj) = meta.as_object_mut() {
         obj.insert("pdfMarginStripRegexes".to_string(), json!(regexes));
     }
-    let _ = sqlx::query(r#"UPDATE Book SET metadata = ?, updatedAt = datetime('now') WHERE id = ?"#)
-        .bind(serde_json::to_string(&meta).unwrap_or_else(|_| "{}".to_string()))
-        .bind(book_id)
-        .execute(pool)
-        .await;
+    let _ =
+        sqlx::query(r#"UPDATE Book SET metadata = ?, updatedAt = datetime('now') WHERE id = ?"#)
+            .bind(serde_json::to_string(&meta).unwrap_or_else(|_| "{}".to_string()))
+            .bind(book_id)
+            .execute(pool)
+            .await;
 }
 
 #[derive(sqlx::FromRow)]
@@ -114,10 +120,7 @@ fn extract_lines_per_page(pdf: &Path) -> Option<Vec<Vec<String>>> {
 }
 
 fn pdf_page_count(pdf: &Path) -> Option<usize> {
-    let out = Command::new("pdfinfo")
-        .arg(pdf)
-        .output()
-        .ok()?;
+    let out = Command::new("pdfinfo").arg(pdf).output().ok()?;
     if !out.status.success() {
         return None;
     }
@@ -299,9 +302,6 @@ mod tests {
         let tally = collect_margin_tallies(&lines);
         let regexes = regexes_from_tallies(&tally, lines.len());
         assert!(!regexes.is_empty(), "{regexes:?}");
-        assert!(
-            regexes.iter().any(|r| r.contains("Chapter")),
-            "{regexes:?}"
-        );
+        assert!(regexes.iter().any(|r| r.contains("Chapter")), "{regexes:?}");
     }
 }

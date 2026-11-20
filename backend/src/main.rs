@@ -8,12 +8,8 @@ async fn main() {
         .init();
 
     config::assert_production_signing_secret();
-    let state = AppState::connect()
-        .await
-        .expect("connect sqlite");
-    startup::run_startup(&state.pool)
-        .await
-        .expect("startup");
+    let state = AppState::connect().await.expect("connect sqlite");
+    startup::run_startup(&state.pool).await.expect("startup");
     tracing::info!(db = %config::resolve_sqlite_url(), "database ready");
 
     let app = app::build_router(state);

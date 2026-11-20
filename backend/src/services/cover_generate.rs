@@ -69,24 +69,33 @@ fn pdf_via_pdftoppm(pdf: &Path, out_path: &Path) -> Result<(), String> {
 fn epub_cover_webp(epub: &Path, out_path: &Path) -> Result<(), String> {
     let file = std::fs::File::open(epub).map_err(|e| e.to_string())?;
     let mut zip = ZipArchive::new(file).map_err(|e| e.to_string())?;
-    let container = zip.by_name("META-INF/container.xml").map_err(|e| e.to_string())?;
+    let container = zip
+        .by_name("META-INF/container.xml")
+        .map_err(|e| e.to_string())?;
     let mut cx = String::new();
     container.take(1024 * 512).read_to_string(&mut cx).ok();
     let root = regex::Regex::new(r#"full-path\s*=\s*["']([^"']+)["']"#)
         .ok()
         .and_then(|re| re.captures(&cx))
-        .and_then(|c| c.get(1).map(|m| m.as_str().trim_start_matches('/').to_string()));
+        .and_then(|c| {
+            c.get(1)
+                .map(|m| m.as_str().trim_start_matches('/').to_string())
+        });
     let Some(opf_path) = root else {
         return Err("no opf in epub".to_string());
     };
     let href = {
         let mut opf_file = zip.by_name(&opf_path).map_err(|e| e.to_string())?;
         let mut opf = String::new();
-        opf_file.read_to_string(&mut opf).map_err(|e| e.to_string())?;
+        opf_file
+            .read_to_string(&mut opf)
+            .map_err(|e| e.to_string())?;
         opf_cover_href(&opf).ok_or_else(|| "no cover href".to_string())?
     };
     let img_rel = crate::services::epub::zip_paths::resolve_zip_path(&opf_path, &href);
-    let mut img_entry = zip.by_name(&img_rel).map_err(|_| "cover image missing in epub")?;
+    let mut img_entry = zip
+        .by_name(&img_rel)
+        .map_err(|_| "cover image missing in epub")?;
     let mut buf = Vec::new();
     img_entry.read_to_end(&mut buf).map_err(|e| e.to_string())?;
     let image = image::load_from_memory(&buf).map_err(|e| e.to_string())?;
@@ -94,11 +103,10 @@ fn epub_cover_webp(epub: &Path, out_path: &Path) -> Result<(), String> {
 }
 
 fn opf_cover_href(opf: &str) -> Option<String> {
-    if let Some(prop) = regex::Regex::new(
-        r#"<item\b[^>]*properties\s*=\s*["'][^"']*cover-image[^"']*["'][^>]*/?>"#,
-    )
-    .ok()
-    .and_then(|re| re.find(opf))
+    if let Some(prop) =
+        regex::Regex::new(r#"<item\b[^>]*properties\s*=\s*["'][^"']*cover-image[^"']*["'][^>]*/?>"#)
+            .ok()
+            .and_then(|re| re.find(opf))
     {
         if let Some(h) = regex::Regex::new(r#"\bhref\s*=\s*["']([^"']+)["']"#)
             .ok()
@@ -119,14 +127,15 @@ fn opf_cover_href(opf: &str) -> Option<String> {
             return Some(h);
         }
     }
-    let item_re = regex::Regex::new(
-        r#"<item\b[^>]*href\s*=\s*["']([^"']+\.(?:jpe?g|png|webp))["'][^>]*/?>"#,
-    )
-    .ok()?;
+    let item_re =
+        regex::Regex::new(r#"<item\b[^>]*href\s*=\s*["']([^"']+\.(?:jpe?g|png|webp))["'][^>]*/?>"#)
+            .ok()?;
     for cap in item_re.captures_iter(opf) {
         let block = cap.get(0).map(|m| m.as_str()).unwrap_or("");
         let href = cap.get(1).map(|m| m.as_str()).unwrap_or("");
-        if block.to_ascii_lowercase().contains("cover") || href.to_ascii_lowercase().contains("cover") {
+        if block.to_ascii_lowercase().contains("cover")
+            || href.to_ascii_lowercase().contains("cover")
+        {
             return Some(href.to_string());
         }
     }
@@ -146,7 +155,11 @@ fn item_href_by_id(opf: &str, item_id: &str) -> Option<String> {
         .and_then(|c| c.get(1).map(|x| x.as_str().to_string()))
 }
 
-pub async fn try_generate_cover_webp(file_path: &Path, ext: &str, out_path: &Path) -> Result<(), CoverServeError> {
+pub async fn try_generate_cover_webp(
+    file_path: &Path,
+    ext: &str,
+    out_path: &Path,
+) -> Result<(), CoverServeError> {
     let ext = ext.to_ascii_lowercase();
     tokio::task::spawn_blocking({
         let file_path = file_path.to_path_buf();
@@ -154,12 +167,12 @@ pub async fn try_generate_cover_webp(file_path: &Path, ext: &str, out_path: &Pat
         let ext = ext.clone();
         move || {
             if ext == ".pdf" {
-                let meta = std::fs::metadata(&file_path).map_err(|e| CoverServeError::Other(e.to_string()))?;
+                let meta = std::fs::metadata(&file_path)
+                    .map_err(|e| CoverServeError::Other(e.to_string()))?;
                 if meta.len() > MAX_PDF_BYTES {
                     return Err(CoverServeError::Other("pdf too large".to_string()));
                 }
-                pdf_via_pdftoppm(&file_path, &out_path)
-                    .map_err(CoverServeError::Other)?;
+                pdf_via_pdftoppm(&file_path, &out_path).map_err(CoverServeError::Other)?;
                 return Ok(());
             }
             if ext == ".epub" {

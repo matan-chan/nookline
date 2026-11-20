@@ -4,8 +4,8 @@ use axum::body::Body;
 use axum::http::{Request, StatusCode};
 use axum::Router;
 use http_body_util::BodyExt;
-use nookline_backend::{app, startup, AppState};
 use nookline_backend::auth::{create_auth_token, AUTH_TOKEN_TTL_MS};
+use nookline_backend::{app, startup, AppState};
 use serde_json::{json, Value};
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use tower::ServiceExt;
@@ -38,7 +38,10 @@ impl TestEnv {
             .await
             .expect("sqlite");
         for stmt in INIT_SQL.split(';').filter(|s| !s.trim().is_empty()) {
-            sqlx::query(stmt).execute(&pool).await.expect("migrate stmt");
+            sqlx::query(stmt)
+                .execute(&pool)
+                .await
+                .expect("migrate stmt");
         }
         startup::run_startup(&pool).await.expect("startup");
         Self {
@@ -121,15 +124,15 @@ pub async fn gql(
     if let Some(errs) = val.get("errors") {
         panic!("gql errors: {errs}");
     }
-    val.get("data")
-        .cloned()
-        .expect("gql data")
+    val.get("data").cloned().expect("gql data")
 }
 
 pub fn gql_path<'a>(data: &'a Value, path: &[&str]) -> &'a Value {
     let mut cur = data;
     for key in path {
-        cur = cur.get(key).unwrap_or_else(|| panic!("missing {key} in {data}"));
+        cur = cur
+            .get(key)
+            .unwrap_or_else(|| panic!("missing {key} in {data}"));
     }
     cur
 }

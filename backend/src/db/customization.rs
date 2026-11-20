@@ -32,17 +32,18 @@ pub struct AppCustomizationView {
     pub convert_pdf_to_epub: bool,
 }
 
-pub async fn load_app_customization(pool: &SqlitePool) -> Result<AppCustomizationView, sqlx::Error> {
+pub async fn load_app_customization(
+    pool: &SqlitePool,
+) -> Result<AppCustomizationView, sqlx::Error> {
     let row: Option<AppCustomizationRow> = sqlx::query_as(&format!(
         "SELECT id, siteName, faviconRelPath, convertPdfToEpub, {NORMALIZE_UPDATED_AT} AS updatedAt FROM AppCustomization WHERE id = 1"
     ))
     .fetch_optional(pool)
     .await?;
-    let banners: Vec<CustomBannerRow> = sqlx::query_as(
-        r#"SELECT id FROM CustomLibraryBanner ORDER BY id ASC"#,
-    )
-    .fetch_all(pool)
-    .await?;
+    let banners: Vec<CustomBannerRow> =
+        sqlx::query_as(r#"SELECT id FROM CustomLibraryBanner ORDER BY id ASC"#)
+            .fetch_all(pool)
+            .await?;
     let site_name = row
         .as_ref()
         .and_then(|r| r.site_name.as_deref())
@@ -54,10 +55,7 @@ pub async fn load_app_customization(pool: &SqlitePool) -> Result<AppCustomizatio
         .collect::<String>();
     let favicon_rel = row.as_ref().and_then(|r| r.favicon_rel_path.clone());
     let favicon_url = favicon_rel.as_ref().filter(|s| !s.is_empty()).map(|_| {
-        let v = row
-            .as_ref()
-            .map(|r| r.updated_at.as_str())
-            .unwrap_or("");
+        let v = row.as_ref().map(|r| r.updated_at.as_str()).unwrap_or("");
         format!("/api/files/branding/favicon?v={v}")
     });
     let has_overrides = row
@@ -76,9 +74,6 @@ pub async fn load_app_customization(pool: &SqlitePool) -> Result<AppCustomizatio
         has_overrides,
         favicon_url,
         banners: banner_urls,
-        convert_pdf_to_epub: row
-            .as_ref()
-            .map(|r| r.convert_pdf_to_epub)
-            .unwrap_or(false),
+        convert_pdf_to_epub: row.as_ref().map(|r| r.convert_pdf_to_epub).unwrap_or(false),
     })
 }

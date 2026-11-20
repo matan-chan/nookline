@@ -24,7 +24,10 @@ const LIBRARY_SELECT: &str = concat!(
     "userId FROM Library"
 );
 
-pub async fn library_by_id(pool: &SqlitePool, library_id: i64) -> Result<Option<LibraryRow>, sqlx::Error> {
+pub async fn library_by_id(
+    pool: &SqlitePool,
+    library_id: i64,
+) -> Result<Option<LibraryRow>, sqlx::Error> {
     let q = format!("{LIBRARY_SELECT} WHERE id = ?");
     sqlx::query_as::<_, LibraryRow>(&q)
         .bind(library_id)
@@ -32,7 +35,10 @@ pub async fn library_by_id(pool: &SqlitePool, library_id: i64) -> Result<Option<
         .await
 }
 
-pub async fn libraries_for_user(pool: &SqlitePool, user_id: i64) -> Result<Vec<LibraryRow>, sqlx::Error> {
+pub async fn libraries_for_user(
+    pool: &SqlitePool,
+    user_id: i64,
+) -> Result<Vec<LibraryRow>, sqlx::Error> {
     let q = format!("{LIBRARY_SELECT} WHERE userId = ? ORDER BY id ASC");
     sqlx::query_as::<_, LibraryRow>(&q)
         .bind(user_id)

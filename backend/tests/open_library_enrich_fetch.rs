@@ -58,14 +58,11 @@ async fn enrich_book_fetches_work_and_ratings() {
     )
     .await
     .expect("book");
-    let out = nookline_backend::services::open_library::enrich_book_record(
-        &env.state.pool,
-        uid,
-        book.id,
-    )
-    .await
-    .expect("enrich")
-    .expect("row");
+    let out =
+        nookline_backend::services::open_library::enrich_book_record(&env.state.pool, uid, book.id)
+            .await
+            .expect("enrich")
+            .expect("row");
     let meta: serde_json::Value =
         serde_json::from_str(out.metadata.as_deref().unwrap_or("{}")).expect("json");
     assert_eq!(

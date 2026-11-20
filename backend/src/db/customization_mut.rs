@@ -48,14 +48,14 @@ fn unlink_upload_rel(rel: &str) {
 }
 
 pub async fn reset_app_customization(pool: &SqlitePool) -> Result<(), sqlx::Error> {
-    let banner_paths: Vec<String> = sqlx::query_scalar(r#"SELECT relPath FROM CustomLibraryBanner"#)
-        .fetch_all(pool)
-        .await?;
-    let favicon_before: Option<String> = sqlx::query_scalar(
-        r#"SELECT faviconRelPath FROM AppCustomization WHERE id = 1"#,
-    )
-    .fetch_optional(pool)
-    .await?;
+    let banner_paths: Vec<String> =
+        sqlx::query_scalar(r#"SELECT relPath FROM CustomLibraryBanner"#)
+            .fetch_all(pool)
+            .await?;
+    let favicon_before: Option<String> =
+        sqlx::query_scalar(r#"SELECT faviconRelPath FROM AppCustomization WHERE id = 1"#)
+            .fetch_optional(pool)
+            .await?;
     let mut tx = pool.begin().await?;
     sqlx::query(r#"DELETE FROM CustomLibraryBanner"#)
         .execute(&mut *tx)

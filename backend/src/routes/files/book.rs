@@ -46,7 +46,11 @@ async fn resolve_stored_or_derived_cover_path(
     path
 }
 
-async fn serve_local_cover_path(path: &str, book_id: i64, width: u32) -> Result<Response, CoverServeError> {
+async fn serve_local_cover_path(
+    path: &str,
+    book_id: i64,
+    width: u32,
+) -> Result<Response, CoverServeError> {
     let src = cover_abs_path(path);
     let bytes = serve_optimized_local_cover(&src, &format!("book-{book_id}"), width).await?;
     let mime = cover_bytes_mime(&bytes, &src);
@@ -80,12 +84,10 @@ async fn book_file(
     Path(book_id_raw): Path<String>,
 ) -> Result<Response, (StatusCode, Json<Value>)> {
     let book_id = parse_positive_id(&book_id_raw, "book id")?;
-    let user = require_user(&state, &headers)
-        .await
-        .ok_or((
-            StatusCode::UNAUTHORIZED,
-            Json(json!({ "error": "Unauthenticated" })),
-        ))?;
+    let user = require_user(&state, &headers).await.ok_or((
+        StatusCode::UNAUTHORIZED,
+        Json(json!({ "error": "Unauthenticated" })),
+    ))?;
     #[derive(sqlx::FromRow)]
     struct BookPathRow {
         #[sqlx(rename = "filePath")]
@@ -158,7 +160,8 @@ async fn book_cover(
         Ok(resp) => Ok(resp),
         Err(CoverServeError::NotFound) | Err(CoverServeError::Unsupported) => {
             if let Some(derived) =
-                crate::services::book::persist_book_derived_cover_if_possible(&state.pool, book_id).await
+                crate::services::book::persist_book_derived_cover_if_possible(&state.pool, book_id)
+                    .await
             {
                 if derived != path {
                     if let Ok(resp) = serve_local_cover_path(&derived, book_id, width).await {
@@ -199,20 +202,14 @@ async fn ol_cover(
                             .await
                         {
                             let src = std::path::PathBuf::from(path);
-                            if let Ok(bytes) = serve_optimized_local_cover(
-                                &src,
-                                &format!("book-{book_id}"),
-                                width,
-                            )
-                            .await
+                            if let Ok(bytes) =
+                                serve_optimized_local_cover(&src, &format!("book-{book_id}"), width)
+                                    .await
                             {
                                 let mime = cover_bytes_mime(&bytes, &src);
-                                return Ok(stream_bytes(
-                                    bytes,
-                                    mime,
-                                    "private, max-age=86400",
-                                )
-                                .await);
+                                return Ok(
+                                    stream_bytes(bytes, mime, "private, max-age=86400").await
+                                );
                             }
                         }
                     }
@@ -237,12 +234,10 @@ async fn post_cover(
     Json(body): Json<PostCoverBody>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
     let book_id = parse_positive_id(&book_id_raw, "book id")?;
-    let user = require_user(&state, &headers)
-        .await
-        .ok_or((
-            StatusCode::UNAUTHORIZED,
-            Json(json!({ "error": "Unauthenticated" })),
-        ))?;
+    let user = require_user(&state, &headers).await.ok_or((
+        StatusCode::UNAUTHORIZED,
+        Json(json!({ "error": "Unauthenticated" })),
+    ))?;
     let owned: Option<i64> = sqlx::query_scalar(
         r#"SELECT b.id FROM Book b JOIN Library l ON b.libraryId = l.id WHERE b.id = ? AND l.userId = ?"#,
     )

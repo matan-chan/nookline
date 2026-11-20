@@ -32,7 +32,9 @@ pub use series::{series_for_library, SeriesRow};
 pub use series_ops::{
     create_series, delete_series_for_user, series_for_user, series_list_for_user, CreateSeriesInput,
 };
-pub use tts_user::{load_tts_settings, update_tts_settings, UpdateTtsSettingsInput, TtsSettingsView};
+pub use tts_user::{
+    load_tts_settings, update_tts_settings, TtsSettingsView, UpdateTtsSettingsInput,
+};
 pub use voice_profile::{
     create_voice_profile, delete_voice_profile, voice_profiles_for_user, VoiceProfileRow,
 };

@@ -64,7 +64,9 @@ async fn auth_bootstrap_register_login_and_gql_me() {
     )
     .await;
     assert_eq!(
-        data.get("me").and_then(|m| m.get("username")).and_then(|v| v.as_str()),
+        data.get("me")
+            .and_then(|m| m.get("username"))
+            .and_then(|v| v.as_str()),
         Some("reader1")
     );
     assert!(data.get("libraries").and_then(|v| v.as_array()).is_some());

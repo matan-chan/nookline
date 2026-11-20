@@ -13,11 +13,6 @@ static SCHEMA: std::sync::OnceLock<Schema<QueryRoot, MutationRoot, EmptySubscrip
 
 pub fn schema() -> &'static Schema<QueryRoot, MutationRoot, EmptySubscription> {
     SCHEMA.get_or_init(|| {
-        Schema::build(
-            QueryRoot,
-            MutationRoot::default(),
-            EmptySubscription,
-        )
-        .finish()
+        Schema::build(QueryRoot, MutationRoot::default(), EmptySubscription).finish()
     })
 }

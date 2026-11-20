@@ -47,13 +47,14 @@ fn infer_regex_repeating_footer_number_pipe_title() {
         return;
     }
     let pdf = fixture("margin-footer-6p.pdf");
-    assert!(pdf.exists(), "run: node backend/scripts/gen_margin_fixtures.mjs (npm install pdf-lib)");
+    assert!(
+        pdf.exists(),
+        "run: node backend/scripts/gen_margin_fixtures.mjs (npm install pdf-lib)"
+    );
     let regexes = infer_margin_strip_regexes_from_pdf(&pdf).expect("extract");
     assert!(!regexes.is_empty(), "{regexes:?}");
-    let stripped = strip_with_line_regexes(
-        "Some text\n5 | THE BEHAVIOR OPS MANUAL\nmore",
-        &regexes,
-    );
+    let stripped =
+        strip_with_line_regexes("Some text\n5 | THE BEHAVIOR OPS MANUAL\nmore", &regexes);
     assert!(!stripped.contains("THE BEHAVIOR OPS MANUAL"));
     assert!(stripped.contains("Some text"));
     assert!(stripped.contains("more"));

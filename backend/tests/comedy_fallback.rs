@@ -29,7 +29,10 @@ async fn comedy_shelf_paths_normalize_for_fallback() {
         let stored = "a.pdf";
         let want = books_base.join("comedy").join("a.pdf");
         let resolved = resolve_book_file_on_disk(lib_path, stored);
-        assert!(same_file(&resolved, &want), "resolved {resolved:?} want {want:?}");
+        assert!(
+            same_file(&resolved, &want),
+            "resolved {resolved:?} want {want:?}"
+        );
         let book = create_book_record(
             &env.state.pool,
             CreateBookInput {

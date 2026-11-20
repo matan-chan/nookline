@@ -35,7 +35,11 @@ pub struct AddHighlightInput {
 
 #[Object]
 impl SocialMutation {
-    async fn add_bookmark(&self, ctx: &Context<'_>, input: AddBookmarkInput) -> Result<BookmarkGql> {
+    async fn add_bookmark(
+        &self,
+        ctx: &Context<'_>,
+        input: AddBookmarkInput,
+    ) -> Result<BookmarkGql> {
         let state = ctx.data_unchecked::<AppState>();
         let user = require_user(ctx)?;
         if input.user_id != user.id as i32 {
@@ -63,7 +67,11 @@ impl SocialMutation {
             .map_err(async_graphql::Error::from)
     }
 
-    async fn add_highlight(&self, ctx: &Context<'_>, input: AddHighlightInput) -> Result<HighlightGql> {
+    async fn add_highlight(
+        &self,
+        ctx: &Context<'_>,
+        input: AddHighlightInput,
+    ) -> Result<HighlightGql> {
         let state = ctx.data_unchecked::<AppState>();
         let user = require_user(ctx)?;
         if input.user_id != user.id as i32 {

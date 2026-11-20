@@ -15,10 +15,9 @@ pub fn tts_upstream_connection_message(err: &str, request_url: &str) -> String {
             r#"Cannot reach TTS at {origin}. Hostname "kokoro" only resolves on Docker networks (shared Kokoro from apps/kokoro). Nookline's backend is reaching Kokoro from wherever it runs — if that is your PC (dev server on :4006), use http://127.0.0.1:8881 (published port). If the backend runs in Docker with nginx-proxy-manager, use http://kokoro:8880."#
         );
     }
-    let looks_local =
-        regex::Regex::new(r"(?i)localhost|127\.0\.0\.1|:8880\b|:8881\b|:8882\b")
-            .ok()
-            .is_some_and(|re| re.is_match(request_url));
+    let looks_local = regex::Regex::new(r"(?i)localhost|127\.0\.0\.1|:8880\b|:8881\b|:8882\b")
+        .ok()
+        .is_some_and(|re| re.is_match(request_url));
     let hint = if looks_local {
         " Start GPU Kokoro (docker compose), or set TTS_URL. If this host has no GPU or Kokoro keeps crashing, use Settings → Text-to-speech → OpenAI compatible and point at CPU Kokoro or another TTS API."
     } else {

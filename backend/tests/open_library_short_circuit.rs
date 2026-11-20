@@ -11,7 +11,8 @@ async fn enrich_book_skips_when_already_at_version() {
     let lib = create_library(&env.state.pool, uid, "L", ".", "NOVEL", 0, None)
         .await
         .expect("lib");
-    let meta = r#"{"openLibrary":{"enrichedAt":"2021-01-01","fetchFailed":false,"sourceVersion":3}}"#;
+    let meta =
+        r#"{"openLibrary":{"enrichedAt":"2021-01-01","fetchFailed":false,"sourceVersion":3}}"#;
     let book = create_book_record(
         &env.state.pool,
         CreateBookInput {

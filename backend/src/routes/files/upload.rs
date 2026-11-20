@@ -13,11 +13,11 @@ use serde_json::{json, Value};
 use crate::routes::files::stream::stream_bytes;
 use crate::routes::files_auth::{require_user, require_user_for_cover};
 use crate::routes::rest_parse::map_upload_io_error;
+use crate::services::book_filename::title_from_disk_path;
 use crate::services::cover_generate::try_generate_cover_webp;
 use crate::services::cover_serve::{
     cover_bytes_mime, parse_cover_width, serve_optimized_local_cover, CoverServeError,
 };
-use crate::services::book_filename::title_from_disk_path;
 use crate::services::pdf::{extract_pdf_embedded_metadata, guess_pdf_title_author_from_first_page};
 use crate::state::AppState;
 use crate::util::paths::{
@@ -241,19 +241,18 @@ async fn upload_preview(
             Json(json!({ "error": "Invalid libraryId" })),
         ));
     }
-    let lib_path: Option<String> = sqlx::query_scalar(
-        r#"SELECT path FROM Library WHERE id = ? AND userId = ?"#,
-    )
-    .bind(lib_id)
-    .bind(user.id)
-    .fetch_optional(&state.pool)
-    .await
-    .map_err(|_| {
-        (
-            axum::http::StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({ "error": "db error" })),
-        )
-    })?;
+    let lib_path: Option<String> =
+        sqlx::query_scalar(r#"SELECT path FROM Library WHERE id = ? AND userId = ?"#)
+            .bind(lib_id)
+            .bind(user.id)
+            .fetch_optional(&state.pool)
+            .await
+            .map_err(|_| {
+                (
+                    axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(json!({ "error": "db error" })),
+                )
+            })?;
     let Some(lib_path) = lib_path else {
         return Err((
             axum::http::StatusCode::NOT_FOUND,

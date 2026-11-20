@@ -73,12 +73,11 @@ pub async fn delete_series_for_user(
         .bind(s.library_id)
         .fetch_one(pool)
         .await?;
-    let books: Vec<BookArtifactRow> = sqlx::query_as(
-        r#"SELECT id, filePath, coverImagePath FROM Book WHERE seriesId = ?"#,
-    )
-    .bind(series_id)
-    .fetch_all(pool)
-    .await?;
+    let books: Vec<BookArtifactRow> =
+        sqlx::query_as(r#"SELECT id, filePath, coverImagePath FROM Book WHERE seriesId = ?"#)
+            .bind(series_id)
+            .fetch_all(pool)
+            .await?;
     unlink_library_books_disk_artifacts(&lib_path, &books);
     let book_ids: Vec<i64> = books.iter().map(|b| b.id).collect();
     let mut tx = pool.begin().await?;

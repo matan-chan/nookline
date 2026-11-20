@@ -32,14 +32,13 @@ fn ext_ok(name: &str, allowed: &[&str]) -> Option<String> {
 }
 
 async fn get_favicon(State(state): State<AppState>) -> Result<Response, axum::http::StatusCode> {
-    let rel: Option<String> = sqlx::query_scalar(
-        r#"SELECT faviconRelPath FROM AppCustomization WHERE id = 1"#,
-    )
-    .fetch_optional(&state.pool)
-    .await
-    .ok()
-    .flatten()
-    .flatten();
+    let rel: Option<String> =
+        sqlx::query_scalar(r#"SELECT faviconRelPath FROM AppCustomization WHERE id = 1"#)
+            .fetch_optional(&state.pool)
+            .await
+            .ok()
+            .flatten()
+            .flatten();
     let Some(rel) = rel.filter(|p| !p.is_empty()) else {
         return Err(axum::http::StatusCode::NOT_FOUND);
     };
@@ -52,12 +51,10 @@ async fn post_favicon(
     headers: HeaderMap,
     mut multipart: Multipart,
 ) -> Result<Json<Value>, (axum::http::StatusCode, Json<Value>)> {
-    let _admin = require_admin(&state, &headers)
-        .await
-        .ok_or((
-            axum::http::StatusCode::FORBIDDEN,
-            Json(json!({ "error": "Forbidden" })),
-        ))?;
+    let _admin = require_admin(&state, &headers).await.ok_or((
+        axum::http::StatusCode::FORBIDDEN,
+        Json(json!({ "error": "Forbidden" })),
+    ))?;
     tokio::fs::create_dir_all(branding_dir()).await.ok();
     let mut file_name = None;
     let mut file_data = None;
@@ -114,15 +111,16 @@ async fn post_favicon(
             Json(json!({ "error": "db error" })),
         )
     })?;
-    let updated: Option<String> = sqlx::query_scalar(
-        r#"SELECT updatedAt FROM AppCustomization WHERE id = 1"#,
-    )
-    .fetch_optional(&state.pool)
-    .await
-    .ok()
-    .flatten();
+    let updated: Option<String> =
+        sqlx::query_scalar(r#"SELECT updatedAt FROM AppCustomization WHERE id = 1"#)
+            .fetch_optional(&state.pool)
+            .await
+            .ok()
+            .flatten();
     let v = urlencoding::encode(updated.as_deref().unwrap_or(""));
-    Ok(Json(json!({ "url": format!("/api/files/branding/favicon?v={v}") })))
+    Ok(Json(
+        json!({ "url": format!("/api/files/branding/favicon?v={v}") }),
+    ))
 }
 
 async fn post_library_banner(
@@ -130,13 +128,13 @@ async fn post_library_banner(
     headers: HeaderMap,
     mut multipart: Multipart,
 ) -> Result<Json<Value>, (axum::http::StatusCode, Json<Value>)> {
-    let _admin = require_admin(&state, &headers)
+    let _admin = require_admin(&state, &headers).await.ok_or((
+        axum::http::StatusCode::FORBIDDEN,
+        Json(json!({ "error": "Forbidden" })),
+    ))?;
+    tokio::fs::create_dir_all(library_banner_upload_dir())
         .await
-        .ok_or((
-            axum::http::StatusCode::FORBIDDEN,
-            Json(json!({ "error": "Forbidden" })),
-        ))?;
-    tokio::fs::create_dir_all(library_banner_upload_dir()).await.ok();
+        .ok();
     let mut file_name = None;
     let mut file_data = None;
     while let Some(field) = multipart.next_field().await.map_err(|e| {
@@ -188,18 +186,17 @@ async fn post_library_banner(
         )
     })?;
     let rel = rel_path_from_upload(&final_abs);
-    let id: i64 = sqlx::query_scalar(
-        r#"INSERT INTO CustomLibraryBanner (relPath) VALUES (?) RETURNING id"#,
-    )
-    .bind(&rel)
-    .fetch_one(&state.pool)
-    .await
-    .map_err(|_| {
-        (
-            axum::http::StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({ "error": "db error" })),
-        )
-    })?;
+    let id: i64 =
+        sqlx::query_scalar(r#"INSERT INTO CustomLibraryBanner (relPath) VALUES (?) RETURNING id"#)
+            .bind(&rel)
+            .fetch_one(&state.pool)
+            .await
+            .map_err(|_| {
+                (
+                    axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(json!({ "error": "db error" })),
+                )
+            })?;
     Ok(Json(json!({
         "id": id,
         "url": format!("/api/files/branding/library-banner/{id}")
@@ -213,13 +210,12 @@ async fn get_library_banner(
     if id < 1 {
         return Err(axum::http::StatusCode::BAD_REQUEST);
     }
-    let rel: Option<String> = sqlx::query_scalar(
-        r#"SELECT relPath FROM CustomLibraryBanner WHERE id = ?"#,
-    )
-    .bind(id)
-    .fetch_optional(&state.pool)
-    .await
-    .map_err(|_| axum::http::StatusCode::INTERNAL_SERVER_ERROR)?;
+    let rel: Option<String> =
+        sqlx::query_scalar(r#"SELECT relPath FROM CustomLibraryBanner WHERE id = ?"#)
+            .bind(id)
+            .fetch_optional(&state.pool)
+            .await
+            .map_err(|_| axum::http::StatusCode::INTERNAL_SERVER_ERROR)?;
     let Some(rel) = rel else {
         return Err(axum::http::StatusCode::NOT_FOUND);
     };
@@ -232,30 +228,27 @@ async fn delete_library_banner(
     headers: HeaderMap,
     Path(id): Path<i64>,
 ) -> Result<impl IntoResponse, (axum::http::StatusCode, Json<Value>)> {
-    let _admin = require_admin(&state, &headers)
-        .await
-        .ok_or((
-            axum::http::StatusCode::FORBIDDEN,
-            Json(json!({ "error": "Forbidden" })),
-        ))?;
+    let _admin = require_admin(&state, &headers).await.ok_or((
+        axum::http::StatusCode::FORBIDDEN,
+        Json(json!({ "error": "Forbidden" })),
+    ))?;
     if id < 1 {
         return Err((
             axum::http::StatusCode::BAD_REQUEST,
             Json(json!({ "error": "Invalid id" })),
         ));
     }
-    let rel: Option<String> = sqlx::query_scalar(
-        r#"SELECT relPath FROM CustomLibraryBanner WHERE id = ?"#,
-    )
-    .bind(id)
-    .fetch_optional(&state.pool)
-    .await
-    .map_err(|_| {
-        (
-            axum::http::StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({ "error": "db error" })),
-        )
-    })?;
+    let rel: Option<String> =
+        sqlx::query_scalar(r#"SELECT relPath FROM CustomLibraryBanner WHERE id = ?"#)
+            .bind(id)
+            .fetch_optional(&state.pool)
+            .await
+            .map_err(|_| {
+                (
+                    axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(json!({ "error": "db error" })),
+                )
+            })?;
     let Some(rel) = rel else {
         return Err((
             axum::http::StatusCode::NOT_FOUND,
@@ -280,10 +273,7 @@ async fn delete_library_banner(
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/branding/favicon", get(get_favicon).post(post_favicon))
-        .route(
-            "/branding/library-banner",
-            post(post_library_banner),
-        )
+        .route("/branding/library-banner", post(post_library_banner))
         .route(
             "/branding/library-banner/{id}",
             get(get_library_banner).delete(delete_library_banner),

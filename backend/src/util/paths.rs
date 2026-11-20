@@ -84,18 +84,21 @@ pub fn upload_base_dir() -> PathBuf {
     if Path::new("/.dockerenv").exists() {
         return PathBuf::from(DOCKER_BOOKS_ROOT);
     }
-    std::env::current_dir()
-        .unwrap_or_default()
-        .join("uploads")
+    std::env::current_dir().unwrap_or_default().join("uploads")
 }
 
 pub fn resolve_library_content_dir(upload_dir: &Path, library_path: &str) -> PathBuf {
     let trimmed = library_path.trim();
-    let base = upload_dir.canonicalize().unwrap_or_else(|_| upload_dir.to_path_buf());
+    let base = upload_dir
+        .canonicalize()
+        .unwrap_or_else(|_| upload_dir.to_path_buf());
     if trimmed.is_empty() {
         return base;
     }
-    let segments: Vec<&str> = trimmed.split(['/', '\\']).filter(|s| !s.is_empty()).collect();
+    let segments: Vec<&str> = trimmed
+        .split(['/', '\\'])
+        .filter(|s| !s.is_empty())
+        .collect();
     let root_style = segments.len() == 1
         && trimmed
             .chars()
@@ -134,10 +137,7 @@ pub fn resolve_library_cover_cache_dir(library_path: &str) -> PathBuf {
         let abs = Path::new(trimmed)
             .canonicalize()
             .unwrap_or_else(|_| PathBuf::from(trimmed));
-        return abs
-            .parent()
-            .unwrap_or(&abs)
-            .join(COVER_CACHE_SEGMENT);
+        return abs.parent().unwrap_or(&abs).join(COVER_CACHE_SEGMENT);
     }
     base.join(COVER_CACHE_SEGMENT)
 }
@@ -299,9 +299,8 @@ mod tests {
         let dir = tempfile::tempdir().expect("tmpdir");
         let base = dir.path().join("u");
         fs::create_dir_all(&base).expect("mkdir");
-        let same_dir = |a: PathBuf, b: PathBuf| {
-            a.canonicalize().unwrap_or(a) == b.canonicalize().unwrap_or(b)
-        };
+        let same_dir =
+            |a: PathBuf, b: PathBuf| a.canonicalize().unwrap_or(a) == b.canonicalize().unwrap_or(b);
         assert!(same_dir(
             resolve_library_content_dir(&base, ""),
             base.clone()
@@ -330,9 +329,8 @@ mod tests {
         let upload = dir.path().join("uploads");
         std::fs::create_dir_all(&upload).expect("mkdir");
         std::env::set_var("UPLOAD_DIR", upload.to_string_lossy().as_ref());
-        let same = |a: PathBuf, b: PathBuf| {
-            a.canonicalize().unwrap_or(a) == b.canonicalize().unwrap_or(b)
-        };
+        let same =
+            |a: PathBuf, b: PathBuf| a.canonicalize().unwrap_or(a) == b.canonicalize().unwrap_or(b);
         assert!(same(
             resolve_library_cover_cache_dir("comedy"),
             upload.join(".cover-cache")

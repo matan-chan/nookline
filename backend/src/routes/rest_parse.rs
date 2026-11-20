@@ -1,10 +1,7 @@
 use axum::http::StatusCode;
 use serde_json::{json, Value};
 
-pub fn parse_positive_id(
-    raw: &str,
-    label: &str,
-) -> Result<i64, (StatusCode, axum::Json<Value>)> {
+pub fn parse_positive_id(raw: &str, label: &str) -> Result<i64, (StatusCode, axum::Json<Value>)> {
     let id: i64 = raw.parse().map_err(|_| {
         (
             StatusCode::BAD_REQUEST,

@@ -21,6 +21,11 @@ async fn libraries_query_with_prisma_ms_created_at() {
         Some(&token),
     )
     .await;
-    let libs = data.get("libraries").and_then(|v| v.as_array()).expect("libs");
-    assert!(libs.iter().any(|l| l.get("name").and_then(|v| v.as_str()) == Some("Legacy")));
+    let libs = data
+        .get("libraries")
+        .and_then(|v| v.as_array())
+        .expect("libs");
+    assert!(libs
+        .iter()
+        .any(|l| l.get("name").and_then(|v| v.as_str()) == Some("Legacy")));
 }

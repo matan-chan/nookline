@@ -1,9 +1,9 @@
 mod common;
 
-use std::fs;
 use common::TestEnv;
 use nookline_backend::db::create_library;
 use nookline_backend::services::library_disk_sync::sync_library_books_from_disk;
+use std::fs;
 
 #[tokio::test]
 async fn sync_imports_pdf_once() {
@@ -17,17 +17,9 @@ async fn sync_imports_pdf_once() {
 
     std::env::set_var("UPLOAD_DIR", books_root.to_string_lossy().as_ref());
 
-    let lib = create_library(
-        &env.state.pool,
-        uid,
-        "Disk",
-        "scan",
-        "NOVEL",
-        0,
-        None,
-    )
-    .await
-    .expect("library");
+    let lib = create_library(&env.state.pool, uid, "Disk", "scan", "NOVEL", 0, None)
+        .await
+        .expect("library");
 
     let added = sync_library_books_from_disk(&env.state.pool, lib.id)
         .await
@@ -39,5 +31,4 @@ async fn sync_imports_pdf_once() {
         .await
         .expect("sync2");
     assert!(again.is_empty());
-
 }

@@ -98,11 +98,7 @@ pub async fn probe_tts_synthesis(target: &ResolvedTtsTarget) -> TtsProbeResult {
         if head.starts_with('{') || head.starts_with('[') {
             return TtsProbeResult {
                 ok: false,
-                error: Some(
-                    head.chars()
-                        .take(PROBE_ERROR_BODY_MAX)
-                        .collect::<String>(),
-                ),
+                error: Some(head.chars().take(PROBE_ERROR_BODY_MAX).collect::<String>()),
             };
         }
     }

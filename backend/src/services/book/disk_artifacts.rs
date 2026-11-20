@@ -1,6 +1,8 @@
 use std::path::PathBuf;
 
-use crate::util::paths::{cover_cache_dir, resolve_book_file_on_disk, resolve_library_cover_cache_dir};
+use crate::util::paths::{
+    cover_cache_dir, resolve_book_file_on_disk, resolve_library_cover_cache_dir,
+};
 
 const DERIVED_COVER_PREFIX: &str = "derived-cover-";
 

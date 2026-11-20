@@ -91,7 +91,10 @@ fn build_custom_target(user: &TtsUserRow) -> Result<ResolvedTtsTarget, String> {
     })
 }
 
-pub async fn resolve_tts_target(pool: &SqlitePool, user_id: i64) -> Result<ResolvedTtsTarget, String> {
+pub async fn resolve_tts_target(
+    pool: &SqlitePool,
+    user_id: i64,
+) -> Result<ResolvedTtsTarget, String> {
     let user = sqlx::query_as::<_, TtsUserRow>(
         r#"SELECT ttsMode, ttsCustomBaseUrl, ttsCustomApiKey, ttsVoice, ttsModel FROM User WHERE id = ?"#,
     )

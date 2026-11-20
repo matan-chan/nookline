@@ -47,17 +47,9 @@ async fn slash_library_path_book_detail_file_and_upload_preview() {
     std::env::set_var("UPLOAD_DIR", upload_root.to_string_lossy().as_ref());
 
     let (uid, token) = env.insert_user("addflow@test.local", "reader").await;
-    let lib = create_library(
-        &env.state.pool,
-        uid,
-        "Test67",
-        "/test67",
-        "NOVEL",
-        0,
-        None,
-    )
-    .await
-    .expect("library");
+    let lib = create_library(&env.state.pool, uid, "Test67", "/test67", "NOVEL", 0, None)
+        .await
+        .expect("library");
 
     let lib_dir = upload_root.join("test67");
     fs::create_dir_all(&lib_dir).expect("lib dir");
@@ -103,7 +95,10 @@ async fn slash_library_path_book_detail_file_and_upload_preview() {
     assert!(!book.is_null(), "book detail returned null");
     assert_eq!(book.get("id").and_then(|v| v.as_i64()), Some(row.id));
     assert_eq!(book.get("fileExt").and_then(|v| v.as_str()), Some("pdf"));
-    assert!(data.get("recommendedBooksForBook").and_then(|v| v.as_array()).is_some());
+    assert!(data
+        .get("recommendedBooksForBook")
+        .and_then(|v| v.as_array())
+        .is_some());
 
     let router = env.router();
     let book_uri = format!("/api/files/books/{}", row.id);
@@ -143,7 +138,11 @@ async fn slash_library_path_book_detail_file_and_upload_preview() {
         .output()
         .is_ok()
     {
-        assert_eq!(preview_status, StatusCode::OK, "upload-preview needs poppler");
+        assert_eq!(
+            preview_status,
+            StatusCode::OK,
+            "upload-preview needs poppler"
+        );
         let bytes = res.into_body().collect().await.unwrap().to_bytes();
         assert!(!bytes.is_empty());
     } else if preview_ok {

@@ -145,13 +145,12 @@ pub async fn is_book_favorite(
     user_id: i64,
     book_id: i64,
 ) -> Result<bool, sqlx::Error> {
-    let n: i64 = sqlx::query_scalar(
-        r#"SELECT COUNT(*) FROM BookFavorite WHERE userId = ? AND bookId = ?"#,
-    )
-    .bind(user_id)
-    .bind(book_id)
-    .fetch_one(pool)
-    .await?;
+    let n: i64 =
+        sqlx::query_scalar(r#"SELECT COUNT(*) FROM BookFavorite WHERE userId = ? AND bookId = ?"#)
+            .bind(user_id)
+            .bind(book_id)
+            .fetch_one(pool)
+            .await?;
     Ok(n > 0)
 }
 
@@ -215,7 +214,11 @@ pub async fn add_bookmark(
     .await
 }
 
-pub async fn delete_bookmark(pool: &SqlitePool, user_id: i64, id: i64) -> Result<bool, sqlx::Error> {
+pub async fn delete_bookmark(
+    pool: &SqlitePool,
+    user_id: i64,
+    id: i64,
+) -> Result<bool, sqlx::Error> {
     let r = sqlx::query(r#"DELETE FROM Bookmark WHERE id = ? AND userId = ?"#)
         .bind(id)
         .bind(user_id)
@@ -267,7 +270,11 @@ pub async fn add_highlight(
     .await
 }
 
-pub async fn delete_highlight(pool: &SqlitePool, user_id: i64, id: i64) -> Result<bool, sqlx::Error> {
+pub async fn delete_highlight(
+    pool: &SqlitePool,
+    user_id: i64,
+    id: i64,
+) -> Result<bool, sqlx::Error> {
     let r = sqlx::query(r#"DELETE FROM Highlight WHERE id = ? AND userId = ?"#)
         .bind(id)
         .bind(user_id)
@@ -281,7 +288,7 @@ pub struct UserBookmarkRow {
     pub id: i64,
     #[sqlx(rename = "bookId")]
     pub book_id: i64,
-  #[sqlx(rename = "bookTitle")]
+    #[sqlx(rename = "bookTitle")]
     pub book_title: String,
     pub position: String,
     pub note: Option<String>,
@@ -289,7 +296,10 @@ pub struct UserBookmarkRow {
     pub created_at: String,
 }
 
-pub async fn user_bookmarks(pool: &SqlitePool, user_id: i64) -> Result<Vec<UserBookmarkRow>, sqlx::Error> {
+pub async fn user_bookmarks(
+    pool: &SqlitePool,
+    user_id: i64,
+) -> Result<Vec<UserBookmarkRow>, sqlx::Error> {
     sqlx::query_as::<_, UserBookmarkRow>(
         &format!(
             r#"SELECT Bookmark.id, Bookmark.bookId, Book.title as bookTitle, Bookmark.position, Bookmark.note, {NORMALIZE_CREATED_AT_BOOKMARK} AS createdAt
@@ -323,7 +333,10 @@ pub struct UserHighlightRow {
     pub created_at: String,
 }
 
-pub async fn user_highlights(pool: &SqlitePool, user_id: i64) -> Result<Vec<UserHighlightRow>, sqlx::Error> {
+pub async fn user_highlights(
+    pool: &SqlitePool,
+    user_id: i64,
+) -> Result<Vec<UserHighlightRow>, sqlx::Error> {
     sqlx::query_as::<_, UserHighlightRow>(
         &format!(
             r#"SELECT Highlight.id, Highlight.bookId, Book.title as bookTitle, Highlight.startPos, Highlight.endPos, Highlight.text, Highlight.color, {NORMALIZE_CREATED_AT_HIGHLIGHT} AS createdAt

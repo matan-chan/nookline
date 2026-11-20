@@ -18,7 +18,9 @@ async fn tts_settings_probe_sync_and_enrich_stubs() {
     )
     .await;
     assert_eq!(
-        tts0.get("ttsSettings").and_then(|t| t.get("mode")).and_then(|v| v.as_str()),
+        tts0.get("ttsSettings")
+            .and_then(|t| t.get("mode"))
+            .and_then(|v| v.as_str()),
         Some("kokoro")
     );
 
@@ -38,15 +40,15 @@ async fn tts_settings_probe_sync_and_enrich_stubs() {
     )
     .await;
     let upd = tts1.get("updateTtsSettings").expect("updateTtsSettings");
-    assert_eq!(upd.get("readerShowPage").and_then(|v| v.as_bool()), Some(false));
+    assert_eq!(
+        upd.get("readerShowPage").and_then(|v| v.as_bool()),
+        Some(false)
+    );
     assert_eq!(
         upd.get("readerDarkDocument").and_then(|v| v.as_bool()),
         Some(true)
     );
-    assert_eq!(
-        upd.get("voice").and_then(|v| v.as_str()),
-        Some("af_bella")
-    );
+    assert_eq!(upd.get("voice").and_then(|v| v.as_str()), Some("af_bella"));
 
     let probe = gql(
         &env,

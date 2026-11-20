@@ -50,14 +50,12 @@ pub async fn persist_book_derived_cover_if_possible(
         return None;
     }
     let path = normalize_stored_upload_path(&out.to_string_lossy());
-    sqlx::query(
-        r#"UPDATE Book SET coverImagePath = ?, updatedAt = datetime('now') WHERE id = ?"#,
-    )
-    .bind(&path)
-    .bind(book_id)
-    .execute(pool)
-    .await
-    .ok()?;
+    sqlx::query(r#"UPDATE Book SET coverImagePath = ?, updatedAt = datetime('now') WHERE id = ?"#)
+        .bind(&path)
+        .bind(book_id)
+        .execute(pool)
+        .await
+        .ok()?;
     Some(path)
 }
 
@@ -113,7 +111,12 @@ async fn run_apply(pool: &SqlitePool, book_id: i64) -> Result<(), String> {
         PdfPlainTextGuess::default()
     };
     let new_cover = maybe_generate_derived_cover(&row, &meta, book_id, &abs, &ext).await;
-    let next_title = pick_repaired_title(inference.repair_title, &pdf_emb, &pdf_text, &inference.inferred);
+    let next_title = pick_repaired_title(
+        inference.repair_title,
+        &pdf_emb,
+        &pdf_text,
+        &inference.inferred,
+    );
     let next_author = pick_fallback_author(&meta, &pdf_emb, &pdf_text, &inference.inferred);
     let merged = merge_local_fallback_metadata(
         &meta,
@@ -196,11 +199,7 @@ fn parse_meta(raw: &Option<String>) -> Value {
 }
 
 fn should_generate_cover(book: &BookLibRow, _meta: &Value) -> bool {
-    let stored = book
-        .cover_image_path
-        .as_deref()
-        .unwrap_or("")
-        .trim();
+    let stored = book.cover_image_path.as_deref().unwrap_or("").trim();
     stored.is_empty() || !Path::new(stored).exists()
 }
 
@@ -292,10 +291,7 @@ fn merge_local_fallback_metadata(
     new_cover: Option<&str>,
     pdf_text: &PdfPlainTextGuess,
 ) -> Value {
-    let prev_lf = meta
-        .get("localFallback")
-        .cloned()
-        .unwrap_or(json!({}));
+    let prev_lf = meta.get("localFallback").cloned().unwrap_or(json!({}));
     let now = chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
     let pdf_txt = match (&pdf_text.title, &pdf_text.author) {
         (None, None) => None,
@@ -313,7 +309,10 @@ fn merge_local_fallback_metadata(
         lf.insert("appliedAt".to_string(), json!(now));
         lf.insert("filenameSlug".to_string(), json!(slug));
         lf.insert("inferredTitle".to_string(), json!(inferred.suggested_title));
-        lf.insert("inferredAuthor".to_string(), json!(inferred.suggested_author));
+        lf.insert(
+            "inferredAuthor".to_string(),
+            json!(inferred.suggested_author),
+        );
         if let Some(p) = pdf_txt {
             lf.insert("pdfFirstPageText".to_string(), p);
         }

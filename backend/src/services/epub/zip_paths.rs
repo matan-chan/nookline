@@ -19,7 +19,11 @@ pub fn find_opf_item_href_by_id(opf: &str, item_id: &str) -> Option<String> {
 pub fn resolve_zip_path(opf_path: &str, href: &str) -> String {
     let dec: String = href
         .split('/')
-        .map(|p| urlencoding::decode(p).map(|c| c.into_owned()).unwrap_or_else(|_| p.to_string()))
+        .map(|p| {
+            urlencoding::decode(p)
+                .map(|c| c.into_owned())
+                .unwrap_or_else(|_| p.to_string())
+        })
         .collect::<Vec<_>>()
         .join("/");
     let opf_dir = if let Some(i) = opf_path.rfind('/') {
@@ -41,8 +45,15 @@ pub fn find_zip_entry_key(files: &HashMap<String, bool>, target: &str) -> Option
         .replace('\\', "/")
         .trim_start_matches('/')
         .to_lowercase();
-    let keys: Vec<&String> = files.iter().filter(|(_, is_dir)| !**is_dir).map(|(k, _)| k).collect();
-    if let Some(exact) = keys.iter().find(|k| k.trim_start_matches('/').to_lowercase() == norm) {
+    let keys: Vec<&String> = files
+        .iter()
+        .filter(|(_, is_dir)| !**is_dir)
+        .map(|(k, _)| k)
+        .collect();
+    if let Some(exact) = keys
+        .iter()
+        .find(|k| k.trim_start_matches('/').to_lowercase() == norm)
+    {
         return Some((*exact).clone());
     }
     keys.iter()

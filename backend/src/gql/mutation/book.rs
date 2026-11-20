@@ -1,8 +1,8 @@
 use async_graphql::{Context, InputObject, Object, Result};
 
 use crate::db::{
-    assert_library_owned, book_for_user, create_book_record, delete_book_for_user, set_book_favorite,
-    upsert_reading_progress, CreateBookInput,
+    assert_library_owned, book_for_user, create_book_record, delete_book_for_user,
+    set_book_favorite, upsert_reading_progress, CreateBookInput,
 };
 use crate::gql::extra_types::ReadingProgressGql;
 use crate::gql::types::{require_user, BookGql};
@@ -77,9 +77,10 @@ impl BookMutation {
     async fn enrich_book_from_open_library(&self, ctx: &Context<'_>, id: i32) -> Result<BookGql> {
         let state = ctx.data_unchecked::<AppState>();
         let user = require_user(ctx)?;
-        let row = crate::services::open_library::enrich_book_record(&state.pool, user.id, id as i64)
-            .await?
-            .ok_or_else(|| async_graphql::Error::new("Book not found"))?;
+        let row =
+            crate::services::open_library::enrich_book_record(&state.pool, user.id, id as i64)
+                .await?
+                .ok_or_else(|| async_graphql::Error::new("Book not found"))?;
         Ok(BookGql(row))
     }
 

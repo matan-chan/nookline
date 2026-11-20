@@ -9,8 +9,9 @@ use serde_json::{json, Value};
 use sqlx::FromRow;
 
 use crate::auth::{
-    auth_user_from_request, create_auth_token, email_for_username, hash_password, is_valid_username,
-    normalize_username, validate_password_strength, verify_password_scrypt, AUTH_TOKEN_TTL_MS,
+    auth_user_from_request, create_auth_token, email_for_username, hash_password,
+    is_valid_username, normalize_username, validate_password_strength, verify_password_scrypt,
+    AUTH_TOKEN_TTL_MS,
 };
 use crate::state::AppState;
 
@@ -101,10 +102,7 @@ async fn admin_user(
 ) -> Result<UserAuthRow, (StatusCode, Json<Value>)> {
     let u = session_user(state, headers).await?;
     if !u.is_admin {
-        return Err((
-            StatusCode::FORBIDDEN,
-            Json(json!({ "error": "Forbidden" })),
-        ));
+        return Err((StatusCode::FORBIDDEN, Json(json!({ "error": "Forbidden" }))));
     }
     Ok(u)
 }
@@ -170,7 +168,9 @@ async fn register(
     if n > 0 {
         return Err((
             StatusCode::FORBIDDEN,
-            Json(json!({ "error": "Registration is closed. Sign in or ask an admin to add a user." })),
+            Json(
+                json!({ "error": "Registration is closed. Sign in or ask an admin to add a user." }),
+            ),
         ));
     }
     let un = body
@@ -182,25 +182,26 @@ async fn register(
     if !is_valid_username(&un) {
         return Err((
             StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "Invalid username. Use 2–32 letters, numbers, or underscores." })),
+            Json(
+                json!({ "error": "Invalid username. Use 2–32 letters, numbers, or underscores." }),
+            ),
         ));
     }
     if let Err(msg) = validate_password_strength(pw) {
         return Err((StatusCode::BAD_REQUEST, Json(json!({ "error": msg }))));
     }
-    let exists: Option<i64> = sqlx::query_scalar(
-        r#"SELECT id FROM User WHERE username = ? OR email = ? LIMIT 1"#,
-    )
-    .bind(&un)
-    .bind(email_for_username(&un))
-    .fetch_optional(&state.pool)
-    .await
-    .map_err(|_| {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({ "error": "db error" })),
-        )
-    })?;
+    let exists: Option<i64> =
+        sqlx::query_scalar(r#"SELECT id FROM User WHERE username = ? OR email = ? LIMIT 1"#)
+            .bind(&un)
+            .bind(email_for_username(&un))
+            .fetch_optional(&state.pool)
+            .await
+            .map_err(|_| {
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(json!({ "error": "db error" })),
+                )
+            })?;
     if exists.is_some() {
         return Err((
             StatusCode::CONFLICT,
@@ -405,25 +406,26 @@ async fn create_user(
     if !is_valid_username(&un) {
         return Err((
             StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "Invalid username. Use 2–32 letters, numbers, or underscores." })),
+            Json(
+                json!({ "error": "Invalid username. Use 2–32 letters, numbers, or underscores." }),
+            ),
         ));
     }
     if let Err(msg) = validate_password_strength(pw) {
         return Err((StatusCode::BAD_REQUEST, Json(json!({ "error": msg }))));
     }
-    let exists: Option<i64> = sqlx::query_scalar(
-        r#"SELECT id FROM User WHERE username = ? OR email = ? LIMIT 1"#,
-    )
-    .bind(&un)
-    .bind(email_for_username(&un))
-    .fetch_optional(&state.pool)
-    .await
-    .map_err(|_| {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({ "error": "db error" })),
-        )
-    })?;
+    let exists: Option<i64> =
+        sqlx::query_scalar(r#"SELECT id FROM User WHERE username = ? OR email = ? LIMIT 1"#)
+            .bind(&un)
+            .bind(email_for_username(&un))
+            .fetch_optional(&state.pool)
+            .await
+            .map_err(|_| {
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(json!({ "error": "db error" })),
+                )
+            })?;
     if exists.is_some() {
         return Err((
             StatusCode::CONFLICT,
@@ -546,10 +548,7 @@ async fn e2e_token(
         .map(|v| v == "production")
         .unwrap_or(false)
     {
-        return Err((
-            StatusCode::NOT_FOUND,
-            Json(json!({ "error": "Not found" })),
-        ));
+        return Err((StatusCode::NOT_FOUND, Json(json!({ "error": "Not found" }))));
     }
     let expected = std::env::var("E2E_AUTH_KEY").unwrap_or_default();
     let expected = expected.trim();
@@ -558,10 +557,7 @@ async fn e2e_token(
         .and_then(|v| v.to_str().ok())
         .unwrap_or("");
     if !expected.is_empty() && provided != expected {
-        return Err((
-            StatusCode::FORBIDDEN,
-            Json(json!({ "error": "Forbidden" })),
-        ));
+        return Err((StatusCode::FORBIDDEN, Json(json!({ "error": "Forbidden" }))));
     }
     const E2E_USERNAME: &str = "playwright";
     let row: Option<UserAuthRow> = sqlx::query_as(

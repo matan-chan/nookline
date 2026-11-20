@@ -16,7 +16,15 @@ pub fn guess_pdf_title_author_from_first_page(path: &Path, file_size: u64) -> Pd
         return PdfPlainTextGuess::default();
     }
     let Ok(out) = Command::new("pdftotext")
-        .args(["-f", "1", "-l", "1", "-layout", &path.to_string_lossy(), "-"])
+        .args([
+            "-f",
+            "1",
+            "-l",
+            "1",
+            "-layout",
+            &path.to_string_lossy(),
+            "-",
+        ])
         .output()
     else {
         return PdfPlainTextGuess::default();
@@ -38,9 +46,7 @@ fn normalize_spaces(s: &str) -> String {
 }
 
 fn strip_trailing_author_junk(s: &str) -> String {
-    s.trim_end_matches(['.', ',', ';', ':'])
-        .trim()
-        .to_string()
+    s.trim_end_matches(['.', ',', ';', ':']).trim().to_string()
 }
 
 fn looks_like_noise_line(line: &str) -> bool {
@@ -69,8 +75,7 @@ fn infer_title_author_from_plain_lines(lines: &[String]) -> PdfPlainTextGuess {
         return PdfPlainTextGuess::default();
     }
     let scan = lines.len().min(24);
-    let by_re =
-        regex::Regex::new(r"(?i)^(.{2,240}?)\s+by\s+(.{2,120})$").ok();
+    let by_re = regex::Regex::new(r"(?i)^(.{2,240}?)\s+by\s+(.{2,120})$").ok();
     for line in lines.iter().take(scan) {
         let Some(re) = by_re.as_ref() else {
             break;
@@ -79,8 +84,9 @@ fn infer_title_author_from_plain_lines(lines: &[String]) -> PdfPlainTextGuess {
             continue;
         };
         let title = normalize_spaces(cap.get(1).map(|m| m.as_str()).unwrap_or(""));
-        let author =
-            strip_trailing_author_junk(&normalize_spaces(cap.get(2).map(|m| m.as_str()).unwrap_or("")));
+        let author = strip_trailing_author_junk(&normalize_spaces(
+            cap.get(2).map(|m| m.as_str()).unwrap_or(""),
+        ));
         if title.len() >= 2 && author.len() >= 2 {
             return PdfPlainTextGuess {
                 title: Some(title.chars().take(MAX_TITLE_LEN).collect()),
@@ -146,7 +152,12 @@ mod tests {
 
     #[test]
     fn ignores_noise_before_by_line() {
-        let g = infer(&["3", "Copyright 1999", "Pride and Prejudice", "by Jane Austen"]);
+        let g = infer(&[
+            "3",
+            "Copyright 1999",
+            "Pride and Prejudice",
+            "by Jane Austen",
+        ]);
         assert_eq!(g.title.as_deref(), Some("Pride and Prejudice"));
         assert_eq!(g.author.as_deref(), Some("Jane Austen"));
     }

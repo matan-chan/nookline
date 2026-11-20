@@ -25,14 +25,12 @@ pub async fn enqueue_pdf_to_epub_for_book(pool: &SqlitePool, book_id: i64) -> bo
 }
 
 async fn is_pdf_to_epub_enabled(pool: &SqlitePool) -> bool {
-    sqlx::query_scalar::<_, bool>(
-        r#"SELECT convertPdfToEpub FROM AppCustomization WHERE id = 1"#,
-    )
-    .fetch_optional(pool)
-    .await
-    .ok()
-    .flatten()
-    .unwrap_or(false)
+    sqlx::query_scalar::<_, bool>(r#"SELECT convertPdfToEpub FROM AppCustomization WHERE id = 1"#)
+        .fetch_optional(pool)
+        .await
+        .ok()
+        .flatten()
+        .unwrap_or(false)
 }
 
 async fn run_job(pool: &SqlitePool, book_id: i64) -> Result<(), String> {
@@ -122,7 +120,9 @@ fn resolve_ebook_convert_cmd() -> String {
     if cfg!(windows) {
         for var in ["PROGRAMFILES", "PROGRAMFILES(X86)"] {
             if let Ok(root) = std::env::var(var) {
-                let p = PathBuf::from(&root).join("Calibre2").join("ebook-convert.exe");
+                let p = PathBuf::from(&root)
+                    .join("Calibre2")
+                    .join("ebook-convert.exe");
                 if p.exists() {
                     return p.to_string_lossy().to_string();
                 }
@@ -147,7 +147,10 @@ fn convert_pdf_to_epub(input: &Path, output: &Path) -> Result<(), String> {
     }
     let cmd = resolve_ebook_convert_cmd();
     let status = Command::new(&cmd)
-        .args([input.to_string_lossy().as_ref(), output.to_string_lossy().as_ref()])
+        .args([
+            input.to_string_lossy().as_ref(),
+            output.to_string_lossy().as_ref(),
+        ])
         .status()
         .map_err(|e| format!("ebook-convert not available ({cmd}): {e}"))?;
     if !status.success() {
@@ -197,7 +200,13 @@ async fn try_update_book_to_epub(
     .execute(pool)
     .await
     .map_err(|e| e.to_string())?;
-    if pdf != epub && pdf.extension().and_then(|e| e.to_str()).unwrap_or("").eq_ignore_ascii_case("pdf") {
+    if pdf != epub
+        && pdf
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("")
+            .eq_ignore_ascii_case("pdf")
+    {
         let _ = tokio::fs::remove_file(pdf).await;
     }
     Ok(())

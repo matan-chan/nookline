@@ -45,7 +45,10 @@ fn genre_from(meta: &Value) -> Option<String> {
 
 fn subjects_from(meta: &Value) -> Vec<String> {
     let mut out = Vec::new();
-    if let Some(subj) = meta.get("openLibrary").and_then(|v| v.get("subjects")).and_then(|v| v.as_array())
+    if let Some(subj) = meta
+        .get("openLibrary")
+        .and_then(|v| v.get("subjects"))
+        .and_then(|v| v.as_array())
     {
         for x in subj {
             if let Some(s) = x.as_str() {
@@ -138,7 +141,11 @@ pub fn merge_with_fallback(scored: Vec<i64>, pool_ids: &[i64], cap: i64) -> Vec<
             }
         }
     }
-    let mut filler: Vec<i64> = pool_ids.iter().copied().filter(|id| !seen.contains(id)).collect();
+    let mut filler: Vec<i64> = pool_ids
+        .iter()
+        .copied()
+        .filter(|id| !seen.contains(id))
+        .collect();
     use rand::seq::SliceRandom;
     filler.shuffle(&mut rand::rng());
     for id in filler {
@@ -176,7 +183,10 @@ mod tests {
         assert_eq!(ids.len(), 2);
         ids = merge_with_fallback(ids, &user_wide, 10);
         assert_eq!(ids.len(), 10);
-        assert_eq!(ids.iter().collect::<std::collections::HashSet<_>>().len(), 10);
+        assert_eq!(
+            ids.iter().collect::<std::collections::HashSet<_>>().len(),
+            10
+        );
     }
 
     #[test]

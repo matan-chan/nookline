@@ -13,12 +13,10 @@ async fn local_fallback_missing_and_relative_paths() {
     std::fs::create_dir_all(&upload).expect("mkdir");
     std::env::set_var("UPLOAD_DIR", upload.to_string_lossy().as_ref());
 
-    assert!(
-        apply_local_book_fallback(&env.state.pool, 9_999_999)
-            .await
-            .unwrap_err()
-            .contains("book missing")
-    );
+    assert!(apply_local_book_fallback(&env.state.pool, 9_999_999)
+        .await
+        .unwrap_err()
+        .contains("book missing"));
 
     let lib = create_library(&env.state.pool, uid, "L", ".", "NOVEL", 0, None)
         .await
@@ -47,17 +45,9 @@ async fn local_fallback_missing_and_relative_paths() {
     std::fs::create_dir_all(&lib_path).expect("shelf");
     let rel_name = "inside.pdf";
     std::fs::write(lib_path.join(rel_name), b"%PDF").expect("pdf");
-    let lib2 = create_library(
-        &env.state.pool,
-        uid,
-        "Rel",
-        "shelf",
-        "NOVEL",
-        0,
-        None,
-    )
-    .await
-    .expect("lib2");
+    let lib2 = create_library(&env.state.pool, uid, "Rel", "shelf", "NOVEL", 0, None)
+        .await
+        .expect("lib2");
     let rel_book = create_book_record(
         &env.state.pool,
         CreateBookInput {

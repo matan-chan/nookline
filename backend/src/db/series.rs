@@ -16,7 +16,10 @@ pub struct SeriesRow {
     pub created_at: String,
 }
 
-pub async fn series_for_library(pool: &SqlitePool, library_id: i64) -> Result<Vec<SeriesRow>, sqlx::Error> {
+pub async fn series_for_library(
+    pool: &SqlitePool,
+    library_id: i64,
+) -> Result<Vec<SeriesRow>, sqlx::Error> {
     sqlx::query_as::<_, SeriesRow>(
         r#"SELECT id, libraryId, title, description, coverImagePath, metadata, status,
         CASE WHEN typeof(createdAt) = 'integer' THEN datetime(createdAt / 1000, 'unixepoch') ELSE createdAt END AS createdAt

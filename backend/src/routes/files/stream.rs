@@ -43,10 +43,7 @@ pub fn parse_single_byte_range(range_header: &str, file_size: u64) -> Option<(u6
     Some((start, end))
 }
 
-pub async fn stream_file_with_range(
-    headers: &HeaderMap,
-    abs: &Path,
-) -> Result<Response, ()> {
+pub async fn stream_file_with_range(headers: &HeaderMap, abs: &Path) -> Result<Response, ()> {
     let meta = tokio::fs::metadata(abs).await.map_err(|_| ())?;
     let file_size = meta.len();
     let ext = abs
@@ -78,7 +75,10 @@ pub async fn stream_file_with_range(
         file.read_exact(&mut buf).await.map_err(|_| ())?;
         let mut resp = Response::builder()
             .status(StatusCode::PARTIAL_CONTENT)
-            .header(header::CONTENT_RANGE, format!("bytes {start}-{end}/{file_size}"))
+            .header(
+                header::CONTENT_RANGE,
+                format!("bytes {start}-{end}/{file_size}"),
+            )
             .header(header::ACCEPT_RANGES, "bytes")
             .header(header::CONTENT_LENGTH, chunk.to_string())
             .header(header::CONTENT_TYPE, mime);
@@ -120,6 +120,8 @@ pub async fn stream_disk_image(abs: &Path, cache_control: &str) -> Result<Respon
         .map(|e| format!(".{}", e.to_ascii_lowercase()))
         .unwrap_or_default();
     let mime = mime_for_upload_ext(&ext);
-    let data = tokio::fs::read(abs).await.map_err(|_| StatusCode::NOT_FOUND)?;
+    let data = tokio::fs::read(abs)
+        .await
+        .map_err(|_| StatusCode::NOT_FOUND)?;
     Ok(stream_bytes(data, mime, cache_control).await)
 }

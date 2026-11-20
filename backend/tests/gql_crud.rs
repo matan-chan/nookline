@@ -1,8 +1,8 @@
 mod common;
 
+use common::{gql, gql_path, TestEnv};
 use serde_json::json;
 use std::fs;
-use common::{gql, gql_path, TestEnv};
 
 #[tokio::test]
 async fn graphql_libraries_through_voice_crud() {
@@ -91,7 +91,10 @@ async fn graphql_libraries_through_voice_crud() {
         gql_path(&nested, &["library", "previewBook", "title"]).as_str(),
         Some("Ch1")
     );
-    assert_eq!(gql_path(&nested, &["book", "fileExt"]).as_str(), Some("pdf"));
+    assert_eq!(
+        gql_path(&nested, &["book", "fileExt"]).as_str(),
+        Some("pdf")
+    );
     assert!(gql_path(&nested, &["book", "readingProgressForUser"]).is_null());
 
     let prog = gql(
@@ -115,10 +118,16 @@ async fn graphql_libraries_through_voice_crud() {
         Some(&token),
     )
     .await;
-    let on_deck = deck.get("onDeck").and_then(|v| v.as_array()).expect("onDeck");
+    let on_deck = deck
+        .get("onDeck")
+        .and_then(|v| v.as_array())
+        .expect("onDeck");
     assert_eq!(on_deck.len(), 1);
     assert_eq!(
-        on_deck[0].get("progress").and_then(|p| p.get("percentage")).and_then(|v| v.as_f64()),
+        on_deck[0]
+            .get("progress")
+            .and_then(|p| p.get("percentage"))
+            .and_then(|v| v.as_f64()),
         Some(42.0)
     );
 
@@ -175,7 +184,9 @@ async fn graphql_libraries_through_voice_crud() {
         Some(&token),
     )
     .await;
-    let bm_id = gql_path(&bm, &["addBookmark", "id"]).as_i64().expect("bm id");
+    let bm_id = gql_path(&bm, &["addBookmark", "id"])
+        .as_i64()
+        .expect("bm id");
 
     let hl = gql(
         &env,
@@ -186,7 +197,9 @@ async fn graphql_libraries_through_voice_crud() {
         Some(&token),
     )
     .await;
-    let hl_id = gql_path(&hl, &["addHighlight", "id"]).as_i64().expect("hl id");
+    let hl_id = gql_path(&hl, &["addHighlight", "id"])
+        .as_i64()
+        .expect("hl id");
 
     let vp = gql(
         &env,
@@ -197,7 +210,9 @@ async fn graphql_libraries_through_voice_crud() {
         Some(&token),
     )
     .await;
-    let vp_id = gql_path(&vp, &["saveVoiceProfile", "id"]).as_i64().expect("vp id");
+    let vp_id = gql_path(&vp, &["saveVoiceProfile", "id"])
+        .as_i64()
+        .expect("vp id");
 
     let lists = gql(
         &env,
@@ -214,11 +229,20 @@ async fn graphql_libraries_through_voice_crud() {
     .await;
 
     assert_eq!(
-        lists.get("bookmarks").and_then(|v| v.as_array()).map(|a| a.len()),
+        lists
+            .get("bookmarks")
+            .and_then(|v| v.as_array())
+            .map(|a| a.len()),
         Some(1)
     );
-    let highlights = lists.get("highlights").and_then(|v| v.as_array()).expect("highlights");
-    assert_eq!(highlights[0].get("text").and_then(|v| v.as_str()), Some("hi"));
+    let highlights = lists
+        .get("highlights")
+        .and_then(|v| v.as_array())
+        .expect("highlights");
+    assert_eq!(
+        highlights[0].get("text").and_then(|v| v.as_str()),
+        Some("hi")
+    );
     let user_bm = lists
         .get("userBookmarks")
         .and_then(|v| v.as_array())

@@ -57,8 +57,8 @@ struct ScenarioResult {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct ProcessSummary {
-  rss_bytes: RssStats,
-  cpu_seconds_delta: Option<f64>,
+    rss_bytes: RssStats,
+    cpu_seconds_delta: Option<f64>,
 }
 
 #[derive(Serialize)]
@@ -141,11 +141,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 i += 2;
             }
             "--iterations" => {
-                iterations = args.get(i + 1).and_then(|s| s.parse().ok()).unwrap_or(iterations);
+                iterations = args
+                    .get(i + 1)
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(iterations);
                 i += 2;
             }
             "--warmup" => {
-                warmup = args.get(i + 1).and_then(|s| s.parse().ok()).unwrap_or(warmup);
+                warmup = args
+                    .get(i + 1)
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(warmup);
                 i += 2;
             }
             _ => i += 1,
@@ -158,11 +164,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()?;
     let mut scenario_rows = Vec::new();
     for sc in SCENARIOS {
-        let url = format!(
-            "{}{}",
-            base_url.trim_end_matches('/'),
-            sc.path
-        );
+        let url = format!("{}{}", base_url.trim_end_matches('/'), sc.path);
         let mut latencies = Vec::new();
         let mut errors = 0u32;
         let total = warmup + iterations;

@@ -9,7 +9,7 @@ use crate::db::{
     series_list_for_user, user_bookmarks, user_highlights, voice_profiles_for_user,
 };
 use crate::gql::extra_types::{
-    AppCustomizationGql, BookmarkGql, BookWithProgressGql, HighlightGql, ReadingProgressGql,
+    AppCustomizationGql, BookWithProgressGql, BookmarkGql, HighlightGql, ReadingProgressGql,
     TtsEngineProbeGql, TtsSettingsGql, UserBookmarkGql, UserHighlightGql, VoiceProfileGql,
 };
 use crate::gql::types::{require_user, AuthUserGql, BookGql, LibraryGql, SeriesGql};
@@ -103,8 +103,7 @@ impl QueryRoot {
         let state = ctx.data_unchecked::<AppState>();
         let user = require_user(ctx)?;
         let lim = limit.unwrap_or(10).clamp(1, 20) as i64;
-        let rows =
-            recommended_books_for_user(&state.pool, user.id, book_id as i64, lim).await?;
+        let rows = recommended_books_for_user(&state.pool, user.id, book_id as i64, lim).await?;
         Ok(rows.into_iter().map(BookGql).collect())
     }
 

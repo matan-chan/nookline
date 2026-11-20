@@ -9,7 +9,11 @@ pub struct PdfEmbeddedMeta {
 }
 
 fn clean_meta(raw: &str) -> Option<String> {
-    let t = raw.replace('\0', "").split_whitespace().collect::<Vec<_>>().join(" ");
+    let t = raw
+        .replace('\0', "")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ");
     if t.is_empty() {
         None
     } else {

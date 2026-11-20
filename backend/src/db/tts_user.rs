@@ -185,16 +185,28 @@ pub async fn update_tts_settings(
                 existing.tts_model.clone()
             }
         });
-    let speed = input.speed.map(clamp_speed).unwrap_or(clamp_speed(existing.tts_speed));
-    let pitch = input.pitch.map(clamp_speed).unwrap_or(clamp_speed(existing.tts_pitch));
+    let speed = input
+        .speed
+        .map(clamp_speed)
+        .unwrap_or(clamp_speed(existing.tts_speed));
+    let pitch = input
+        .pitch
+        .map(clamp_speed)
+        .unwrap_or(clamp_speed(existing.tts_pitch));
 
     let (min_c, max_c, period_c) = if input.chunk_min_chars.is_some()
         || input.chunk_max_chars.is_some()
         || input.chunk_period_extra.is_some()
     {
         normalize_chunk_triple(
-            input.chunk_min_chars.map(i64::from).unwrap_or(existing.tts_chunk_min_chars),
-            input.chunk_max_chars.map(i64::from).unwrap_or(existing.tts_chunk_max_chars),
+            input
+                .chunk_min_chars
+                .map(i64::from)
+                .unwrap_or(existing.tts_chunk_min_chars),
+            input
+                .chunk_max_chars
+                .map(i64::from)
+                .unwrap_or(existing.tts_chunk_max_chars),
             input
                 .chunk_period_extra
                 .map(i64::from)

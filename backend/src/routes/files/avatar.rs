@@ -41,13 +41,12 @@ async fn avatar_user(
     if user_id < 1 {
         return Err(StatusCode::BAD_REQUEST);
     }
-    let rel: Option<String> =
-        sqlx::query_scalar(r#"SELECT avatarRelPath FROM User WHERE id = ?"#)
-            .bind(user_id)
-            .fetch_optional(&state.pool)
-            .await
-            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-            .flatten();
+    let rel: Option<String> = sqlx::query_scalar(r#"SELECT avatarRelPath FROM User WHERE id = ?"#)
+        .bind(user_id)
+        .fetch_optional(&state.pool)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .flatten();
     let Some(rel) = rel.filter(|p| !p.is_empty()) else {
         return Err(StatusCode::NOT_FOUND);
     };
@@ -72,28 +71,27 @@ async fn post_avatar(
     headers: HeaderMap,
     mut multipart: Multipart,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let user = require_user(&state, &headers)
-        .await
-        .ok_or((
-            StatusCode::UNAUTHORIZED,
-            Json(json!({ "error": "Unauthenticated" })),
-        ))?;
+    let user = require_user(&state, &headers).await.ok_or((
+        StatusCode::UNAUTHORIZED,
+        Json(json!({ "error": "Unauthenticated" })),
+    ))?;
     tokio::fs::create_dir_all(avatar_dir()).await.ok();
     let mut file_name = None;
     let mut file_data = None;
-    while let Some(field) = multipart
-        .next_field()
-        .await
-        .map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?
-    {
+    while let Some(field) = multipart.next_field().await.map_err(|e| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(json!({ "error": e.to_string() })),
+        )
+    })? {
         if field.name() == Some("file") {
             file_name = field.file_name().map(String::from);
-            file_data = Some(
-                field
-                    .bytes()
-                    .await
-                    .map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?,
-            );
+            file_data = Some(field.bytes().await.map_err(|e| {
+                (
+                    StatusCode::BAD_REQUEST,
+                    Json(json!({ "error": e.to_string() })),
+                )
+            })?);
         }
     }
     let Some(data) = file_data else {
@@ -113,14 +111,12 @@ async fn post_avatar(
             let _ = tokio::fs::remove_file(old_abs).await;
         }
     }
-    tokio::fs::write(&final_abs, &data)
-        .await
-        .map_err(|_| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(json!({ "error": "Failed to store avatar" })),
-            )
-        })?;
+    tokio::fs::write(&final_abs, &data).await.map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "error": "Failed to store avatar" })),
+        )
+    })?;
     let rel = rel_path_from_upload(&final_abs);
     sqlx::query(r#"UPDATE User SET avatarRelPath = ?, updatedAt = datetime('now') WHERE id = ?"#)
         .bind(&rel)
@@ -143,17 +139,18 @@ async fn delete_avatar(
     let user = require_user(&state, &headers)
         .await
         .ok_or(StatusCode::UNAUTHORIZED)?;
-    let rel: Option<String> =
-        sqlx::query_scalar(r#"SELECT avatarRelPath FROM User WHERE id = ?"#)
-            .bind(user.id)
-            .fetch_optional(&state.pool)
-            .await
-            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    sqlx::query(r#"UPDATE User SET avatarRelPath = NULL, updatedAt = datetime('now') WHERE id = ?"#)
+    let rel: Option<String> = sqlx::query_scalar(r#"SELECT avatarRelPath FROM User WHERE id = ?"#)
         .bind(user.id)
-        .execute(&state.pool)
+        .fetch_optional(&state.pool)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    sqlx::query(
+        r#"UPDATE User SET avatarRelPath = NULL, updatedAt = datetime('now') WHERE id = ?"#,
+    )
+    .bind(user.id)
+    .execute(&state.pool)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     if let Some(rel) = rel.filter(|p| !p.is_empty()) {
         let abs: PathBuf = abs_from_upload_rel(&rel);
         let _ = tokio::fs::remove_file(abs).await;
