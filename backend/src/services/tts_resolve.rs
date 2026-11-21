@@ -41,10 +41,10 @@ fn local_kokoro_base_url() -> String {
 
 const DOCKER_KOKORO_TTS_URL: &str = "http://kokoro:8880";
 
-const is_loopback_tts_url = |raw: &str| {
+fn is_loopback_tts_url(raw: &str) -> bool {
     let lower = raw.to_ascii_lowercase();
     lower.contains("127.0.0.1") || lower.contains("localhost")
-};
+}
 
 fn kokoro_preset_base_url() -> String {
     let docker = std::path::Path::new("/.dockerenv").exists();

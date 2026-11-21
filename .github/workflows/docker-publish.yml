@@ -26,7 +26,7 @@ jobs:
             version_file: backend/Cargo.toml
           - image: nookline-frontend
             context: ./frontend
-            dockerfile: Dockerfile
+            dockerfile: frontend/Dockerfile
             version_file: frontend/package.json
 
     steps:
