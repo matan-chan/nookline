@@ -148,10 +148,14 @@ export const useTtsParagraphPlaybackAudio = ({
       setPlaying(false);
     };
     audioRef.current = a;
-    void a.play();
     playingRef.current = true;
     setPlaying(true);
-  }, []);
+    void a.play().catch((e) => {
+      playingRef.current = false;
+      setPlaying(false);
+      setErr(e instanceof Error ? e.message : "Playback failed");
+    });
+  }, [setErr, setPlaying]);
 
   advanceAfterParagraphRef.current = createAdvanceAfterParagraphHandler({
     format,

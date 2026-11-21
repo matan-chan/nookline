@@ -25,7 +25,7 @@ export const useTtsParagraphPlaybackPlay = (args: PlayArgs) => {
     flushServerReadingRef,
     audioRef,
     playingRef,
-    playing,
+    voiceSpeedModelRef,
     fetchSpeechBlob,
     playAudioFromUrl,
     prefetchAt,
@@ -91,23 +91,44 @@ export const useTtsParagraphPlaybackPlay = (args: PlayArgs) => {
     }
   }, [format, loadSource, fetchSpeechBlob, playAudioFromUrl, prefetchAt, stopPlayback]);
 
+  const startAudioPlay = useCallback(
+    (a: HTMLAudioElement) => {
+      a.playbackRate = voiceSpeedModelRef.current.speed;
+      playingRef.current = true;
+      setPlaying(true);
+      void a.play().catch((e) => {
+        playingRef.current = false;
+        setPlaying(false);
+        setErr(e instanceof Error ? e.message : "Playback failed");
+      });
+    },
+    [setErr, setPlaying, voiceSpeedModelRef],
+  );
+
   const togglePlay = useCallback(() => {
     const a = audioRef.current;
     const hasSession = parasRef.current.length > 0;
-    if (playing || (a && !a.paused && playingRef.current)) {
-      a?.pause();
+    const isAudiblyPlaying = Boolean(a && !a.paused && !a.ended);
+
+    if (isAudiblyPlaying) {
+      a!.pause();
       playingRef.current = false;
       setPlaying(false);
       return;
     }
-    if (a && a.paused && hasSession) {
-      void a.play();
-      playingRef.current = true;
-      setPlaying(true);
+
+    if (hasSession && urlCurRef.current) {
+      if (a) {
+        if (a.ended) a.currentTime = 0;
+        startAudioPlay(a);
+        return;
+      }
+      playAudioFromUrl(urlCurRef.current);
       return;
     }
+
     void beginPlayback();
-  }, [beginPlayback, playing]);
+  }, [beginPlayback, playAudioFromUrl, startAudioPlay, urlCurRef]);
 
   const goParagraph = useCallback(
     (delta: number) => {

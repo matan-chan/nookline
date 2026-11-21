@@ -103,7 +103,7 @@ const ReaderPage = () => {
     setReaderPanelOpen(true);
     if (!aiOpen) {
       setAiOpen(true);
-      requestAnimationFrame(() => void ttsPlayback.togglePlay());
+      void ttsPlayback.togglePlay();
     }
   }, [aiOpen, ttsPlayback]);
 
@@ -114,7 +114,7 @@ const ReaderPage = () => {
 
   const togglePlayFromWave = useCallback(() => {
     if (!aiOpen) setAiOpen(true);
-    requestAnimationFrame(() => void ttsPlayback.togglePlay());
+    void ttsPlayback.togglePlay();
   }, [aiOpen, ttsPlayback]);
 
   const closeReaderPanel = useCallback(() => setReaderPanelOpen(false), []);

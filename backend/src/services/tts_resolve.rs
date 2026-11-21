@@ -39,11 +39,20 @@ fn local_kokoro_base_url() -> String {
     std::env::var("KOKORO_TTS_URL").unwrap_or_else(|_| "http://127.0.0.1:8881".to_string())
 }
 
+const DOCKER_KOKORO_TTS_URL: &str = "http://kokoro:8880";
+
+const is_loopback_tts_url = |raw: &str| {
+    let lower = raw.to_ascii_lowercase();
+    lower.contains("127.0.0.1") || lower.contains("localhost")
+};
+
 fn kokoro_preset_base_url() -> String {
     let docker = std::path::Path::new("/.dockerenv").exists();
     let raw = match std::env::var("TTS_URL") {
+        Ok(url) if docker && is_loopback_tts_url(url.trim()) => DOCKER_KOKORO_TTS_URL.to_string(),
         Ok(url) if !docker && url.contains("kokoro:") => local_kokoro_base_url(),
         Ok(url) => url,
+        Err(_) if docker => DOCKER_KOKORO_TTS_URL.to_string(),
         Err(_) => local_kokoro_base_url(),
     };
     normalize_open_ai_tts_base_url(raw.trim())

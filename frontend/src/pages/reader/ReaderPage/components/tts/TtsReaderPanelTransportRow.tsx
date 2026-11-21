@@ -54,7 +54,7 @@ export const TtsReaderPanelTransportRow = ({
       <IconButton type="button" size="small" aria-label={prevLabel} disabled={busy || totalParas === 0 || paraIndex <= 0} onClick={onPrev} sx={(th) => chunkNavIconButtonSx(th, compact)}>
         <SkipPrevious fontSize="inherit" />
       </IconButton>
-      <IconButton type="button" disabled={busy} onClick={onTogglePlay} aria-label={playAria} size="small" sx={(th) => ttsPlayPauseIconButtonSx(th, compact)}>
+      <IconButton type="button" disabled={busy && playing} onClick={onTogglePlay} aria-label={playAria} size="small" sx={(th) => ttsPlayPauseIconButtonSx(th, compact)}>
         {busy ? <CircularProgress size={18} color="inherit" /> : playing ? <Pause fontSize="inherit" /> : <PlayArrow fontSize="inherit" />}
       </IconButton>
       <IconButton type="button" size="small" aria-label={nextLabel} disabled={busy || totalParas === 0 || paraIndex >= totalParas - 1} onClick={onNext} sx={(th) => chunkNavIconButtonSx(th, compact)}>
