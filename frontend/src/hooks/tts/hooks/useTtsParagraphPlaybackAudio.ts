@@ -81,7 +81,14 @@ export const useTtsParagraphPlaybackAudio = ({
   const clearAudioOnly = useCallback(() => {
     prefetchAbortRef.current?.abort();
     prefetchAbortRef.current = null;
-    audioRef.current?.pause();
+    const a = audioRef.current;
+    if (a) {
+      a.onplaying = null;
+      a.onpause = null;
+      a.onended = null;
+      a.onerror = null;
+      a.pause();
+    }
     audioRef.current = null;
     revoke(urlCurRef.current);
     revoke(urlNextRef.current);
@@ -133,10 +140,16 @@ export const useTtsParagraphPlaybackAudio = ({
     [fetchSpeechBlob]
   );
 
-  const playAudioFromUrl = useCallback((url: string) => {
-    audioRef.current?.pause();
-    const a = new Audio(url);
-    a.playbackRate = voiceSpeedModelRef.current.speed;
+  const bindAudioElementHandlers = useCallback((a: HTMLAudioElement) => {
+    a.onplaying = () => {
+      playingRef.current = true;
+      setPlaying(true);
+    };
+    a.onpause = () => {
+      if (a.ended) return;
+      playingRef.current = false;
+      setPlaying(false);
+    };
     a.onended = () => {
       playingRef.current = false;
       setPlaying(false);
@@ -147,15 +160,23 @@ export const useTtsParagraphPlaybackAudio = ({
       playingRef.current = false;
       setPlaying(false);
     };
-    audioRef.current = a;
-    playingRef.current = true;
-    setPlaying(true);
-    void a.play().catch((e) => {
-      playingRef.current = false;
-      setPlaying(false);
-      setErr(e instanceof Error ? e.message : "Playback failed");
-    });
   }, [setErr, setPlaying]);
+
+  const playAudioFromUrl = useCallback(
+    (url: string) => {
+      audioRef.current?.pause();
+      const a = new Audio(url);
+      a.playbackRate = voiceSpeedModelRef.current.speed;
+      bindAudioElementHandlers(a);
+      audioRef.current = a;
+      void a.play().catch((e) => {
+        playingRef.current = false;
+        setPlaying(false);
+        setErr(e instanceof Error ? e.message : "Playback failed");
+      });
+    },
+    [bindAudioElementHandlers, setErr, setPlaying],
+  );
 
   advanceAfterParagraphRef.current = createAdvanceAfterParagraphHandler({
     format,

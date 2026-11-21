@@ -1,5 +1,6 @@
 import { pdfCustomTextWrapSavedHighlights, type PdfSavedHighlightRow } from "../utils/pdf/pdfTextLayerSavedHighlightHtml";
-import { TTS_READING_PDF_CLASS } from "../hooks/tts/constants/ttsPlaybackConstants";
+import { usePdfTtsHighlightOverlayPaint } from "./pdf/usePdfTtsHighlightOverlayPaint";
+import { TTS_PDF_ANCHOR_CLASS } from "../utils/pdf/pdfTtsHighlightOverlay";
 import {
   PDF_DOCUMENT_PAGES_LIST_NO_PINNED,
   PDF_DOCUMENT_PAGES_LIST_PAD_TOP_PX,
@@ -99,9 +100,11 @@ export const PdfDocumentPagesList = ({
   const pins = pinnedPages ?? PDF_DOCUMENT_PAGES_LIST_NO_PINNED;
   const pinnedSet = useMemo(() => new Set(pins.filter((p) => p >= 1)), [pins]);
   const ttsHighlightSet = useMemo(() => new Set(ttsHighlightItemIndices), [ttsHighlightItemIndices]);
+  usePdfTtsHighlightOverlayPaint(ttsHighlightPage, ttsHighlightItemIndices, ttsTextLayerTick);
   const pdfCustomTextRenderer = useCallback(
     ({ pageNumber, itemIndex, str }: { pageNumber: number; itemIndex: number; str: string }) => {
-      if (ttsHighlightPage === pageNumber && ttsHighlightSet.has(itemIndex)) return `<mark class="${TTS_READING_PDF_CLASS}">${escapeHtmlText(str)}</mark>`;
+      if (ttsHighlightPage === pageNumber && ttsHighlightSet.has(itemIndex))
+        return `<mark class="${TTS_PDF_ANCHOR_CLASS}">${escapeHtmlText(str)}</mark>`;
       const saved = pdfCustomTextWrapSavedHighlights(pageNumber, itemIndex, str, pdfSavedHighlights);
       if (saved) return saved;
       return str;

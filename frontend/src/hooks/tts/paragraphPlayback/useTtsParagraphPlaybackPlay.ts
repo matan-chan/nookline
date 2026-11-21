@@ -91,23 +91,24 @@ export const useTtsParagraphPlaybackPlay = (args: PlayArgs) => {
     }
   }, [format, loadSource, fetchSpeechBlob, playAudioFromUrl, prefetchAt, stopPlayback]);
 
-  const startAudioPlay = useCallback(
-    (a: HTMLAudioElement) => {
+  const resumePausedAudio = useCallback(
+    (a: HTMLAudioElement, url: string) => {
+      if (a.ended) a.currentTime = 0;
+      const needsSrc = !a.src || a.readyState === HTMLMediaElement.HAVE_NOTHING;
+      if (needsSrc) {
+        a.src = url;
+        a.load();
+      }
       a.playbackRate = voiceSpeedModelRef.current.speed;
-      playingRef.current = true;
-      setPlaying(true);
-      void a.play().catch((e) => {
-        playingRef.current = false;
-        setPlaying(false);
-        setErr(e instanceof Error ? e.message : "Playback failed");
-      });
+      void a.play().catch(() => playSpeechAtIndex(indexRef.current));
     },
-    [setErr, setPlaying, voiceSpeedModelRef],
+    [playSpeechAtIndex, voiceSpeedModelRef],
   );
 
   const togglePlay = useCallback(() => {
     const a = audioRef.current;
     const hasSession = parasRef.current.length > 0;
+    const url = urlCurRef.current;
     const isAudiblyPlaying = Boolean(a && !a.paused && !a.ended);
 
     if (isAudiblyPlaying) {
@@ -117,18 +118,22 @@ export const useTtsParagraphPlaybackPlay = (args: PlayArgs) => {
       return;
     }
 
-    if (hasSession && urlCurRef.current) {
+    if (hasSession && url) {
       if (a) {
-        if (a.ended) a.currentTime = 0;
-        startAudioPlay(a);
+        resumePausedAudio(a, url);
         return;
       }
-      playAudioFromUrl(urlCurRef.current);
+      playAudioFromUrl(url);
+      return;
+    }
+
+    if (hasSession) {
+      playSpeechAtIndex(indexRef.current);
       return;
     }
 
     void beginPlayback();
-  }, [beginPlayback, playAudioFromUrl, startAudioPlay, urlCurRef]);
+  }, [beginPlayback, playAudioFromUrl, playSpeechAtIndex, resumePausedAudio, urlCurRef]);
 
   const goParagraph = useCallback(
     (delta: number) => {

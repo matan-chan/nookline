@@ -1,4 +1,4 @@
-import { type RefObject, useEffect, useState } from "react";
+import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 const BAR_COUNT = 12;
 const IDLE_HEIGHTS = [5, 8, 12, 7, 14, 8, 11, 6, 13, 9, 10, 6] as const;
@@ -15,8 +15,47 @@ const mapFrequencyToBars = (bins: Uint8Array) => {
   });
 };
 
+type WaveGraph = {
+  ctx: AudioContext;
+  analyser: AnalyserNode;
+  source: MediaElementAudioSourceNode;
+  audio: HTMLAudioElement;
+};
+
 export const useAudioWaveLevels = (audioRef: RefObject<HTMLAudioElement | null>, active: boolean) => {
   const [levels, setLevels] = useState<number[]>(() => [...IDLE_HEIGHTS]);
+  const graphRef = useRef<WaveGraph | null>(null);
+
+  const tearDownGraph = useCallback(() => {
+    const graph = graphRef.current;
+    if (!graph) return;
+    graph.source.disconnect();
+    graph.analyser.disconnect();
+    void graph.ctx.close();
+    graphRef.current = null;
+  }, []);
+
+  const ensureGraph = useCallback(
+    (audio: HTMLAudioElement) => {
+      if (graphRef.current?.audio === audio) return graphRef.current;
+      tearDownGraph();
+      const ctx = new AudioContext();
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 64;
+      analyser.smoothingTimeConstant = 0.75;
+      try {
+        const source = ctx.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(ctx.destination);
+        graphRef.current = { ctx, analyser, source, audio };
+        return graphRef.current;
+      } catch {
+        void ctx.close();
+        return null;
+      }
+    },
+    [tearDownGraph],
+  );
 
   useEffect(() => {
     if (!active) {
@@ -24,68 +63,38 @@ export const useAudioWaveLevels = (audioRef: RefObject<HTMLAudioElement | null>,
       return;
     }
 
-    let ctx: AudioContext | null = null;
-    let analyser: AnalyserNode | null = null;
-    let source: MediaElementAudioSourceNode | null = null;
-    let linkedAudio: HTMLAudioElement | null = null;
     let raf = 0;
     let disposed = false;
-
-    const detach = () => {
-      source?.disconnect();
-      analyser?.disconnect();
-      source = null;
-      analyser = null;
-      linkedAudio = null;
-    };
 
     const loop = () => {
       if (disposed) return;
       const audio = audioRef.current;
       if (!audio) {
+        setLevels([...IDLE_HEIGHTS]);
         raf = requestAnimationFrame(loop);
         return;
       }
-      if (audio !== linkedAudio) {
-        detach();
-        if (ctx) void ctx.close();
-        ctx = new AudioContext();
-        analyser = ctx.createAnalyser();
-        analyser.fftSize = 64;
-        analyser.smoothingTimeConstant = 0.75;
-        try {
-          source = ctx.createMediaElementSource(audio);
-          source.connect(analyser);
-          analyser.connect(ctx.destination);
-          linkedAudio = audio;
-        } catch {
-          raf = requestAnimationFrame(loop);
-          return;
-        }
-      }
-
-      if (!analyser || !ctx) {
+      const graph = ensureGraph(audio);
+      if (!graph) {
         raf = requestAnimationFrame(loop);
         return;
       }
+      if (graph.ctx.state === "suspended") void graph.ctx.resume();
 
-      if (ctx.state === "suspended") void ctx.resume();
-
-      const bins = new Uint8Array(analyser.frequencyBinCount);
-      analyser.getByteFrequencyData(bins);
+      const bins = new Uint8Array(graph.analyser.frequencyBinCount);
+      graph.analyser.getByteFrequencyData(bins);
       setLevels(mapFrequencyToBars(bins));
       raf = requestAnimationFrame(loop);
     };
 
     raf = requestAnimationFrame(loop);
-
     return () => {
       disposed = true;
       cancelAnimationFrame(raf);
-      detach();
-      if (ctx) void ctx.close();
     };
-  }, [active, audioRef]);
+  }, [active, audioRef, ensureGraph]);
+
+  useEffect(() => () => tearDownGraph(), [tearDownGraph]);
 
   return levels;
 };

@@ -39,7 +39,7 @@ export const ReaderBottomBar = ({
   const activeVoice = readerPanelOpen || ttsPlaying || ttsBusy;
   const wavePress = useReaderAiWavePress({
     mobilePressSplit,
-    disabled: ttsBusy,
+    disabled: ttsBusy && ttsPlaying,
     onShort: onAiTap ?? onAiToggle,
     onLong: onAiLongPress ?? onAiToggle,
     onDesktopClick: onAiTap ?? onAiToggle,
@@ -100,7 +100,7 @@ export const ReaderBottomBar = ({
         onContextMenu={wavePress.onContextMenu}
         aria-label={t("aiReader")}
         aria-pressed={readerPanelOpen || ttsPlaying}
-        disabled={ttsBusy}
+        disabled={ttsBusy && ttsPlaying}
         sx={{
           justifySelf: "center",
           width: { xs: 44, sm: 48 },
